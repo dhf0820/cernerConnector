@@ -1,0 +1,27 @@
+version: "3.7"
+
+services:
+  ucBaseConnector:
+    image: dhf0820/connector_arm64:230627_0    #dhf0820/uc_ca3_arm64:220925.0
+    ports:
+      - "0.0.0.0:30103:9200"
+    environment:
+      LISTEN_PORT: 9200
+      CONFIG_ADDRESS: "http://192.168.1.148:30300/api/rest/v1"
+      SERVICE_NAME: "ucBaseConnector"
+      SERVICE_VERSION: "docker_test"
+      COMPANY: "test"
+      REFRESH_SECRET: "Debbie loves me more"
+      ACCESS_SECRET: "I am so blessed Debbie loves me!"
+      API: "RESTFUL"
+      DBNAME: "test"
+    volumes:
+      - fhir4-data:/data
+    networks:
+      - uc_attachable
+volumes:
+  fhir4-data:
+networks:
+  uc_attachable:
+    external: true
+

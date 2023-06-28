@@ -1,0 +1,8 @@
+FROM alpine:latest
+
+ADD connector_arm64 ./connector
+RUN mkdir /root/tmp_images
+
+ADD .env.connector_docker ./.env
+EXPOSE 9200
+ENTRYPOINT ["./connector"]

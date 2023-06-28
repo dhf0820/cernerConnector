@@ -1,0 +1,27 @@
+version: "3.7"
+
+services:
+  cerner_conn:
+    image:  dhf0820/cerner_conn:230627_0
+    ports:
+      - "0.0.0.0:20104:9200"
+    environment:
+      CONFIG_ADDRESS: "http://192.168.1.147:30300/api/rest/v1"
+      SERVICE_NAME: "cerner_conn"
+      SERVICE_VERSION: "docker_test"
+      SERVICE_COMPANY: "test"
+      COMPANY: "test"
+      REFRESH_SECRET: "Debbie loves me more"
+      ACCESS_SECRET: "I am so blessed Debbie loves me!"
+      API: "RESTFUL"
+      DBNAME: "test"
+    volumes:
+      - cerner-conn-data:/data  
+    networks:
+      - uc_attachable
+volumes:
+  ca3-data:
+networks:
+  uc_attachable:
+    external: true
+

@@ -1,0 +1,8 @@
+FROM alpine:latest
+
+ADD cerner_conn ./cerner_conn
+RUN mkdir /root/tmp_images
+
+ADD .env.cerner_conn_docker ./.env
+EXPOSE 9200
+ENTRYPOINT ["./ca3_conn"]

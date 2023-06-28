@@ -1,0 +1,25 @@
+version: "3.7"
+
+services:
+  ca3_conn:
+    image: dhf0820/baseConn_arm64:230416_0    #dhf0820/uc_ca3_arm64:220925.0
+    ports:
+      - "0.0.0.0:20103:9200"
+    environment:
+      CONFIG_ADDRESS: "http://192.168.1.152:30300/api/rest/v1"
+      SERVICE_NAME: "ca3_conn"
+      SERVICE_VERSION: "local_test"
+      COMPANY: "test"
+      ACCESS_SECRET: "I am so blessed Debbie loves me!"
+      API: "RESTFUL"
+      DBNAME: "test"
+    volumes:
+      - fhir4-data:/data
+    networks:
+      - uc_attachable
+volumes:
+  fhir4-data:
+networks:
+  uc_attachable:
+    external: true
+
