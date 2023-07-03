@@ -1,8 +1,8 @@
-module github.com/dhf0820/CernerConnector
+module github.com/dhf0820/cernerConnector
 
 go 1.20
 
-replace gitlab.com/dhf0820/CernerConnector => ../CernerConnector
+replace gitlab.com/dhf0820/cernerConnector => ../cernerConnector
 
 require (
 	github.com/davecgh/go-spew v1.1.1
@@ -37,7 +37,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/smarty/assertions v1.15.0 // indirect
-	github.com/smartystreets/assertions v1.13.1 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.1 // indirect
