@@ -8,9 +8,8 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dhf0820/baseConnector v0.0.0-20230612022521-666c749210ae
 	github.com/dhf0820/fhir4 v0.0.0-20230622231015-fd9396d145c7
-	github.com/dhf0820/token v0.0.0-20230701233227-2930125f0e0a
+	github.com/dhf0820/jwToken v0.0.0-20230702231745-103565cb4c1d
 	github.com/dhf0820/uc_common v0.0.0-20230611225614-618d2030ac84
-	github.com/dhf0820/uc_core v0.0.0-20230605021858-a05a04da4340
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/schema v1.2.0
@@ -37,7 +36,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/smarty/assertions v1.15.0 // indirect
-	github.com/stretchr/testify v1.8.4 // indirect
+	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.1 // indirect
 	github.com/xdg-go/stringprep v1.0.3 // indirect

@@ -14,13 +14,13 @@ import (
 	"strings"
 	"testing"
 
-	"time"
+	//"time"
 
-	"github.com/dhf0820/token"
+	jw_token "github.com/dhf0820/jwToken"
 	common "github.com/dhf0820/uc_common"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/dhf0820/uc_core/util"
+	//"github.com/dhf0820/uc_core/util"
 
 	//log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
@@ -47,17 +47,8 @@ func TestPostPatient(t *testing.T) {
 		//cerFhirId := "62f1c5dab3070d0b40e7aac1"
 		err = os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
 		So(err, ShouldBeNil)
-		maker, err := token.NewJWTMaker(os.Getenv("ACCESS_SECRET"))
-		So(err, ShouldBeNil)
-		So(maker, ShouldNotBeNil)
-		username := util.RandomOwner()
-		duration := time.Minute
-		//userId := "user123456"
-		userId := "62d0af5dec383ade03a96b7e"
-		role := "Provider"
-		ip := "192.168.1.1.99"
-		fullName := "Debbie Harman MD"
-		newToken, payload, err := maker.CreateToken(ip, username, duration, userId, fullName, role)
+
+		newToken, payload, err := jw_token.CreateTestJWToken("10s")
 		So(err, ShouldBeNil)
 		So(newToken, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
@@ -152,19 +143,8 @@ func TestPostDuplicatePatient(t *testing.T) {
 		So(err, ShouldBeNil)
 		//caFhirId := "62d0ad3c9d0119afff9978b3"
 		//cerFhirId := "62f1c5dab3070d0b40e7aac1"
-		err = os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
-		So(err, ShouldBeNil)
-		maker, err := token.NewJWTMaker(os.Getenv("ACCESS_SECRET"))
-		So(err, ShouldBeNil)
-		So(maker, ShouldNotBeNil)
-		username := util.RandomOwner()
-		duration := time.Minute
-		//userId := "user123456"
-		userId := "62d0af5dec383ade03a96b7e"
-		role := "Provider"
-		ip := "192.168.1.1.99"
-		fullName := "Debbie Harman MD"
-		newToken, payload, err := maker.CreateToken(ip, username, duration, userId, fullName, role)
+
+		newToken, payload, err := jw_token.CreateTestJWToken("10s")
 		So(err, ShouldBeNil)
 		So(newToken, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)

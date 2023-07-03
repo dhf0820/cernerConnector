@@ -5,14 +5,14 @@ import (
 	//. "github.com/smartystreets/goconvey/convey"
 	//"encoding/json"
 	"fmt"
-	"os"
+	//"os"
 	"testing"
-	"time"
+	//"time"
 
 	"github.com/davecgh/go-spew/spew"
 	fhir "github.com/dhf0820/fhir4"
-	"github.com/dhf0820/token"
-
+	//"github.com/dhf0820/token"
+	jw_token "github.com/dhf0820/jwToken"
 	//github.com/davecgh/go-spew/spew"
 	//log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
@@ -23,14 +23,14 @@ import (
 //const ordercode = "8310-5"
 //const baseurl = "https://open-ic.epic.com/FHIR/api/FHIR/DSTU2/"
 
-//const pid = "63ed93c8bd78ae6b013a502b"
+// const pid = "63ed93c8bd78ae6b013a502b"
 const baseurl = "http://universalcharts.com:4000/api/rest/v1"
 
 func TestQuery(t *testing.T) {
 	fmt.Printf("Test run a FHIR query")
 	c := New(baseurl)
 	Convey("Run a query", t, func() {
-		newToken, payload, err := createJWT()
+		newToken, payload, err := jw_token.CreateTestJWToken("10s")
 		So(err, ShouldBeNil)
 		So(newToken, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
@@ -49,7 +49,7 @@ func TestDocumentReferenceQuery(t *testing.T) {
 	fmt.Printf("\n\n\n\nFhir4Test:38  --  Test run a FHIR query")
 	c := New(baseurl)
 	Convey("Run a query", t, func() {
-		newToken, payload, err := createJWT()
+		newToken, payload, err := jw_token.CreateTestJWToken("10s")
 		So(err, ShouldBeNil)
 		So(newToken, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
@@ -71,16 +71,17 @@ func TestDocumentReferenceQuery(t *testing.T) {
 // 		//url := "https://fhir-open.cerner.com/dstu2/ec2458f2-1e24-41c8-b71b-0e701af7583d/Patient?-pageContext=2d61b0b7-805d-4fd5-bb1d-a111f942f7a5&-pageDirection=NEXT"
 // 		c := New(baseurl)
 
-// 		data, err := c.GetFhir(url, newToken)
-// 		So(err, ShouldBeNil)
-// 		So(data, ShouldNotBeNil)
-// 	})
-// }
-//TestGetFhir returns a single Resource.
+//			data, err := c.GetFhir(url, newToken)
+//			So(err, ShouldBeNil)
+//			So(data, ShouldNotBeNil)
+//		})
+//	}
+//
+// TestGetFhir returns a single Resource.
 func TestGetFHIR(t *testing.T) {
 	Convey("Subject: GetFHIR", t, func() {
 		fmt.Printf("TestGetFHIR\n")
-		newToken, payload, err := createJWT()
+		newToken, payload, err := jw_token.CreateTestJWToken("10s")
 		So(err, ShouldBeNil)
 		So(newToken, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
@@ -111,12 +112,12 @@ func TestGetFHIR(t *testing.T) {
 	})
 }
 
-//TestGetFhir returns a single Resource.
+// TestGetFhir returns a single Resource.
 func TestGetSrcFHIRBundle(t *testing.T) {
 	Convey("Subject: GetSrcFHIRBundle", t, func() {
 		srcBaseUrl := "http://192.168.1.152:4000/api/rest/v1"
 		fmt.Printf("TestGetSrcFHIR:116\n")
-		newToken, payload, err := createJWT()
+		newToken, payload, err := jw_token.CreateTestJWToken("10s")
 		So(err, ShouldBeNil)
 		So(newToken, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
@@ -302,26 +303,26 @@ func TestGetSrcFHIRBundle(t *testing.T) {
 // // 	}
 // // }
 
-func createJWT() (string, *token.Payload, error) {
-	os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
-	maker, err := token.NewJWTMaker(os.Getenv("ACCESS_SECRET"))
-	So(err, ShouldBeNil)
-	So(maker, ShouldNotBeNil)
-	username := "DHarman0127"
-	duration := 5 * time.Minute
-	userId := "user123456"
-	role := "Provider"
-	ip := "192.168.1.1.99"
-	fullName := "Debbie Harman MD"
-	newToken, payload, err := maker.CreateToken(ip, username, duration, userId, fullName, role)
-	return newToken, payload, err
+// func createJWT() (string, *token.Payload, error) {
+// 	os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
+// 	maker, err := token.NewJWTMaker(os.Getenv("ACCESS_SECRET"))
+// 	So(err, ShouldBeNil)
+// 	So(maker, ShouldNotBeNil)
+// 	username := "DHarman0127"
+// 	duration := 5 * time.Minute
+// 	userId := "user123456"
+// 	role := "Provider"
+// 	ip := "192.168.1.1.99"
+// 	fullName := "Debbie Harman MD"
+// 	newToken, payload, err := maker.CreateToken(ip, username, duration, userId, fullName, role)
+// 	return newToken, payload, err
 
-}
+// }
 
 func TestGetRemoteFhirPatient(t *testing.T) {
 	Convey("Subject: GetRemoteFhirPatient", t, func() {
 		fmt.Printf("TestGetRemoteFhirPatient:321\n")
-		newToken, payload, err := createJWT()
+		newToken, payload, err := jw_token.CreateTestJWToken("10s")
 		So(err, ShouldBeNil)
 		So(newToken, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)

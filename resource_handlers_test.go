@@ -19,9 +19,9 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
+	//"time"
 
-	"github.com/dhf0820/token"
+	jw_token "github.com/dhf0820/jwToken"
 	"github.com/dhf0820/uc_common"
 	//"github.com/dhf0820/uc_core/service"
 
@@ -41,10 +41,10 @@ func TestSimpleFindResource(t *testing.T) {
 		So(err, ShouldBeNil)
 		//w := httptest.NewRecorder()
 		os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
-		dur := time.Duration(300) * time.Second
-		jwt, err := token.CreateToken("192.168.1.2", "DHarman", dur, "userId1234", "Debbie Harman", "Physician")
+		jwt, payload, err := jw_token.CreateTestJWToken("10s")
 		So(err, ShouldBeNil)
 		So(jwt, ShouldNotBeNil)
+		So(payload, ShouldNotBeNil)
 		req.Header.Set("Authorization", jwt)
 		fmt.Printf("\nCalling Router\n")
 		cp := CreateCP(false)
@@ -77,9 +77,10 @@ func TestSimpleFindResource(t *testing.T) {
 func TestResourceHandlerGet(t *testing.T) {
 	Convey("TestResourceHandlerGet", t, func() {
 		fmt.Printf("Creating Get Request\n")
-		jwt, err := CreateJWToken()
+		jwt, payload, err := jw_token.CreateTestJWToken("10s")
 		So(err, ShouldBeNil)
 		So(jwt, ShouldNotBeNil)
+		So(payload, ShouldNotBeNil)
 		req, err := http.NewRequest("GET", "/api/rest/v1/Patient/63ed93c8bd78ae6b013a502b", nil)
 		So(err, ShouldBeNil)
 		So(req, ShouldNotBeNil)
@@ -241,9 +242,11 @@ func TestFindCa3ResourceHandler(t *testing.T) {
 		Convey("Given a valid patient Family", func() {
 			//resource := "Patient"
 			fmt.Printf("\n\nGiven a valid Family Name\n")
-			jwt, err := CreateJWToken()
+			jwt, payload, err := jw_token.CreateTestJWToken("10s")
 			So(err, ShouldBeNil)
 			So(jwt, ShouldNotBeNil)
+			So(payload, ShouldNotBeNil)
+
 			//w := httptest.NewRecorder()
 			fmt.Printf("Creating Find Request\n")
 			//req, _ := http.NewRequest("GET", "http://192.168.1.152:20104/6329112852f3616990e2f763/Patient?family=smart", nil)
@@ -380,10 +383,10 @@ func TestFhirDocumentForPatient(t *testing.T) {
 		Convey("Given a valid patient Family", func() {
 			fmt.Printf("\n\nTestFhirDocumentForPatient:343  --  Given a valid DocumentId\n")
 			os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
-			dur := time.Duration(300) * time.Second
-			jwt, err := token.CreateToken("192.168.1.2", "DHarman", dur, "userId1234", "Debbie Harman", "Physician")
+			jwt, payload, err := jw_token.CreateTestJWToken("10s")
 			So(err, ShouldBeNil)
 			So(jwt, ShouldNotBeNil)
+			So(payload, ShouldNotBeNil)
 			w := httptest.NewRecorder()
 			fmt.Printf("TestFhirDocumentForPatient:350  --  Creating Search Request\n")
 			cps := CreateTestFileCloser()
@@ -427,8 +430,8 @@ func TestFhirEncountersForPatient(t *testing.T) {
 		Convey("Given a valid patient Family", func() {
 			fmt.Printf("\n\nGiven a valid PatientId\n")
 			os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
-			dur := time.Duration(300) * time.Second
-			jwt, err := token.CreateToken("192.168.1.2", "DHarman", dur, "userId1234", "Debbie Harman", "Physician")
+			jwt, payload, err := jw_token.CreateTestJWToken("10s")
+			So(payload, ShouldNotBeNil)
 			So(err, ShouldBeNil)
 			So(jwt, ShouldNotBeNil)
 			w := httptest.NewRecorder()
@@ -463,10 +466,10 @@ func TestFhirProceduresForPatient(t *testing.T) {
 		Convey("Given a valid patient Family", func() {
 			fmt.Printf("\n\nGiven a valid PatientId\n")
 			os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
-			dur := time.Duration(300) * time.Second
-			jwt, err := token.CreateToken("192.168.1.2", "DHarman", dur, "userId1234", "Debbie Harman", "Physician")
+			jwt, payload, err := jw_token.CreateTestJWToken("10s")
 			So(err, ShouldBeNil)
 			So(jwt, ShouldNotBeNil)
+			So(payload, ShouldNotBeNil)
 			w := httptest.NewRecorder()
 			fmt.Printf("TestFhirProceduresForPatient:433  --  Creating Search Request\n")
 			cps := CreateTestFileCloser()
@@ -935,24 +938,10 @@ func TestCernerPatientResourceSearch(t *testing.T) {
 		fmt.Printf("\nTestCernerPatientResourceSearch:935  --  cps: %s\n", cps)
 		rc := io.NopCloser(strings.NewReader(cps))
 		req.Body = rc
-		userId := "62d0af5dec383ade03a96b7e"
-		//userID, err := primitive.ObjectIDFromHex("62d0af5dec383ade03a96b7e")
-		//So(err, ShouldBeNil)
 
 		err = os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
 		So(err, ShouldBeNil)
-		maker, err := token.NewJWTMaker(os.Getenv("ACCESS_SECRET"))
-		So(err, ShouldBeNil)
-		So(maker, ShouldNotBeNil)
-		username := "dHarman"
-		duration := time.Duration(300) * time.Minute
-		//userId := "user123456"
-		role := "Provider"
-		ip := "192.168.1.1.99"
-		fullName := "Debbie Harman MD"
-		//issuedAt := time.Now()
-		//expiredAt := issuedAt.Add(duration)
-		newToken, payload, err := maker.CreateToken(ip, username, duration, userId, fullName, role)
+		newToken, payload, err := jw_token.CreateTestJWToken("10s")
 		So(err, ShouldBeNil)
 		So(newToken, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
@@ -988,9 +977,10 @@ func TestCernerResourceHandlerGet(t *testing.T) {
 			log.Errorf("TestCernerSearchPatient:988  --  Unable to connect to Mongo")
 			return
 		}
-		jwt, err := CreateJWToken()
+		jwt, payload, err := jw_token.CreateTestJWToken("10s")
 		So(err, ShouldBeNil)
 		So(jwt, ShouldNotBeNil)
+		So(payload, ShouldNotBeNil)
 		req, err := http.NewRequest("GET", "/api/rest/v1/Patient/12792842", nil)
 		So(err, ShouldBeNil)
 		So(req, ShouldNotBeNil)

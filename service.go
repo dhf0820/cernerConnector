@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	//"errors"
 	"fmt"
-	"github.com/dhf0820/token"
+	//jw_token "github.com/dhf0820/jwToken"
 	//"github.com/davecgh/go-spew/spew"
 
 	"io/ioutil"
@@ -23,7 +23,7 @@ import (
 	//"github.com/sirupsen/logrus"
 )
 
-//var Log = logrus.New()
+// var Log = logrus.New()
 var (
 	// DateMods      map[string]string
 	// SqlMods       map[string]string
@@ -244,17 +244,17 @@ func GetFhirSystem(id string) (*common.FhirSystem, error) {
 	return fhirSystem, nil
 }
 
-func CreateJWToken() (string, error) {
-	err := os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
-	if err != nil {
-		return "", err
-	}
-	os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
-	dur := time.Duration(300) * time.Second
-	jwt, err := token.CreateToken("192.168.1.2", "DHarman", dur, "dharman0127", "Debbie Harman", "Physician")
-	//maker, err := token.NewJWTMaker(os.Getenv("ACCESS_SECRET"))
-	if err != nil {
-		return "", err
-	}
-	return jwt, nil
-}
+// func CreateJWToken() (string, error) {
+// 	err := os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
+// 	dur := time.Duration(300) * time.Second
+// 	jwt, err := token.CreateToken("192.168.1.2", "DHarman", dur, "dharman0127", "Debbie Harman", "Physician")
+// 	//maker, err := token.NewJWTMaker(os.Getenv("ACCESS_SECRET"))
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	return jwt, nil
+// }

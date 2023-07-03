@@ -19,7 +19,7 @@ import (
 
 	// //"os"
 	// //"strconv"
-	token "github.com/dhf0820/token"
+	jw_token "github.com/dhf0820/jwToken"
 	"strings"
 	"time"
 )
@@ -429,7 +429,7 @@ import (
 
 func findResource(w http.ResponseWriter, r *http.Request) {
 	JWToken = r.Header.Get("Authorization")
-	Payload, status, err := token.ValidateToken(JWToken, "")
+	Payload, status, err := jw_token.ValidateToken(JWToken, "")
 	if err != nil {
 		errMsg := err.Error()
 		WriteFhirOperationOutcome(w, status, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
@@ -722,7 +722,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 
 func getResource(w http.ResponseWriter, r *http.Request) {
 	JWToken = r.Header.Get("Authorization")
-	_, status, err := token.ValidateToken(JWToken, "")
+	_, status, err := jw_token.ValidateToken(JWToken, "")
 	if err != nil {
 		errMsg := err.Error()
 		WriteFhirOperationOutcome(w, status, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))

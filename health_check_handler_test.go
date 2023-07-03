@@ -40,7 +40,7 @@ package main
 
 // 		os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
 // 		dur := time.Duration(300) * time.Second
-// 		jwt, err := token.CreateToken("192.168.1.2", "DHarman", dur, "userId1234", "Debbie Harman", "Physician")
+// 		newToken, payload, err := jw_token.CreateTestJWToken("10s")
 // 		So(err, ShouldBeNil)
 // 		So(jwt, ShouldNotBeNil)
 // 		req.Header.Set("Authorization", jwt)

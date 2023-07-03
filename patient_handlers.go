@@ -9,7 +9,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	cm "github.com/dhf0820/baseConnector/common"
 	fhir "github.com/dhf0820/fhir4"
-	token "github.com/dhf0820/token"
+	jw_token "github.com/dhf0820/jwToken"
 	common "github.com/dhf0820/uc_common"
 	//"github.com/gorilla/mux"
 
@@ -28,7 +28,7 @@ import (
 
 //################################### FHIR Responses ####################################
 
-//####################################### Route Handlers #######################################
+// ####################################### Route Handlers #######################################
 // getPatient - By patientId returning one single patient matching the ID
 // otherwise return OperationOutcome for NotFound
 var JWToken string
@@ -186,12 +186,12 @@ func getPatient(w http.ResponseWriter, r *http.Request) {
 	// WriteFhirResource(w, resp.Status, &resp)
 }
 
-//postPatient: Stores the fhir patient payload in the url {Fhir-System} specified fhirSystem.
+// postPatient: Stores the fhir patient payload in the url {Fhir-System} specified fhirSystem.
 func savePatient(w http.ResponseWriter, r *http.Request) {
 	//Resource := "Patient"
 	//fmt.Printf("postPatient:182 - Post: %s \n", spew.Sdump(r))
 	JWToken := r.Header.Get("Authorization")
-	_, status, err := token.ValidateToken(JWToken, "")
+	_, status, err := jw_token.ValidateToken(JWToken, "")
 	if err != nil {
 		errMsg := err.Error()
 		fmt.Printf("savePatient:190  - ValidateToken err = %s\n", errMsg)
@@ -456,7 +456,7 @@ func searchPatient(w http.ResponseWriter, r *http.Request) {
 	//buildFieldsByTagMap("schema", *psp)
 	JWToken = r.Header.Get("Authorization")
 	//fmt.Printf("searchPatient:219 - JWToken: %s\n", JWToken)
-	Payload, status, err := token.ValidateToken(r.Header.Get("Authorization"), "")
+	Payload, status, err := jw_token.ValidateToken(r.Header.Get("Authorization"), "")
 	if err != nil {
 		errMsg := err.Error()
 		fmt.Printf("searchPatient:433  --  ValidateToken err: %s\n", errMsg)
@@ -748,7 +748,7 @@ type SearchParam struct {
 
 func findPatient(w http.ResponseWriter, r *http.Request) {
 	JWToken := r.Header.Get("Authorization")
-	Payload, status, err := token.ValidateToken(JWToken, "")
+	Payload, status, err := jw_token.ValidateToken(JWToken, "")
 	if err != nil {
 		errMsg := err.Error()
 		WriteFhirOperationOutcome(w, status, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))

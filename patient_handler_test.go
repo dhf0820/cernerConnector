@@ -3,9 +3,11 @@ package main
 import (
 	//"bytes"
 	"encoding/json"
-	"github.com/joho/godotenv"
 	"io"
 	"io/ioutil"
+
+	"github.com/joho/godotenv"
+
 	//"github.com/gorilla/mux"
 	//"github.com/joho/godotenv"
 	//"gitlab.com/dhf0820/ids_model/common"
@@ -14,16 +16,18 @@ import (
 	//. "github.com/smartystreets/goconvey/convey"
 	"fmt"
 	"net/http"
+
 	//"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
-	"time"
 
-	"github.com/dhf0820/token"
+	//"time"
+
+	//"github.com/dhf0820/token"
 	common "github.com/dhf0820/uc_common"
 	//"github.com/dhf0820/uc_core/service"
-
+	jw_token "github.com/dhf0820/jwToken"
 	//"github.com/davecgh/go-spew/spew"
 	//fhir "github.com/dhf0820/fhir4"
 
@@ -41,10 +45,11 @@ func TestSearchPatient(t *testing.T) {
 		So(err, ShouldBeNil)
 
 		os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
-		dur := time.Duration(300) * time.Second
-		jwt, err := token.CreateToken("192.168.1.2", "DHarman", dur, "userId1234", "Debbie Harman", "Physician")
+
+		jwt, payload, err := jw_token.CreateTestJWToken("10s")
 		So(err, ShouldBeNil)
 		So(jwt, ShouldNotBeNil)
+		So(payload, ShouldNotBeNil)
 		req.Header.Set("Authorization", jwt)
 		fmt.Printf("\nTestSearchPatient:49  --  Calling Router\n")
 		cp := CreateCP(false)
@@ -177,9 +182,10 @@ func TestPatientGet(t *testing.T) {
 			//req := httptest.NewRequest("GET", "/62f14531ba5395278cd530c4/Patient/12724066", nil)
 			//req, _ := http.NewRequest("GET", "/api/rest/v1/Patient?family=smart&given=fred&_count=2", nil)
 			godotenv.Load("./.env_uc_ca3_conn_test")
-			jwt, err := CreateJWToken()
+			jwt, payload, err := jw_token.CreateTestJWToken("10s")
 			So(err, ShouldBeNil)
 			So(jwt, ShouldNotBeNil)
+			So(payload, ShouldNotBeNil)
 
 			//fmt.Printf("n\nTest Request = %s\n\n\n", spew.Sdump(req))
 			//req.Header.Add("tracing-id", "123")
@@ -298,10 +304,10 @@ func TestCernerSearchPatient(t *testing.T) {
 		So(err, ShouldBeNil)
 
 		os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
-		dur := time.Duration(300) * time.Second
-		jwt, err := token.CreateToken("192.168.1.2", "DHarman", dur, "userId1234", "Debbie Harman", "Physician")
+		jwt, payload, err := jw_token.CreateTestJWToken("10s")
 		So(err, ShouldBeNil)
 		So(jwt, ShouldNotBeNil)
+		So(payload, ShouldNotBeNil)
 		req.Header.Set("Authorization", jwt)
 		fmt.Printf("\nTestCernerSearchPatient:306  --  Calling Router\n")
 		cp := CreateCernerCP(false)
