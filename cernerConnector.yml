@@ -7,7 +7,7 @@ services:
       - "0.0.0.0:40103:9200"
     environment:
       LISTEN_PORT: 9200
-      CONFIG_ADDRESS: "http://192.168.1.148:30300/api/rest/v1"
+      CONFIG_ADDRESS: "http://dev.vertisoft.com:30300/api/rest/v1"
       SERVICE_NAME: "cerner_conn"
       SERVICE_VERSION: "docker_test"
       COMPANY: "test"
