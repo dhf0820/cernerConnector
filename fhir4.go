@@ -38,7 +38,7 @@ type Connection struct {
 	client  *http.Client
 }
 
-//TODO: Consider including the FhirSystem in the Connection
+// TODO: Consider including the FhirSystem in the Connection
 // New creates a new connection
 func New(baseurl string) *Connection {
 	return &Connection{
@@ -191,14 +191,14 @@ func (c *Connection) GetFhirBundle(url string, token string) (*fhir.Bundle, erro
 	defer resp.Body.Close()
 	byte, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("GetFhirBundle:194  --  Error Decoding bundle: %s\n", err.Error())
+		return nil, fmt.Errorf("GetFhirBundle:194  --  Error Decoding bundle: %s", err.Error())
 	}
 	bundle, err := fhir.UnmarshalBundle(byte)
 	if err != nil {
 		fmt.Printf("GetFhirBundle:198  --  Error Decoding bundle: %s\n", err.Error())
 		return nil, err
 	}
-	fmt.Printf("GetFhirBundle:201  --  Bundle =  %s\n", spew.Sdump(bundle))
+	//fmt.Printf("GetFhirBundle:201  --  Bundle =  %s\n", spew.Sdump(bundle))
 	// err = json.NewDecoder(resp.Body).Decode(&data)
 	// if err != nil {
 	// 	fmt.Printf("NewDecoder error: %s\n", err.Error())
@@ -225,9 +225,10 @@ func (c *Connection) GetFhirBundle(url string, token string) (*fhir.Bundle, erro
 	// return body, nil
 }
 
-// func (c *Connection)PatientNextPage(url string) {
-// 	bytes, err := c.GetFhir(url)
-// }
+//	func (c *Connection)PatientNextPage(url string) {
+//		bytes, err := c.GetFhir(url)
+//	}
+//
 // Query sends a query to the base url
 func (c *Connection) QueryBundle(q string, token string) (*fhir.Bundle, error) {
 	fmt.Printf("\n\n\n\nQueryBundle:233  --  BaseUrl: %s  -  Query param: %s\n\n\n\n", c.BaseURL, q)

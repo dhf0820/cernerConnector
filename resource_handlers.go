@@ -1046,17 +1046,21 @@ func FillResourceResponse(resp *common.ResourceResponse, resourceType string) er
 	resp.ResourceType = resourceType
 	switch strings.ToLower(resourceType) {
 	case "patient":
-		pats := []fhir.Patient{}
+		//pats := []fhir.Patient{}
+		//resData := common.ResourceData{}
 		for _, item := range resp.Bundle.Entry {
+			resData := common.ResourceData{}
 			pat, err := fhir.UnmarshalPatient(item.Resource)
 			if err != nil {
-				return fmt.Errorf("FillResourceResponse:1053  -- error = %s", err.Error())
+				return fmt.Errorf("FillResourceResponse:1055  -- error = %s", err.Error())
 			}
-			fmt.Printf("FillResourceResponse:1055  --  Added PatientId: %s\n", *pat.Id)
-			pats = append(pats, pat)
+			resData.Patient = &pat
+			fmt.Printf("FillResourceResponse:1058  --  Added PatientId: %s\n", *pat.Id)
+			resp.Resources = append(resp.Resources, resData)
+			//pats = append(resData.Patient, pat)
 		}
-		resp.Patients = pats
-		fmt.Printf("FillResourceResponse:1059  -- Set %d Patients  Bundle had %d entries\n", len(resp.Patients), len(resp.Bundle.Entry))
+		//resp.Resources = pats
+		fmt.Printf("FillResourceResponse:1063  -- Set %d Patients  Bundle had %d entries\n", len(resp.Resources), len(resp.Bundle.Entry))
 	case "documentRef":
 	}
 	return nil
