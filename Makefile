@@ -71,7 +71,7 @@ linux_test:
 	ARCH=amd64
 	CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) $(GOBUILD) -o $(IMAGE_NAME) 
 #  go build -o $(IMAGE_NAME)_amd64
-	docker build -t $(TEST)/$(IMAGE_NAME):$(VERSION) -f Dockerfile_$(ARCH) .
+	docker build -t $(TEST)/$(IMAGE_NAME):$(VERSION) -f Dockerfile .
 	docker push $(NS)/$(IMAGE_NAME):$(VERSION)
 
 
@@ -92,12 +92,12 @@ mac_local:
 
 
 test_linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOHOSTARCH=amd64 GOHOSTOS=linux $(GOBUILD) -o $(IMAGE_NAME)_amd64 
-	docker build -t $(TEST)/$(IMAGE_NAME)_amd64:$(VERSION) --no-cache -f Dockerfile_amd64 .
-	docker push $(TEST)/$(IMAGE_NAME)_amd64:$(VERSION)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOHOSTARCH=amd64 GOHOSTOS=linux $(GOBUILD) -o $(IMAGE_NAME) 
+	docker build -t $(TEST)/$(IMAGE_NAME):$(VERSION) --no-cache -f Dockerfile .
+	docker push $(TEST)/$(IMAGE_NAME):$(VERSION)
 
 test_amd64:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(IMG_NAME)_amd64 
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(IMG_NAME) 
 	docker build -t $(TEST)/$(IMAGE_NAME):$(VERSION) -f Dockerfile_amd64 .
 	docker push $(TEST)/$(IMAGE_NAME):$(VERSION)
 
