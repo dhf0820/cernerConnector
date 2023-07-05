@@ -16,11 +16,11 @@ import (
 	// "strings"
 )
 
-//var err error
+// var err error
 var err error
 
 func main() {
-	version := "230627_1"
+	version := "230705_0"
 	switch os.Getenv("MODE") {
 	case "local":
 		err = godotenv.Load("./.env.ca3_conn")

@@ -694,7 +694,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	//fmt.Printf("findResource:628 - Header: %s\n", spew.Sdump(header))
 	host := connectorPayload.System.Url
 	//host := common.GetKVData(GetConfig().Data, "cacheHost")
-	fmt.Printf("findResource:697 - ##host: %s\n\n\n", host)
+	fmt.Printf("findResource:697 --  host: %s\n\n\n", host)
 	cacheBundleUrl := fmt.Sprintf("%s/%s/BundleTransaction", connectorConfig.CacheUrl, header.QueryId)
 	//header.CacheUrl = fmt.Sprintf("%s%sv1/Cache/%s/", host, parts[0], header.QueryId)
 	fmt.Printf("findResource:700  --  CacheUrl = %s\n", cacheBundleUrl)
@@ -714,7 +714,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	resp.Bundle = bundle
 	fmt.Printf("findResource:715  --  Number of entries in buldle: %d\n", len(bundle.Entry))
 	fmt.Printf("findResource:716  --  QueryId: %s\n\n", header.QueryId)
-
+	FillResourceResponse(&resp, Resource)
 	//fmt.Printf("findResource:614  --  Returning Bundle: %s\n", spew.Sdump(bundle))
 	//WriteFhirResourceBundle(w, resp.Status, &resp)
 	WriteFhirResponse(w, resp.Status, &resp)
@@ -1040,23 +1040,23 @@ func DeterminResource(url string, prefix string) string {
 }
 
 func FillResourceResponse(resp *common.ResourceResponse, resourceType string) error {
+	//resourceType := resp.Header.ResourceType
 	resp.Status = 200
 	resp.Message = "Ok"
 	resp.ResourceType = resourceType
-
-	switch resourceType {
+	switch strings.ToLower(resourceType) {
 	case "patient":
 		pats := []fhir.Patient{}
 		for _, item := range resp.Bundle.Entry {
 			pat, err := fhir.UnmarshalPatient(item.Resource)
 			if err != nil {
-				return fmt.Errorf("FillResourceResponse:1004  -- error = %s", err.Error())
+				return fmt.Errorf("FillResourceResponse:1053  -- error = %s", err.Error())
 			}
-			fmt.Printf("FillResourceResponse:1006  --  Added PatientId: %s\n", *pat.Id)
+			fmt.Printf("FillResourceResponse:1055  --  Added PatientId: %s\n", *pat.Id)
 			pats = append(pats, pat)
 		}
 		resp.Patients = pats
-		fmt.Printf("FillResourceResponse:1012  -- Set %d Patients  Bundle had %d entries\n", len(resp.Patients), len(resp.Bundle.Entry))
+		fmt.Printf("FillResourceResponse:1059  -- Set %d Patients  Bundle had %d entries\n", len(resp.Patients), len(resp.Bundle.Entry))
 	case "documentRef":
 	}
 	return nil

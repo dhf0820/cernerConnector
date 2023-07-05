@@ -821,14 +821,11 @@ func findPatient(w http.ResponseWriter, r *http.Request) {
 		WriteFhirOperationOutcome(w, status, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
-	//TODO: Cache the bundle
-	//pats, err := patFilter.Find()
 	resp := common.ResourceResponse{}
-	//resp.Patients = pats
 	resp.Bundle = bundle
 	FillResourceResponse(&resp, "patient") // Fills the response resource fields
 	//fmt.Printf("\n\nfindPatient:830  --  patients: %s\n", spew.Sdump(resp.Patients))
-	fmt.Printf("\n\nfindPatient:831  --  resp: %s\n", spew.Sdump(resp))
+	fmt.Printf("\n\nfindPatient:828  --  resp: %s\n", spew.Sdump(resp))
 	WriteFhirResponse(w, 200, &resp)
 }
 

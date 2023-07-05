@@ -107,6 +107,7 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	// if err != nil {
 	// 	return 0, nil, nil, err
 	// }
+	fmt.Printf("FindResource:110  --  bundle: %s\n", spew.Sdump(bundle))
 	header := &common.CacheHeader{}
 	header.SystemCfg = connPayLoad.System
 	header.ResourceType = resource
@@ -114,7 +115,7 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	header.PageId = page
 	queryId := primitive.NewObjectID().Hex()
 	header.QueryId = queryId
-	fmt.Printf("FindResource:115  --  connConfig: %s\n", spew.Sdump(connConfig))
+	fmt.Printf("FindResource:118  --  connConfig: %s\n", spew.Sdump(connConfig))
 	header.CacheBase = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
 	//header.ResourceCacheBase = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
 	header.GetBundleCacheBase = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheBase, header.SystemCfg.ID.Hex())
