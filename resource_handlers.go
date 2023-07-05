@@ -662,17 +662,22 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 		} else {
 			fmt.Printf("findResource:663 - using other search params: %v\n", uriValues)
 		}
-
 	}
 	var bundle *fhir.Bundle
 	var header *common.CacheHeader
 	//resourceId := r.Header.Get("Fhir-System")
 	fmt.Printf("\nfindResource:670  - connectorPayload = %s\n", spew.Sdump(connectorPayload))
 	qryStr := r.URL.RawQuery
+<<<<<<< HEAD
 	fmt.Printf("\nfindResource:672 - resource = %s  uri = %s\n", Resource, qryStr)
 	url := connectorPayload.ConnectorConfig.HostUrl + Resource + "?" + qryStr
 	//url := connectorPayload.System.Url + Resource + "?" + qryStr
 	fmt.Printf("findResource:675 - calling %s \n", url)
+=======
+	//fmt.Printf("\nfindResource:670 - resource = %s  uri = %s\n", Resource, qryStr)
+	url := connectorPayload.System.Url + Resource + "?" + qryStr
+	fmt.Printf("findResource:672 - calling %s \n", url)
+>>>>>>> e22efec (Removed log message)
 	var totalPages int64
 	fmt.Printf("findResource:677  --  Search %s with %s\n", Resource, qryStr)
 	startTime := time.Now()
