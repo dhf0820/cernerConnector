@@ -57,16 +57,16 @@ func Start(serviceName, version string) {
 	}
 	listenPort := os.Getenv("LISTEN_PORT")
 	if listenPort == "" {
-		log.Warnf("Start:61  --  LISTEN_PORT not set in environment. Meaning  running standalone.  Using default port 40103\n")
+		log.Warnf("Start:61  --  LISTEN_PORT not set in environment. Meaning  running standalone.  Using default port 40103")
 		listenPort = "40103" // Default for Ca3Connector local host standalone
 	}
 	restAddress := fmt.Sprintf("%s:%s", "0.0.0.0", listenPort)
-	log.Printf("Start:64  --  restAddress: %s  -  port:%s\n", restAddress, listenPort)
+	log.Printf("Start:64  --  restAddress: %s  -  port:%", restAddress, listenPort)
 	router := NewRouter()
 	log.Printf("\n\n")
-	log.Printf("Start:68  --  %s version: %s is listening for restful requests at %s\n\n", serviceName, version, restAddress)
+	log.Printf("Start:68  --  %s version: %s is listening for restful requests at %s", serviceName, version, restAddress)
 	err := http.ListenAndServe(restAddress, router)
-	log.Printf("Start:70  --  This should not happen err = %s\n", err.Error())
+	log.Printf("Start:70  --  This should not happen err = %s", err.Error())
 
 }
 
@@ -75,8 +75,8 @@ func Initialize(serviceName, version string) (*common.ServiceConfig, error) {
 	log.Printf("Initiallizing %s version %s\n", serviceName, version)
 	if serviceName == "" {
 		if os.Getenv("SERVICE_NAME") == "" {
-			serviceName = "ca3_conn"
-			os.Setenv("SERVICE_NAME", "ca3_conn")
+			serviceName = "cerner_conn"
+			os.Setenv("SERVICE_NAME", "cerner_conn")
 		}
 	}
 	if os.Getenv("SERVICE_VERSION") == "" {
@@ -115,23 +115,23 @@ func GetServiceConfig(name, version, company string) (*common.ServiceConfig, err
 	//var unmarshalErr *json.UnmarshalTypeError
 	var bdy []byte
 	cfg = ConfigResp{}
-	log.Printf("GetServiceConfig:118  --  name: %s, version: %s, company: %s\n", name, version, company)
+	log.Printf("GetServiceConfig:118  --  name: %s, version: %s, company: %s", name, version, company)
 	//coreName := strings.ReplaceAll(os.Getenv("CORE_NAME_PORT"), " ","")
 	//api := os.Getenv("API")
 	//Log.Infof("API: [%s]\n", api)
 	configAddr := os.Getenv("CONFIG_ADDRESS")
 	// configAddr = "http://docker1.ihids.com:19101/api/rest/v1"
-	log.Printf("GetServiceConfig:124  --  ConfigAddress: %s\n", configAddr)
+	log.Printf("GetServiceConfig:124  --  ConfigAddress: %s", configAddr)
 	url := fmt.Sprintf("%s/config?name=%s&version=%s&company=%s", configAddr, name, version, company)
 	fmt.Printf("GetServiceConfig:126  --  core url: %s\n", url)
 	startTime := time.Now()
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Errorf("GetServiceConfig:208  --  http.Get(%s)  returned error: %s", url, err.Error())
+		log.Errorf("GetServiceConfig:130  --  http.Get(%s)  returned error: %s", url, err.Error())
 		return nil, err
 	}
-	fmt.Printf("GetServiceConfig:211  --  Elapsed Time: %s\n", time.Since(startTime))
-	fmt.Printf("GetServiceConfig:212  --  status : %d\n", resp.StatusCode)
+	fmt.Printf("GetServiceConfig:133  --  Elapsed Time: %s\n", time.Since(startTime))
+	fmt.Printf("GetServiceConfig:134  --  status : %d\n", resp.StatusCode)
 	defer resp.Body.Close()
 	//cfg = mod.ServiceConfig{}
 	bdy, err = ioutil.ReadAll(resp.Body)
@@ -218,10 +218,10 @@ func GetFhirSystem(id string) (*common.FhirSystem, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("GetFhirSystem:285 - Elapsed time: %s\n", time.Since(startTime))
+	fmt.Printf("GetFhirSystem:221 - Elapsed time: %s\n", time.Since(startTime))
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, fmt.Errorf("GetFhirSystem:287  -  invalid FhirId: [%s]", id)
+		return nil, fmt.Errorf("GetFhirSystem:224  -  invalid FhirId: [%s]", id)
 	}
 	query := bson.D{{"_id", oid}}
 	fmt.Printf("Query: %v\n", query)
@@ -230,7 +230,7 @@ func GetFhirSystem(id string) (*common.FhirSystem, error) {
 	//filterM := bson.M{"_id": oid}
 	fhirSystem := &common.FhirSystem{}
 	startTime = time.Now()
-	fmt.Printf("\n\n\nGetFhirSystem:296 -  FindOne fhirConnector: bson.D %v\n", filter)
+	fmt.Printf("\n\n\nGetFhirSystem:233 -  FindOne fhirConnector: bson.D %v\n", filter)
 	err = collection.FindOne(context.Background(), filter).Decode(fhirSystem)
 	//fmt.Printf("GetFhirSystem:290 - Elapsed Time: %s\n", time.Since(startTime))
 	// if err != nil {
@@ -238,7 +238,7 @@ func GetFhirSystem(id string) (*common.FhirSystem, error) {
 	// 	err = collection.FindOne(context.Background(), filterM).Decode(fhirConfig)
 	// }
 	if err != nil {
-		log.Errorf("GetFhirSystem:304 FindOne %v NotFound\n", filter)
+		log.Errorf("GetFhirSystem:241 FindOne %v NotFound\n", filter)
 		return nil, fmt.Errorf("GetFhirSystem:304  FindOne %v NotFound\n", filter)
 	}
 	return fhirSystem, nil

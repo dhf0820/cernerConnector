@@ -32,7 +32,7 @@ type PostPatientPayload struct {
 	Patient fhir.Patient `json:"patient"`
 }
 
-//patId, patMrn, text, err
+// patId, patMrn, text, err
 func SavePatient(mrn string, cp *common.ConnectorPayload, JWToken string) (*http.Response, error) {
 	var patient *fhir.Patient
 	//var err error
@@ -471,7 +471,7 @@ func (c *Connection) PostPatient(cp *common.ConnectorPayload, mrn string, patien
 	if cp == nil {
 		return nil, errors.New("ConnectorPayload must be provided")
 	}
-	systemURL := cp.System.Url
+	systemURL := cp.ConnectorConfig.HostUrl
 	if systemURL == "" {
 		//if systemURL == "" {
 		return nil, errors.New("cp.SystemUrl to add patient to must be specified")

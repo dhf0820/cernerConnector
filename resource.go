@@ -20,14 +20,14 @@ import (
 // //Request a specific resource by id
 func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, token string) (json.RawMessage, error) {
 	//startTime := time.Now()
-	log.Printf("GetResource:23 - cp: %s\n\n", spew.Sdump(cp))
+	//log.Printf("GetResource:23 - cp: %s\n\n", spew.Sdump(cp))
 	//url := fmt.Sprintf("%s/%s%s", fhirSystem.FhirUrl, resourceName, resourceId)
-	url := fmt.Sprintf("/%s/%s", resourceName, resourceId)
-	log.Printf("GetResource:26 final Query: %s\n", url)
-	log.Infof("GetResource:27  --  cp.System.Url: %s\n", cp.ConnectorConfig.HostUrl)
+	qry := fmt.Sprintf("/%s", resourceId)
+	log.Printf("GetResource:26 final Query: %s\n", qry)
+	log.Printf("GetResource:27  --  cp.System.Url: %s\n", cp.ConnectorConfig.HostUrl)
 	c := New(cp.ConnectorConfig.HostUrl)
-
-	rawMessage, err := c.GetFhir(url, resourceName, token)
+	log.Printf("GetResource:29  --  Calling c.GetFhir with qry: %s  resource: %s", qry, resourceName)
+	rawMessage, err := c.GetFhir(qry, resourceName, token)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +77,7 @@ func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, t
 func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query, JWToken string) (int64, *fhir4.Bundle, *common.CacheHeader, error) {
 	page := 1
 	connConfig := connPayLoad.ConnectorConfig
-	systemCfg := connPayLoad.System
+	//systemCfg := connPayLoad.System
 	fmt.Printf("FindResource:81	 --  resource: %s\n", resource)
 	fmt.Printf("FindResource:82	 --  query: %s\n", query)
 	fullQuery := fmt.Sprintf("%s?%s", resource, query)
@@ -95,7 +95,7 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	//Once background is started wait in a loop checking the ResourceCache Status using the assigned cacheId until either
 	// Have count documents or status is finished.
 	// check every 10 seconds.  Should be a FhirSystem variable value to avoid code change
-	c := New(connPayLoad.System.Url)
+	c := New(connPayLoad.ConnectorConfig.HostUrl)
 	startTime := time.Now()
 	bundle, err := c.GetFhirBundle(fullQuery, JWToken)
 	if err != nil {
@@ -116,10 +116,10 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	queryId := primitive.NewObjectID().Hex()
 	header.QueryId = queryId
 	fmt.Printf("FindResource:118  --  connConfig: %s\n", spew.Sdump(connConfig))
-	header.CacheBase = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
+	//header.CacheBase = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
 	//header.ResourceCacheBase = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
-	header.GetBundleCacheBase = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheBase, header.SystemCfg.ID.Hex())
-	header.GetResourceCacheBase = fmt.Sprintf("%s/%s/CachePage", header.CacheBase, header.SystemCfg.ID.Hex())
+	//header.GetBundleCacheBase = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheBase, header.SystemCfg.ID.Hex())
+	//header.GetResourceCacheBase = fmt.Sprintf("%s/%s/CachePage", header.CacheBase, header.SystemCfg.ID.Hex())
 
 	cacheBundle := common.CacheBundle{}
 	cacheBundle.PageId = header.PageId
@@ -128,7 +128,7 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	//fmt.Printf("\n\n\n\n$$$ FindResource:110 calling CacheResourceBundleAndEntries (without bundle) - %s \n", spew.Sdump(cacheBundle))
 	//fmt.Printf("FindResource:126  --  bundle = %s\n", spew.Sdump(bundle))
 	//Cache the first bundle(page)
-	fmt.Printf("\n\n FindResource:128  --  Query %s for %ss took %s\n\n\n", systemCfg.DisplayName, resource, time.Since(startTime))
+	fmt.Printf("\n\n FindResource:128  --  Query %s for %ss took %s\n\n\n", connPayLoad.ConnectorConfig.Label, resource, time.Since(startTime))
 	fmt.Printf("FindResource:129 --  UnmarshalBundle\n\n")
 	// bundle := fhir4.Bundle{}
 	// bundle, err = fhir4.UnmarshalBundle(byte)

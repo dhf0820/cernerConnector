@@ -20,12 +20,13 @@ import (
 var err error
 
 func main() {
-	version := "230705_0"
+	version := "230708_5"
+	os.Setenv("VERSION", version)
 	switch os.Getenv("MODE") {
 	case "local":
-		err = godotenv.Load("./.env.ca3_conn")
+		err = godotenv.Load("./.env.cerner_conn")
 	case "test":
-		err = godotenv.Load("./.env.ca3_conn_test")
+		err = godotenv.Load("./.env.cerner_conn_test")
 	default:
 		err = godotenv.Load("./.env")
 	}

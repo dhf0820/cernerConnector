@@ -46,7 +46,7 @@ func WriteHealthResponse(w http.ResponseWriter, status int, message string) erro
 	return nil
 }
 
-//Routes processes
+// Routes processes
 func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 
 	version := fmt.Sprintf("OK: Version %s-%s", "baseConnector", os.Getenv("CodeVersion"))
@@ -63,7 +63,7 @@ func HealthHandler(w http.ResponseWriter, r *http.Request) {
 	// 	WriteHealthResponse(w, 400, "Not Responding")
 	// 	return
 	// }
-	curVersion := "230416_2"
+	curVersion := os.Getenv("VERSION")
 	version := fmt.Sprintf("OK: Version %s", curVersion)
 	// version := fmt.Sprintf("OK: Version %s-%s Facility: %s at %s using FhirVersion: %s  URI: %s", "uc_Cache", os.Getenv("CodeVersion"),
 	// 		fhirSystem.DisplayName, fhirSystem.FacilityName,fhirSystem.FhirVersion, uri)

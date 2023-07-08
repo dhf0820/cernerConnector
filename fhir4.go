@@ -99,25 +99,25 @@ func (c *Connection) Query(q, token string) (*fhir.Bundle, error) {
 
 // }
 func (c *Connection) GetFhir(qry string, resourceType, token string) (json.RawMessage, error) {
-	fmt.Printf("GetFhir:102  --  ResourceType = %s Query = %s  BaseUrl = %s\n", resourceType, qry, c.BaseURL)
-	fullUrl := c.BaseURL + qry
-	log.Infof("GetFhir:104 FullURL Requested: %s\n", fullUrl)
+	log.Printf("GetFhir:102  --  ResourceType = %s Query = %s  BaseUrl = %s", resourceType, qry, c.BaseURL)
+	fullUrl := fmt.Sprintf("%s/%s%s", c.BaseURL, resourceType, qry)
+	log.Printf("GetFhir:104  --  FullURL Requested: %s", fullUrl)
 	req, err := http.NewRequest("GET", fullUrl, nil)
 	if err != nil {
 		log.Errorf("GetFhir:107  --  !!!NewRequest failed: %s\n", err.Error())
 		return nil, err
 	}
-	req.Header.Add("Accept", "application/json")
+	req.Header.Set("ACCEPT", "application/json+fhir")
 	req.Header.Set("AUTHORIZATION", token)
-	//fmt.Printf("getFhir:102  --  req: %s\n", spew.Sdump(req))
+	fmt.Printf("getFhir:112  --  req: %s\n", spew.Sdump(req))
 	resp, err := c.client.Do(req)
 	if err != nil {
-		log.Errorf("GetFhir:115  --  !!!fhir query returned err: %s\n", err)
+		log.Errorf("GetFhir:115  --  !!!fhir query returned err: %s", err)
 		return nil, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		log.Errorf("GetFhir:119  --  returned error of %d - %s\n", resp.StatusCode, resp.Status)
-		err = fmt.Errorf("%d|fhir:105 %s", resp.StatusCode, resp.Status)
+		log.Errorf("GetFhir:119  --  returned error of %d - %n", resp.StatusCode, resp.Status)
+		err = fmt.Errorf("%d|GetFhir: %s", resp.StatusCode, resp.Status)
 		//log.Errorf("%s", err.Error())
 		return nil, err
 	}
@@ -165,14 +165,14 @@ func (c *Connection) GetFhirBundle(url string, token string) (*fhir.Bundle, erro
 	// 	url = "/" + url
 	// }
 	fmt.Printf("GetFhirBundle:167  --  url = %s\n", url)
-	fullUrl := c.BaseURL + url
+	fullUrl := c.BaseURL + "/" + url
 	log.Infof("GetFhirBundle:169 FullURL Requested: %s\n", fullUrl)
 	req, err := http.NewRequest("GET", fullUrl, nil)
 	if err != nil {
 		log.Errorf("GetFhirBundle:172  --  !!!NewRequest failed: %s\n", err.Error())
 		return nil, err
 	}
-	req.Header.Add("Accept", "application/json+fhir")
+	req.Header.Set("Accept", "application/json+fhir")
 	req.Header.Set("AUTHORIZATION", token)
 	//fmt.Printf("GetFhirBundle:175  --  req: %s\n", spew.Sdump(req))
 	resp, err := c.client.Do(req)
@@ -351,3 +351,6 @@ func (c *Connection) postFhir(qry, resourceType, token string, patient *fhir.Pat
 	// fmt.Printf("postFhir:291  --  Patient =  %s\n", spew.Sdump(pat))
 	// return byte, nil
 }
+
+// https://fhir-open.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d/Binary/XR-197574792
+// https://fhir-open.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d/Binary/XR-197574792

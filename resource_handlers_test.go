@@ -19,15 +19,18 @@ import (
 	"os"
 	"strings"
 	"testing"
+
 	//"time"
 
 	jw_token "github.com/dhf0820/jwToken"
 	"github.com/dhf0820/uc_common"
+
 	//"github.com/dhf0820/uc_core/service"
 
 	"github.com/davecgh/go-spew/spew"
 	fhir "github.com/dhf0820/fhir4"
 	"go.mongodb.org/mongo-driver/bson"
+
 	//fhirR4go "github.com/dhf0820/fhirR4go"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	//log "github.com/sirupsen/logrus"
@@ -565,19 +568,19 @@ func TestDeterminePatientResource(t *testing.T) {
 	Convey("Subject: Determine Patient Resource from url", t, func() {
 		godotenv.Load("./.env.uc_ca3_test")
 		Convey("Determine PatientResource of GET", func() {
-			resource := DeterminResource("https://chartarchivefhir.com:4000/api/rest/v1/Patient/63ebfb080d5ee398ec3b66c4", "https://chartarchivefhir.com:4000/api/rest/v1/")
+			resource := DetermineResource("https://chartarchivefhir.com:4000/api/rest/v1/Patient/63ebfb080d5ee398ec3b66c4", "https://chartarchivefhir.com:4000/api/rest/v1/")
 			fmt.Printf("TestDetermineResource:566  --  Found Resource: %s\n", resource)
 			So(resource, ShouldEqual, "Patient")
 		})
 		Convey("Subject: Determine Resource of search from url", func() {
 			godotenv.Load("./.env.uc_ca3_test")
-			resource := DeterminResource("https://chartarchivefhir.com:4000/api/rest/v1/Patient?family=smart", "https://chartarchivefhir.com:4000/api/rest/v1/")
+			resource := DetermineResource("https://chartarchivefhir.com:4000/api/rest/v1/Patient?family=smart", "https://chartarchivefhir.com:4000/api/rest/v1/")
 			fmt.Printf("TestDetermineResource:572  --  Found Resource: %s\n", resource)
 			So(resource, ShouldEqual, "Patient")
 		})
 		Convey("Subject: Bad resource search", func() {
 			godotenv.Load("./.env.uc_ca3_test")
-			resource := DeterminResource("https://chartarchivefhir.com:4000/api/rest/v1/Patient-family=smart", "https://chartarchivefhir.com:4000/api/rest/v1/")
+			resource := DetermineResource("https://chartarchivefhir.com:4000/api/rest/v1/Patient-family=smart", "https://chartarchivefhir.com:4000/api/rest/v1/")
 			fmt.Printf("TestDetermineResource:578  --  Found Resource: %s\n", resource)
 			So(resource, ShouldEqual, "")
 		})

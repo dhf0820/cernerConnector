@@ -20,6 +20,7 @@ var routes = Routes{
 		"/api/rest/v1/healthcheck",
 		HealthHandler,
 	},
+
 	/////////////////////////////////////////////////////////////////////////////////
 	//                                FindResources                                //
 	/////////////////////////////////////////////////////////////////////////////////
@@ -34,15 +35,93 @@ var routes = Routes{
 	Route{
 		"GetPatient",
 		"GET",
-		"/api/rest/v1/Patient/{patientId}",
+		"/api/rest/v1/Patient/{resourceId}",
 		getResource,
 		//getPatient,
 	},
 	Route{
-		"FindPatientsDocRefs",
+		"FindAllergyIntolerance",
+		"GET",
+		"/api/rest/v1/AllergyIntolerance",
+		findResource,
+	},
+	Route{
+		"FindDocumentReferences",
 		"GET",
 		"/api/rest/v1/DocumentReference",
 		findResource,
+	},
+	Route{
+		"GetDocumentReference",
+		"GET",
+		"/api/rest/v1/DocumentReference/{resourceId}",
+		getResource,
+	},
+	Route{
+		"FindDiagnosticReports",
+		"GET",
+		"/api/rest/v1/DiagnosticReport",
+		findResource,
+	},
+	Route{
+		"GetDiagnosticReport",
+		"GET",
+		"/api/rest/v1/DiagnosticReport/{resourceId}",
+		getResource,
+	},
+	Route{
+		"FindConditions",
+		"GET",
+		"/api/rest/v1/Condition",
+		findResource,
+	},
+	Route{
+		"GetCondition",
+		"GET",
+		"/api/rest/v1/Condition/{resourceId}",
+		getResource,
+	},
+	Route{
+		"FindObservations",
+		"GET",
+		"/api/rest/v1/Observation",
+		findResource,
+	},
+	Route{
+		"GetObservation",
+		"GET",
+		"/api/rest/v1/Observation/{ressourceId}",
+		getResource,
+	},
+	Route{
+		"GetBinary",
+		"GET",
+		"/api/rest/v1/Binary/{resourceId}",
+		getResource,
+	},
+	Route{
+		"FindProcedure",
+		"GET",
+		"/api/rest/v1/Procedure",
+		findResource,
+	},
+	Route{
+		"GetProcedure",
+		"GET",
+		"/api/rest/v1/Procedure{resourceId}",
+		getResource,
+	},
+	Route{
+		"FindQuestionaireResponse",
+		"GET",
+		"/api/rest/v1/QuestionaireResponse",
+		findResource,
+	},
+	Route{
+		"FindQuestionaireResponse",
+		"GET",
+		"/api/rest/v1/QuestionaireResponse{resourceId}",
+		getResource,
 	},
 	// Route{
 	// 	"SavePatient",

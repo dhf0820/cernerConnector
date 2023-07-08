@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   cerner_connector:
-    image: dhf0820/cerner_conn:230705_4    #dhf0820/uc_ca3_arm64:220925.0
+    image: dhf0820/cerner_connector:230708_5    #dhf0820/uc_ca3_arm64:220925.0
     ports:
       - "0.0.0.0:40103:9200"
     environment:
@@ -16,11 +16,13 @@ services:
       API: "RESTFUL"
       DBNAME: "test"
     networks:
+      - vs_web
       - uc_attachable
     volumes:
       - "cerner_data:/data" 
 volumes:
   cerner_data:
 networks:
+  vs_web:
   uc_attachable:
     external: true
