@@ -20,8 +20,7 @@ import (
 var err error
 
 func main() {
-	version := "230708_5"
-	os.Setenv("VERSION", version)
+	version := "230705_0"
 	switch os.Getenv("MODE") {
 	case "local":
 		err = godotenv.Load("./.env.cerner_conn")
@@ -41,7 +40,7 @@ func main() {
 	// }
 
 	os.Setenv("CodeVersion", version)
-	log.Printf("main:41  --  Starting ca3_conn %s\n\n", version)
+	log.Printf("main:43  --  Starting cernerConnector %s\n\n", version)
 	// port := os.Getenv("PORT")
 	// if port == "" {
 	// 	port = "12113"
@@ -49,22 +48,22 @@ func main() {
 	// }
 	serviceName := os.Getenv("SERVICE_NAME")
 	if serviceName == "" {
-		fmt.Printf("main:49  --  Environment is not set using %s\n", os.Getenv("MODE"))
-		err := godotenv.Load("./.env.ca3_conn_test")
+		fmt.Printf("main:51  --  Environment is not set using %s\n", os.Getenv("MODE"))
+		err := godotenv.Load("./.env.cerner_conn_test")
 		if err != nil {
-			fmt.Printf("Main:50  --  Get environment: %s  err: %s\n", ".env.ca3_conn_test", err.Error())
+			fmt.Printf("Main:54  --  Get environment: %s  err: %s\n", ".env.ca3_conn_test", err.Error())
 			os.Exit(1)
 		}
 		serviceName = os.Getenv("SERVICE_NAME")
-		//serviceName = "baseConnector" // baseConnector
 	}
+	fmt.Printf("main:59  --  Service Name: %s\n", serviceName)
 	secretKey := os.Getenv("ACCESS_SECRET")
 	if secretKey == "" {
 		secretKey = "I am so blessed Debbie loves me!"
 		os.Setenv("ACCESS_SECRET", secretKey)
 	}
 
-	log.Printf("main:64  --  Calling service Start for %s  version: %s\n", serviceName, version)
+	log.Printf("main:66  --  Calling service Start for %s  version: %s\n", serviceName, version)
 	Start(serviceName, version) //Should Not Return
 
 }

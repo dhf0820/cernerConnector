@@ -2,11 +2,7 @@ version: "3.7"
 
 services:
   cerner_connector:
-<<<<<<< HEAD
     image: dhf0820/cerner_connector:230708_5    #dhf0820/uc_ca3_arm64:220925.0
-=======
-    image: dhf0820/cerner_connector:230705_4    #dhf0820/uc_ca3_arm64:220925.0
->>>>>>> e22efec (Removed log message)
     ports:
       - "0.0.0.0:40103:9200"
     environment:
@@ -22,11 +18,11 @@ services:
     networks:
       - vs_web
       - uc_attachable
+      - vs_web
     volumes:
       - "cerner_data:/data" 
 volumes:
   cerner_data:
 networks:
-  vs_web:
   uc_attachable:
     external: true

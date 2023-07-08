@@ -668,16 +668,11 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	//resourceId := r.Header.Get("Fhir-System")
 	fmt.Printf("\nfindResource:670  - connectorPayload = %s\n", spew.Sdump(connectorPayload))
 	qryStr := r.URL.RawQuery
-<<<<<<< HEAD
+
 	fmt.Printf("\nfindResource:672 - resource = %s  uri = %s\n", Resource, qryStr)
 	url := connectorPayload.ConnectorConfig.HostUrl + Resource + "?" + qryStr
 	//url := connectorPayload.System.Url + Resource + "?" + qryStr
 	fmt.Printf("findResource:675 - calling %s \n", url)
-=======
-	//fmt.Printf("\nfindResource:670 - resource = %s  uri = %s\n", Resource, qryStr)
-	url := connectorPayload.System.Url + Resource + "?" + qryStr
-	fmt.Printf("findResource:672 - calling %s \n", url)
->>>>>>> e22efec (Removed log message)
 	var totalPages int64
 	fmt.Printf("findResource:677  --  Search %s with %s\n", Resource, qryStr)
 	startTime := time.Now()
@@ -697,7 +692,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("findResource:692 - QueryId: %s\n", header.QueryId)
 	resp := common.ResourceResponse{}
 	//fmt.Printf("findResource:628 - Header: %s\n", spew.Sdump(header))
-	host := connectorPayload.ConnectorConfig.HostUrl
+	host := connectorPayload.System.Url
 	//host := common.GetKVData(GetConfig().Data, "cacheHost")
 	fmt.Printf("findResource:697 --  host: %s\n\n\n", host)
 	cacheBundleUrl := fmt.Sprintf("%s/%s/BundleTransaction", connectorConfig.CacheUrl, header.QueryId)
@@ -845,9 +840,9 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("GetResource:840  --  Binary: %s\n", spew.Sdump(binary))
 		resp.ResourceType = Resource
 		resp.Resource.ResourceType = Resource
-		resp.Resource.B
-		resp.Resource.ResourceId = *patient.Id
-		resp.ResourceId = *patient.Id
+
+		resp.Resource.ResourceId = *binary.Id
+		resp.ResourceId = *binary.Id
 		resp.Message = "Ok"
 		resp.PageNumber = 1
 		resp.TotalPages = 1
