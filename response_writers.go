@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+
 	//"io/ioutil"
 	"net/http"
 
@@ -11,20 +12,20 @@ import (
 	//"github.com/davecgh/go-spew/spew"
 	//"github.com/dhf0820/fhir4"
 	//cm "github.com/dhf0820/baseConnector/common"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/dhf0820/fhir4"
 	fhir "github.com/dhf0820/fhir4"
 	common "github.com/dhf0820/uc_common"
-    //"github.com/gorilla/mux"
+	//"github.com/gorilla/mux"
 	//"go.mongodb.org/mongo-driver/bson/primitive"
-
 	//"os"
 	//"strconv"
 	//"strings"
 	//"time"
-
 	//token "github.com/dhf0820/token"
 )
-//####################################### Response Writers Functions #######################################
+
+// ####################################### Response Writers Functions #######################################
 func WriteFhirOperationOutcome(w http.ResponseWriter, status int, resp *fhir.OperationOutcome) error {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -166,7 +167,8 @@ func WriteFhirBundle(w http.ResponseWriter, status int, resp *fhir4.Bundle) erro
 
 func WriteFhirResponse(w http.ResponseWriter, status int, resp *common.ResourceResponse) error {
 	w.Header().Set("Content-Type", "application/json")
-
+	fmt.Printf("WriteFhirResponse:170  --  Status: %d\n", status)
+	fmt.Printf("WriteFhirResponse:171  --  Data:  %s\n", spew.Sdump(resp.Resource.Binary))
 	switch status {
 	case 200:
 		w.WriteHeader(http.StatusOK)
@@ -181,7 +183,7 @@ func WriteFhirResponse(w http.ResponseWriter, status int, resp *common.ResourceR
 	}
 	err := json.NewEncoder(w).Encode(resp)
 	if err != nil {
-		fmt.Println("WriteFhirResponse:170  --  Error marshaling JSON:", err)
+		fmt.Println("WriteFhirResponse:184  --  Error marshaling JSON:", err)
 		return err
 	}
 	return nil

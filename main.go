@@ -20,7 +20,7 @@ import (
 var err error
 
 func main() {
-	version := "230707_6"
+	version := "230708_5"
 	switch os.Getenv("MODE") {
 	case "local":
 		err = godotenv.Load("./.env.cerner_conn")

@@ -692,9 +692,9 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("findResource:692 - QueryId: %s\n", header.QueryId)
 	resp := common.ResourceResponse{}
 	//fmt.Printf("findResource:628 - Header: %s\n", spew.Sdump(header))
-	host := connectorPayload.System.Url
+	host := connectorPayload.ConnectorConfig.HostUrl
 	//host := common.GetKVData(GetConfig().Data, "cacheHost")
-	fmt.Printf("findResource:697 --  host: %s\n\n\n", host)
+	fmt.Printf("\n\n\nfindResource:697 --  host: %s\n\n\n", host)
 	cacheBundleUrl := fmt.Sprintf("%s/%s/BundleTransaction", connectorConfig.CacheUrl, header.QueryId)
 	//header.CacheUrl = fmt.Sprintf("%s%sv1/Cache/%s/", host, parts[0], header.QueryId)
 	fmt.Printf("findResource:700  --  CacheUrl = %s\n", cacheBundleUrl)
@@ -828,7 +828,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		resp.QueryId = primitive.NewObjectID().Hex()
 		resp.Status = 200
 	case "binary":
-		fmt.Printf("GetResource:831  --  patient raw = %v\n", results)
+		//fmt.Printf("GetResource:831  --  patient raw = %v\n", results)
 		binary, err := fhir.UnmarshalBinary(results)
 		if err != nil {
 			err = fmt.Errorf("getResource:804  --  UnmarshalPatient error:  %s", err.Error())
@@ -837,7 +837,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 			WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityFatal, &errMsg))
 			return
 		}
-		fmt.Printf("GetResource:840  --  Binary: %s\n", spew.Sdump(binary))
+		//mt.Printf("GetResource:840  --  Binary: %s\n", spew.Sdump(binary))
 		resp.ResourceType = Resource
 		resp.Resource.ResourceType = Resource
 		resp.Resource.Binary = binary
@@ -852,7 +852,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 	}
 	// resp.ResourceType = Resource
 	// resp.Resource.Resource = results
-	fmt.Printf("getResource:833 - returning a %s resource\n", spew.Sdump(resp))
+	fmt.Printf("getResource:855 - returning a %s resource\n", spew.Sdump(resp))
 	WriteFhirResponse(w, resp.Status, &resp)
 }
 
