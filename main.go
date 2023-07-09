@@ -20,12 +20,14 @@ import (
 var err error
 
 func main() {
-	version := "230705_0"
+	version := "230707_6"
 	switch os.Getenv("MODE") {
 	case "local":
 		err = godotenv.Load("./.env.cerner_conn")
 	case "test":
 		err = godotenv.Load("./.env.cerner_conn_test")
+	case "go_test":
+		err = godotenv.Load("./.env.cerner_conn_go_test")
 	default:
 		err = godotenv.Load("./.env")
 	}
@@ -49,14 +51,14 @@ func main() {
 	serviceName := os.Getenv("SERVICE_NAME")
 	if serviceName == "" {
 		fmt.Printf("main:51  --  Environment is not set using %s\n", os.Getenv("MODE"))
-		err := godotenv.Load("./.env.cerner_conn_test")
+		err := godotenv.Load("./.env.cerner_conn_go_test")
 		if err != nil {
 			fmt.Printf("Main:54  --  Get environment: %s  err: %s\n", ".env.ca3_conn_test", err.Error())
 			os.Exit(1)
 		}
 		serviceName = os.Getenv("SERVICE_NAME")
 	}
-	fmt.Printf("main:59  --  Service Name: %s\n", serviceName)
+	fmt.Printf("main:61  --  Service Name: %s\n", serviceName)
 	secretKey := os.Getenv("ACCESS_SECRET")
 	if secretKey == "" {
 		secretKey = "I am so blessed Debbie loves me!"

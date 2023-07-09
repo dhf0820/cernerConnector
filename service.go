@@ -50,7 +50,7 @@ type ConfigResp struct {
 	Config  common.ServiceConfig `json:"config"`
 }
 
-func Start(serviceName, version string) {
+func Start(serviceName, codeVersion string) {
 	baseAddress := os.Getenv("BASE_ADDRESS")
 	if baseAddress == "" {
 		baseAddress = "localhost"
@@ -61,10 +61,11 @@ func Start(serviceName, version string) {
 		listenPort = "40103" // Default for Ca3Connector local host standalone
 	}
 	restAddress := fmt.Sprintf("%s:%s", "0.0.0.0", listenPort)
-	log.Printf("Start:64  --  restAddress: %s  -  port:%", restAddress, listenPort)
+	log.Printf("Start:64  --  restAddress: %s  -  port: %s", restAddress, listenPort)
 	router := NewRouter()
-	log.Printf("\n\n")
-	log.Printf("Start:68  --  %s version: %s is listening for restful requests at %s", serviceName, version, restAddress)
+	configVersion := os.Getenv("CONFIG_VERSION")
+
+	log.Printf("Start:68  --  %s CodeVersion: [%s]  ConfigVersion: [%s]  is listening for restful requests at %s", serviceName, codeVersion, configVersion, restAddress)
 	err := http.ListenAndServe(restAddress, router)
 	log.Printf("Start:70  --  This should not happen err = %s", err.Error())
 
@@ -87,7 +88,7 @@ func Initialize(serviceName, version string) (*common.ServiceConfig, error) {
 		os.Setenv("SERVICE_COMPANY", "test")
 	}
 
-	fmt.Printf("Initialize:162  --  Service: %s  SERVICE_COMPANY = [%s]\n\n", serviceName, os.Getenv("SERVICE_COMPANY"))
+	fmt.Printf("Initialize:91  --  Service: %s  SERVICE_VERSION: %s  SERVICE_COMPANY = [%s]\n\n", serviceName, os.Getenv("SERVICE_VERSION"), os.Getenv("SERVICE_COMPANY"))
 	// PatientData := strings.ToLower(os.Getenv("PATIENT_DATA"))
 	// if strings.Trim(PatientData, " ") == "" {
 	// 	PatientData = "postgres"
@@ -103,7 +104,7 @@ func Initialize(serviceName, version string) (*common.ServiceConfig, error) {
 	// OpenCaDB(Conf.DataConnectors)
 
 	setEndPoints()
-	fmt.Printf("Initilized ca_3Service\n\n")
+	fmt.Printf("Initilized %s\n\n", serviceName)
 	return Conf, err
 }
 

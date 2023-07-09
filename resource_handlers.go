@@ -840,7 +840,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("GetResource:840  --  Binary: %s\n", spew.Sdump(binary))
 		resp.ResourceType = Resource
 		resp.Resource.ResourceType = Resource
-
+		resp.Resource.Binary = binary
 		resp.Resource.ResourceId = *binary.Id
 		resp.ResourceId = *binary.Id
 		resp.Message = "Ok"
