@@ -18,9 +18,11 @@ import (
 
 // var err error
 var err error
+var version string
 
 func main() {
-	version := "230911.0"
+	version = "230911.0"
+	log.Info("run mode: " + os.Getenv("MODE"))
 	switch os.Getenv("MODE") {
 	case "local":
 		err = godotenv.Load("./.env.cerner_conn")
@@ -30,6 +32,11 @@ func main() {
 		err = godotenv.Load("./.env.cerner_conn_go_test")
 	default:
 		err = godotenv.Load("./.env")
+		if err != nil {
+			log.Error("Error loading environment: " + err.Error())
+			os.Exit(1)
+		}
+		log.Info("run mode: default")
 	}
 	// if err != nil {
 	// 	fmt.Printf("Main:41  --  Error loading environment: %s\n", err.Error())

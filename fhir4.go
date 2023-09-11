@@ -17,7 +17,8 @@ import (
 	//"github.com/davecgh/go-spew/spew"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	log "github.com/dhf0820/vslog"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -96,15 +97,14 @@ func (c *Connection) Query(q, token string) (*fhir.Bundle, error) {
 }
 
 // func (c *Connection) GetById(id string)([]byte, error ) {
-
 // }
 func (c *Connection) GetFhir(qry string, resourceType, token string) (json.RawMessage, error) {
-	log.Printf("GetFhir:102  --  ResourceType = %s Query = %s  BaseUrl = %s", resourceType, qry, c.BaseURL)
+	logrus.Printf("GetFhir:102  --  ResourceType = %s Query = %s  BaseUrl = %s", resourceType, qry, c.BaseURL)
 	fullUrl := fmt.Sprintf("%s/%s%s", c.BaseURL, resourceType, qry)
-	log.Printf("GetFhir:104  --  FullURL Requested: %s", fullUrl)
+	logrus.Printf("GetFhir:104  --  FullURL Requested: %s", fullUrl)
 	req, err := http.NewRequest("GET", fullUrl, nil)
 	if err != nil {
-		log.Errorf("GetFhir:107  --  !!!NewRequest failed: %s\n", err.Error())
+		logrus.Errorf("GetFhir:107  --  !!!NewRequest failed: %s\n", err.Error())
 		return nil, err
 	}
 	req.Header.Set("ACCEPT", "application/json+fhir")
@@ -112,11 +112,11 @@ func (c *Connection) GetFhir(qry string, resourceType, token string) (json.RawMe
 	fmt.Printf("getFhir:112  --  req: %s\n", spew.Sdump(req))
 	resp, err := c.client.Do(req)
 	if err != nil {
-		log.Errorf("GetFhir:115  --  !!!fhir query returned err: %s", err)
+		logrus.Errorf("GetFhir:115  --  !!!fhir query returned err: %s", err.Error())
 		return nil, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		log.Errorf("GetFhir:119  --  returned error of %d - %n", resp.StatusCode, resp.Status)
+		logrus.Errorf("GetFhir:119  --  returned error of %d - %n", resp.StatusCode, resp.Status)
 		err = fmt.Errorf("%d|GetFhir: %s", resp.StatusCode, resp.Status)
 		//log.Errorf("%s", err.Error())
 		return nil, err
@@ -165,24 +165,24 @@ func (c *Connection) GetFhirBundle(url string, token string) (*fhir.Bundle, erro
 	// 	url = "/" + url
 	// }
 	fmt.Printf("GetFhirBundle:167  --  url = %s\n", url)
-	fullUrl := c.BaseURL + "/" + url
-	log.Infof("GetFhirBundle:169 FullURL Requested: %s\n", fullUrl)
+	fullUrl := c.BaseURL + url
+	log.Info("GetFhirBundle:169 FullURL Requested: " + fullUrl)
 	req, err := http.NewRequest("GET", fullUrl, nil)
 	if err != nil {
-		log.Errorf("GetFhirBundle:172  --  !!!NewRequest failed: %s\n", err.Error())
+		logrus.Errorf("GetFhirBundle:172  --  !!!NewRequest failed: %s\n", err.Error())
 		return nil, err
 	}
 	req.Header.Set("Accept", "application/json+fhir")
-	req.Header.Set("AUTHORIZATION", token)
+	//req.Header.Set("AUTHORIZATION", token)
 	//fmt.Printf("GetFhirBundle:175  --  req: %s\n", spew.Sdump(req))
 	resp, err := c.client.Do(req)
 	if err != nil {
-		log.Errorf("GetFhirBundle:180  --  !!!fhir query returned err: %s\n", err)
+		logrus.Errorf("GetFhirBundle:180  --  !!!fhir query returned err: %s\n", err)
 		return nil, err
 	}
 	//fmt.Printf("GetFhir:181  --  resp = %s\n", spew.Sdump(resp))
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		log.Errorf("GetFhirBundle:185  --  returned error of %d - %s\n", resp.StatusCode, resp.Status)
+		logrus.Errorf("GetFhirBundle:185  --  returned error of %d - %s\n", resp.StatusCode, resp.Status)
 		err = fmt.Errorf("%d|GetFhirBundle:186 %s", resp.StatusCode, resp.Status)
 		//log.Errorf("%s", err.Error())
 		return nil, err
@@ -256,12 +256,12 @@ func GetRemoteFhirPatient(qry string, fhirUrl string, token string) (*fhir.Patie
 func (c *Connection) PostFhir(qry, resourceType, token string, patient *fhir.Patient) (json.RawMessage, error) {
 	fmt.Printf("PostFhir:256  --  ResourceType = %s,  URLQuery = %s  BaseUrl = %s\n", resourceType, qry, c.BaseURL)
 	fullUrl := c.BaseURL + qry
-	log.Infof("PostFhir:258 FullURL Requested: %s\n", fullUrl)
+	logrus.Infof("PostFhir:258 FullURL Requested: %s\n", fullUrl)
 	patb, err := json.Marshal(patient)
 	rc := io.NopCloser(strings.NewReader(string(patb)))
 	req, err := http.NewRequest("POST", fullUrl, rc)
 	if err != nil {
-		log.Errorf("PostFhir:263  --  !!!NewRequest failed: %s\n", err.Error())
+		logrus.Errorf("PostFhir:263  --  !!!NewRequest failed: %s\n", err.Error())
 		return nil, err
 	}
 	req.Header.Add("Accept", "application/json")
@@ -269,11 +269,11 @@ func (c *Connection) PostFhir(qry, resourceType, token string, patient *fhir.Pat
 	//fmt.Printf("getFhir:102  --  req: %s\n", spew.Sdump(req))
 	resp, err := c.client.Do(req)
 	if err != nil {
-		log.Errorf("PostFhir:271  --  !!!fhir query returned err: %s\n", err)
+		logrus.Errorf("PostFhir:271  --  !!!fhir query returned err: %s\n", err)
 		return nil, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		log.Errorf("postFhir:275  --  returned error of %d - %s\n", resp.StatusCode, resp.Status)
+		logrus.Errorf("postFhir:275  --  returned error of %d - %s\n", resp.StatusCode, resp.Status)
 		err = fmt.Errorf("%d|PostFhir:275 %s", resp.StatusCode, resp.Status)
 		//log.Errorf("%s", err.Error())
 		return nil, err
@@ -297,7 +297,7 @@ func (c *Connection) PostFhir(qry, resourceType, token string, patient *fhir.Pat
 func (c *Connection) postFhir(qry, resourceType, token string, patient *fhir.Patient) (*http.Response, error) {
 	fmt.Printf("postFhir:298  --  ResourceType = %s,  URLQuery = %s  BaseUrl = %s\n", resourceType, qry, c.BaseURL)
 	fullUrl := c.BaseURL + qry
-	log.Infof("postFhir:299 FullURL Requested: %s\n", fullUrl)
+	log.Info("FullURL Requested: " + fullUrl)
 	patb, err := json.Marshal(patient)
 	if err != nil {
 		fmt.Printf("postFhir:302  --  Error Marshalling Patient: %s\n", err.Error())
@@ -306,7 +306,7 @@ func (c *Connection) postFhir(qry, resourceType, token string, patient *fhir.Pat
 	rc := io.NopCloser(strings.NewReader(string(patb)))
 	req, err := http.NewRequest("POST", fullUrl, rc)
 	if err != nil {
-		log.Errorf("postFhir:308  --  !!!NewRequest failed: %s\n", err.Error())
+		logrus.Errorf("postFhir:308  --  !!!NewRequest failed: %s\n", err.Error())
 		return nil, err
 	}
 	req.Header.Add("Accept", "application/json")
@@ -315,12 +315,12 @@ func (c *Connection) postFhir(qry, resourceType, token string, patient *fhir.Pat
 	resp, err := c.client.Do(req)
 
 	if err != nil {
-		log.Errorf("postFhir:317  --  !!!fhir query returned err: %s\n", err)
+		logrus.Errorf("postFhir:317  --  !!!fhir query returned err: %s\n", err)
 		return resp, err
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		log.Errorf("postFhir:321  --  returned error of %d - %s\n", resp.StatusCode, resp.Status)
+		logrus.Errorf("postFhir:321  --  returned error of %d - %s\n", resp.StatusCode, resp.Status)
 		//err = fmt.Errorf("%d|postFhir:275 %s", resp.StatusCode, resp.Status)
 		//log.Errorf("%s", err.Error())
 		defer resp.Body.Close()

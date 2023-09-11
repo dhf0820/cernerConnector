@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	//"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 
 	"github.com/davecgh/go-spew/spew"
 	cm "github.com/dhf0820/baseConnector/common"
@@ -14,7 +14,7 @@ import (
 	//"github.com/gorilla/mux"
 
 	//"github.com/gorilla/schema"
-	"log"
+	log "github.com/dhf0820/vslog"
 	"net/http"
 
 	//"os"
@@ -191,15 +191,15 @@ func savePatient(w http.ResponseWriter, r *http.Request) {
 	//Resource := "Patient"
 	//fmt.Printf("postPatient:182 - Post: %s \n", spew.Sdump(r))
 	JWToken := r.Header.Get("Authorization")
-	_, status, err := jw_token.ValidateToken(JWToken, "")
+	payload, status, err := jw_token.ValidateToken(JWToken, "")
 	if err != nil {
 		errMsg := err.Error()
 		fmt.Printf("savePatient:190  - ValidateToken err = %s\n", errMsg)
 		WriteFhirOperationOutcome(w, status, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
-	//log.Printf("savePatient:194  --  User Name: %s\n", Payload.FullName)
-	body, err := ioutil.ReadAll(r.Body) // Should be ConnectorPayload
+	log.Info("payload: " + spew.Sdump(payload))
+	body, err := io.ReadAll(r.Body) // Should be ConnectorPayload
 	if err != nil {
 		fmt.Printf("savePatient:197  --  ReadAll FhirSystem error %s\n", err.Error())
 		errMsg := err.Error()
@@ -248,7 +248,7 @@ func savePatient(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("savePatient:241  --  httpResp.Status = %s   StatusCode: %d\n", httpResp.Status, httpResp.StatusCode)
 		fmt.Printf("savePatient:242  --  error: %s\n", httpResp.Status)
 		defer httpResp.Body.Close()
-		bodyBytes, err := ioutil.ReadAll(httpResp.Body)
+		bodyBytes, err := io.ReadAll(httpResp.Body)
 		if err != nil {
 			errMsg := err.Error()
 			fmt.Printf("savePatient:247  --  ReadAll SavePatient ReadBody error %s\n", err.Error())
@@ -258,8 +258,7 @@ func savePatient(w http.ResponseWriter, r *http.Request) {
 		opOutcome := fhir.OperationOutcome{}
 		err = json.Unmarshal(bodyBytes, &opOutcome)
 		if err != nil {
-			errMsg := err.Error()
-			fmt.Printf("savePatient:255  --  ErrorMessage ReadBody error %s\n", err.Error())
+			errMsg := log.ErrMsg("ErrorMessage ReadBody error " + err.Error())
 			WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityFatal, &errMsg))
 			return
 		}
@@ -273,7 +272,7 @@ func savePatient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer httpResp.Body.Close()
-	byte, err := ioutil.ReadAll(httpResp.Body)
+	byte, err := io.ReadAll(httpResp.Body)
 	if err != nil {
 		errMsg := err.Error()
 		fmt.Printf("savePatient:272  --  ReadAll SavePatient ReadBody error %s\n", err.Error())
@@ -429,16 +428,15 @@ func searchPatient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Printf("searchPatient:402  --  srchParams: %s\n", spew.Sdump(srchParams))
-	return
+
 	// var pspTags map[string]string
 	// tagFields := make(map[string]string)
 	// var Limit int
 	// var Skip int
 	//Resource := "Patient"
-	body, err := ioutil.ReadAll(r.Body) // Should be ConnectorPayload
+	body, err := io.ReadAll(r.Body) // Should be ConnectorPayload
 	if err != nil {
-		fmt.Printf("searchPatient:411  --  ReadAll FhirSystem error %s\n", err.Error())
-		errMsg := err.Error()
+		errMsg := log.ErrMsg("ReadAll FhirSystem error: " + err.Error())
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
@@ -447,7 +445,7 @@ func searchPatient(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &connectorPayload)
 	if err != nil {
 		fmt.Printf("\nsearchPatient:420  --  unmarshal err = %s\n", err.Error())
-		errMsg := err.Error()
+		errMsg := log.ErrMsg("Unmarshal ConnectorPayload error: " + err.Error())
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
@@ -465,10 +463,10 @@ func searchPatient(w http.ResponseWriter, r *http.Request) {
 	}
 	//fhirId := fhirSystem.ID.String()
 	userId := Payload.UserId
-	log.Printf("searchPatient:439  --  UserId: %s\n", userId)
+	log.Info("UserId: " + userId)
 
-	fmt.Printf("SearchPatient:441  --  raw: %s\n", r.URL.RawQuery)
-	fmt.Printf("SearchPatient:442  --  query values: %v\n", r.URL.Query())
+	log.Info("raw: " + r.URL.RawQuery)
+	//fmt.Printf("query values: %v\n", r.URL.Query())
 	values := r.URL.Query()
 	for k, v := range values {
 		fmt.Println(k, " => ", v)
@@ -755,7 +753,7 @@ func findPatient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userId := Payload.UserId
-	log.Printf("findPatient:758  --  UserId: %s\n", userId)
+	log.Info(" UserId: " + userId)
 	r.ParseForm()
 	decoder.RegisterConverter(time.Now(), func(value string) reflect.Value {
 		result := reflect.Value{}
@@ -766,8 +764,7 @@ func findPatient(w http.ResponseWriter, r *http.Request) {
 	})
 	cp, err := GetConnectorPayload(r)
 	if err != nil {
-		err := fmt.Errorf("findPatient:769  --  GetConnectorPayload error: %s", err.Error())
-		errMsg := err.Error()
+		errMsg := log.ErrMsg("GetConnectorPayload error: " + err.Error())
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeForbidden, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
@@ -789,7 +786,7 @@ func findPatient(w http.ResponseWriter, r *http.Request) {
 	err = decoder.Decode(patFilter, r.Form)
 	if err != nil {
 		status := 400
-		errMsg := fmt.Sprintf("findPatient:763  --  decode err: %s\n", err.Error())
+		errMsg := log.ErrMsg(" decode err: " + err.Error())
 		WriteFhirOperationOutcome(w, status, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
@@ -830,12 +827,9 @@ func findPatient(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetConnectorPayload(r *http.Request) (*common.ConnectorPayload, error) {
-	body, err := ioutil.ReadAll(r.Body) // Should be ConnectorPayload
+	body, err := io.ReadAll(r.Body) // Should be ConnectorPayload
 	if err != nil {
-		log.Printf("GetConnectorPayload:838  --  ReadAll FhirSystem error %s\n", err.Error())
-		//errMsg := err.Error()
-		//WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
-		return nil, err
+		return nil, log.Errorf("ReadAll FhirSystem error " + err.Error())
 	}
 	//mt.Printf("GetConnectorPayload:717  -- Got Body Now Unmarshal ConnectorPayload\n")
 	b := string(body)
@@ -848,11 +842,9 @@ func GetConnectorPayload(r *http.Request) (*common.ConnectorPayload, error) {
 		// WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 		return nil, err
 	}
-	fmt.Printf("GetConnectorPayload:854  --  Check ConPayload\n")
+	log.Info("Check ConPayload")
 	if conPayload == nil {
-		fmt.Printf("\n\nconPayload is nil\n")
-		err = fmt.Errorf("conPayload is nil ")
-		return nil, err
+		return nil, log.Errorf("conPayload is nil ")
 	}
 	//fmt.Printf("GetConnectorPayload:860  --  ConnectorPayLoad = %s\n", spew.Sdump(conPayload))
 	return conPayload, err
@@ -861,17 +853,14 @@ func GetConnectorPayload(r *http.Request) (*common.ConnectorPayload, error) {
 func CreateFhirQuery(r *http.Request) (string, error) {
 	query := ""
 	values := r.URL.Query()
-	fmt.Printf("\nCreateFhirQuery:867  --  values : %v\n\n", values)
+	log.Info(fmt.Sprintf("CreateFhirQuery  values : %v", values))
 	if len(values) < 1 {
-		log.Println("CreateFhirQuery:869  --  No URL.Querys")
-		err := fmt.Errorf("Url.Querys are missing")
+		err := log.Errorf("Url.Querys are missing")
 		return "", err
 	}
 	//fmt.Printf("\nCreateFhirQuery:713  --  Keys : %v\n\n", keys)
 	for k, v := range values {
-		fmt.Println("CreateFhirQuery:875  --  ", k, " => ", v[0])
-		//fmt.Println(strings.TrimLeft(v, "[]"))
-		fmt.Printf("CreateFhirQuery:877  --  k = %s   v = %v\n", k, v)
+		log.Info("Key:  " + k + " => " + v[0])
 		s := strings.TrimLeft(v[0], "[]")
 		if query == "" {
 			//for _, kv := range v {
@@ -880,7 +869,7 @@ func CreateFhirQuery(r *http.Request) (string, error) {
 		} else {
 			query = fmt.Sprintf("%s&%s=%s", query, k, s)
 		}
-		fmt.Printf("CreateFhirQuery:886  --  query = %s\n", query)
+		log.Info("CreateFhirQuery = " + query)
 	}
 	return query, nil
 }
@@ -890,12 +879,11 @@ func HandleOperationOutcome(w http.ResponseWriter, body []byte) {
 	opOutcome := &fhir.OperationOutcome{}
 	err := json.Unmarshal(body, &opOutcome)
 	if err != nil {
-		err := fmt.Errorf("HandleOperationOutcome:896  --  err = %s\n", err.Error())
-		errMsg := err.Error()
+		errMsg := log.ErrMsg(" Error: " + err.Error())
 		WriteFhirOperationOutcome(w, 401, CreateOperationOutcome(fhir.IssueTypeForbidden, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
-	fmt.Printf("HandleOperationOutcome:901  --  opOutcome = %s\n", spew.Sdump(opOutcome))
+	log.Info("opOutcome = " + spew.Sdump(opOutcome))
 	issue := opOutcome.Issue[0]
 	code := opOutcome.Issue[0].Code
 	fmt.Printf("HandleOperationOutcome:904  --  code = %s,  Issue %s\n", code.Display(), *issue.Details.Text)
@@ -907,20 +895,18 @@ func HandleOperationOutcome(w http.ResponseWriter, body []byte) {
 }
 
 func DetermineOutComeErr(body []byte) error {
-	fmt.Printf("HandleOperationOutcome:913  --  body = %s\n", string(body))
+	log.Info("HandleOperationOutcome  body n" + string(body))
 	opOutcome := &fhir.OperationOutcome{}
 	err := json.Unmarshal(body, &opOutcome)
 	if err != nil {
-		fmt.Printf("DeterminOutComeErr:917  --  err = %s\n", err.Error())
-		return nil
+		return log.Errorf("Unmarshal err = " + err.Error())
 	}
 	if opOutcome.Id == nil {
-		fmt.Printf("DeterminOutComeErr:921  --  opOutcome.Id is nil\n")
-		return nil
+		return log.Errorf("opOutcome.Id is nil")
 	}
-	fmt.Printf("HandleOperationOutcome:924  --  opOutcome = %s\n", spew.Sdump(opOutcome))
+	//fmt.Printf("HandleOperationOutcome:924  --  opOutcome = %s\n", spew.Sdump(opOutcome))
 	issue := opOutcome.Issue[0]
 	code := opOutcome.Issue[0].Code
-	fmt.Printf("HandleOperationOutcome:927  --  code = %s,  Issue %s\n", code.Display(), *issue.Details.Text)
+	log.Info(fmt.Sprintf("HandleOperationOutcome:   code = %s,  Issue %s\n", code.Display(), *issue.Details.Text))
 	return nil
 }
