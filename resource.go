@@ -13,7 +13,8 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	fhir4 "github.com/dhf0820/fhir4"
 	common "github.com/dhf0820/uc_common"
-	log "github.com/sirupsen/logrus"
+	log "github.com/dhf0820/vslog"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -22,11 +23,11 @@ func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, t
 	//startTime := time.Now()
 	//log.Printf("GetResource:23 - cp: %s\n\n", spew.Sdump(cp))
 	//url := fmt.Sprintf("%s/%s%s", fhirSystem.FhirUrl, resourceName, resourceId)
-	qry := fmt.Sprintf("/%s", resourceId)
-	log.Printf("GetResource:26 final Query: %s\n", qry)
-	log.Printf("GetResource:27  --  cp.System.Url: %s\n", cp.ConnectorConfig.HostUrl)
+	qry := fmt.Sprintf("%s", resourceId)
+	logrus.Printf("GetResource:26 final Query: %s\n", qry)
+	logrus.Printf("GetResource:27  --  cp.System.Url: %s\n", cp.ConnectorConfig.HostUrl)
 	c := New(cp.ConnectorConfig.HostUrl)
-	log.Printf("GetResource:29  --  Calling c.GetFhir with qry: %s  resource: %s", qry, resourceName)
+	logrus.Printf("GetResource:29  --  Calling c.GetFhir with qry: %s  resource: %s", qry, resourceName)
 	rawMessage, err := c.GetFhir(qry, resourceName, token)
 	if err != nil {
 		return nil, err
@@ -207,7 +208,7 @@ func (c *Connection) GetNextResource(header *common.CacheHeader, url, resource, 
 	fmt.Printf("GetNextResource:192  -- Calling CacheResourceBundleAndEntries\n")
 	pg, err := CacheResourceBundleAndEntries(&cacheBundle, token, page)
 	if err != nil {
-		log.Errorf("GetNextResource:195 returned err; %s\n", err.Error())
+		log.Errorf("GetNextResource:195 returned err: " + err.Error())
 		return
 		//return int64(pg + 1), &bundle, cacheBundle.Header, err
 	}

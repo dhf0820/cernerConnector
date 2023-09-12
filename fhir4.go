@@ -100,7 +100,7 @@ func (c *Connection) Query(q, token string) (*fhir.Bundle, error) {
 // }
 func (c *Connection) GetFhir(qry string, resourceType, token string) (json.RawMessage, error) {
 	logrus.Printf("GetFhir:102  --  ResourceType = %s Query = %s  BaseUrl = %s", resourceType, qry, c.BaseURL)
-	fullUrl := fmt.Sprintf("%s/%s%s", c.BaseURL, resourceType, qry)
+	fullUrl := fmt.Sprintf("%s%s/%s", c.BaseURL, resourceType, qry)
 	logrus.Printf("GetFhir:104  --  FullURL Requested: %s", fullUrl)
 	req, err := http.NewRequest("GET", fullUrl, nil)
 	if err != nil {

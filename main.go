@@ -19,6 +19,8 @@ import (
 // var err error
 var err error
 var version string
+var Mode string
+var Env string
 
 func main() {
 	version = "230911.0"
@@ -26,15 +28,32 @@ func main() {
 	switch os.Getenv("MODE") {
 	case "local":
 		err = godotenv.Load("./.env.cerner_conn")
+		if err == nil {
+			Mode = "local"
+			Env = "./.env.cerner_conn"
+		}
 	case "test":
 		err = godotenv.Load("./.env.cerner_conn_test")
+		if err == nil {
+			Mode = "test"
+			Env = "./.env.cerner_conn_test"
+		}
 	case "go_test":
 		err = godotenv.Load("./.env.cerner_conn_go_test")
+		if err == nil {
+			Mode = "test"
+			Env = "./.env.cerner_conn_go_test"
+		}
+
 	default:
 		err = godotenv.Load("./.env")
 		if err != nil {
 			log.Error("Error loading environment: " + err.Error())
 			os.Exit(1)
+		}
+		if err == nil {
+			Mode = os.Getenv("MODE")
+			Env = "./.env"
 		}
 		log.Info("run mode: default")
 	}
@@ -73,6 +92,7 @@ func main() {
 	}
 
 	log.Printf("main:66  --  Calling service Start for %s  version: %s\n", serviceName, version)
+	log.Info("Service Starting with mode: " + os.Getenv("MODE") + "  env: " + Env)
 	Start(serviceName, version) //Should Not Return
 
 }
