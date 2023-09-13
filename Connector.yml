@@ -2,13 +2,13 @@ version: "3.7"
 
 services:
   cernerConn:
-    image:  dhf0820/cerner_connector:230911.0         #230627_0    #dhf0820/uc_fhir4_arm64:220925.0
+    image:  dhf0820/cerner_connector:230913.0         #230627_0    #dhf0820/uc_fhir4_arm64:220925.0
     ports:
-      - "0.0.0.0:20104:9200"
+      - "0.0.0.0:20103:9200"
     environment:
-      CONFIG_ADDRESS: "http://192.168.1.147:30300/api/rest/v1"
+      CONFIG_ADDRESS: "http://uc_core:9200/api/rest/v1"
       SERVICE_NAME: "cernConn"
-      SERVICE_VERSION: "docker_test"
+      SERVICE_VERSION: "ssd"
       SERVICE_COMPANY: "test"
       COMPANY: "test"
       REFRESH_SECRET: "Debbie loves me more"

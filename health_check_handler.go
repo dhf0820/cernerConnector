@@ -49,7 +49,7 @@ func WriteHealthResponse(w http.ResponseWriter, status int, message string) erro
 // Routes processes
 func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 
-	version := fmt.Sprintf("OK: Version %s-%s", "baseConnector", os.Getenv("CodeVersion"))
+	version := fmt.Sprintf("OK: Version %s-%s  Environment: %s", "CernerConnector", os.Getenv("CodeVersion"), Env)
 	WriteHealthResponse(w, 200, version)
 	fmt.Println(version)
 }
@@ -64,7 +64,7 @@ func HealthHandler(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 	curVersion := os.Getenv("VERSION")
-	version := fmt.Sprintf("OK: Version %s", curVersion)
+	version := fmt.Sprintf("OK: cernerConn Version %s  Environment: %s", curVersion, Env)
 	// version := fmt.Sprintf("OK: Version %s-%s Facility: %s at %s using FhirVersion: %s  URI: %s", "uc_Cache", os.Getenv("CodeVersion"),
 	// 		fhirSystem.DisplayName, fhirSystem.FacilityName,fhirSystem.FhirVersion, uri)
 	WriteHealthResponse(w, 200, version)

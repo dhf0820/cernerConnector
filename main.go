@@ -23,7 +23,7 @@ var Mode string
 var Env string
 
 func main() {
-	version = "230911.0"
+	version = "230913.0"
 	log.Info("run mode: " + os.Getenv("MODE"))
 	switch os.Getenv("MODE") {
 	case "local":
