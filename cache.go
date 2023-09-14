@@ -133,8 +133,8 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 	}
 	//page = page + 1
 	return page, nil
-	c := common.Facility{}
-	c.CoreUrl = "http://	"
+	//c := common.Facility{}
+	//c.CoreUrl = "http://	"
 
 }
 
