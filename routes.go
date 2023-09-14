@@ -46,6 +46,18 @@ var routes = Routes{
 		findResource,
 	},
 	Route{
+		"FindConditions",
+		"GET",
+		"/api/rest/v1/Condition",
+		findResource,
+	},
+	Route{
+		"GetCondition",
+		"GET",
+		"/api/rest/v1/Condition/{resourceId}",
+		getResource,
+	},
+	Route{
 		"FindDocumentReferences",
 		"GET",
 		"/api/rest/v1/DocumentReference",
@@ -68,6 +80,12 @@ var routes = Routes{
 		"GET",
 		"/api/rest/v1/DiagnosticReport/{resourceId}",
 		getResource,
+	},
+	Route{
+		"FindEncounters",
+		"GET",
+		"/system/{systemId}/Encounter",
+		findResource,
 	},
 	Route{
 		"FindConditions",
