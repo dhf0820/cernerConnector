@@ -84,7 +84,7 @@ var routes = Routes{
 	Route{
 		"FindEncounters",
 		"GET",
-		"/system/{systemId}/Encounter",
+		"/api/rest/v1/Encounter",
 		findResource,
 	},
 	Route{
