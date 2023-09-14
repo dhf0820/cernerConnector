@@ -82,6 +82,18 @@ var routes = Routes{
 		getResource,
 	},
 	Route{
+		"Goals",
+		"GET",
+		"/api/rest/v1/goals",
+		findResource,
+	},
+	Route{
+		"GetGoals",
+		"GET",
+		"/api/rest/v1/Goals/{resourceId}",
+		getResource,
+	},
+	Route{
 		"FindObservations",
 		"GET",
 		"/api/rest/v1/Observation",

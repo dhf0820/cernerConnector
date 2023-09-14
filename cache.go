@@ -4,7 +4,7 @@ import (
 	"bytes"
 	//"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 
 	//"errors"
 	"fmt"
@@ -118,7 +118,7 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 		return 0, err
 	}
 	log.Printf("CacheResourceBundleAndEntries:121  --  Bundle Sent to uc_cache Successful\n")
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		err = fmt.Errorf("CacheResourceBundleAndEntries:124  --  ReadAllBody : error: %s\n", err.Error())
 		fmt.Printf("%s\n", err.Error())
@@ -133,6 +133,8 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 	}
 	//page = page + 1
 	return page, nil
+	c := common.Facility{}
+	c.CoreUrl = "http://	"
 
 }
 
