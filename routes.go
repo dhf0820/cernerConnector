@@ -82,9 +82,9 @@ var routes = Routes{
 		getResource,
 	},
 	Route{
-		"Goals",
+		"Goal",
 		"GET",
-		"/api/rest/v1/goals",
+		"/api/rest/v1/goal",
 		findResource,
 	},
 	Route{
