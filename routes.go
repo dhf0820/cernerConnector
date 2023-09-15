@@ -100,6 +100,18 @@ var routes = Routes{
 		getResource,
 	},
 	Route{
+		"FindCoverage",
+		"GET",
+		"/api/rest/v1/Coverage",
+		findResource,
+	},
+	Route{
+		"GetCoverage",
+		"GET",
+		"/api/rest/v1/Coverage/{resourceId}",
+		getResource,
+	},
+	Route{
 		"FindGoal",
 		"GET",
 		"/api/rest/v1/Goal",
