@@ -23,7 +23,7 @@ var Mode string
 var Env string
 
 func main() {
-	version = "230913.0"
+	version = "230924.0"
 	log.Info("run mode: " + os.Getenv("MODE"))
 	switch os.Getenv("MODE") {
 	case "local":
@@ -41,7 +41,7 @@ func main() {
 	case "go_test":
 		err = godotenv.Load("./.env.cerner_conn_go_test")
 		if err == nil {
-			Mode = "test"
+			Mode = "go_test"
 			Env = "./.env.cerner_conn_go_test"
 		}
 

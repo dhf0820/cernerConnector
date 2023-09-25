@@ -21,6 +21,8 @@ github.com/dhf0820/uc_common v0.0.0-20230708215609-631781cbc45b h1:9LcNsGH1B0kN0
 github.com/dhf0820/uc_common v0.0.0-20230708215609-631781cbc45b/go.mod h1:Kl2iHdGZS2SMQ8Pk9NAz9OsxX5211bAbB8LD9Yc+1w4=
 github.com/dhf0820/vslog v0.0.0-20230826215358-bee302d11aba h1:1LPuuPwqQRwf6CMgckLiHcDAVn02OWGZTPz5jwOuN3o=
 github.com/dhf0820/vslog v0.0.0-20230826215358-bee302d11aba/go.mod h1:blpTi2lVYBB7f49692KhhaPW6XIUP8zSl+AlihQiwmM=
+github.com/dhf0820/vslog v0.0.0-20230915162210-6b57c819c640 h1:L8A8NbTixUkA52jCZ34SQALPQQDliCqkYxZijcwWN7c=
+github.com/dhf0820/vslog v0.0.0-20230915162210-6b57c819c640/go.mod h1:blpTi2lVYBB7f49692KhhaPW6XIUP8zSl+AlihQiwmM=
 github.com/golang/snappy v0.0.1 h1:Qgr9rKW7uDUkrbSmQeiDsGa8SjGyCOGtuasMWwvp2P4=
 github.com/golang/snappy v0.0.1/go.mod h1:/XxbfmMg8lxefKM7IXC3fBNl/7bRcc72aCRzEWrmP2Q=
 github.com/google/go-cmp v0.5.2/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=

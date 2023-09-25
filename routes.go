@@ -64,6 +64,18 @@ var routes = Routes{
 		findResource,
 	},
 	Route{
+		"FindCoverage",
+		"GET",
+		"/api/rest/v1/Coverage",
+		findResource,
+	},
+	Route{
+		"FindCoverage",
+		"GET",
+		"/api/rest/v1/Coverage/resourceId",
+		getResource,
+	},
+	Route{
 		"GetDocumentReference",
 		"GET",
 		"/api/rest/v1/DocumentReference/{resourceId}",
@@ -100,15 +112,15 @@ var routes = Routes{
 		getResource,
 	},
 	Route{
-		"FindCoverage",
+		"FindResource",
 		"GET",
-		"/api/rest/v1/Coverage",
+		"/api/rest/v1/resource/{resource}",
 		findResource,
 	},
 	Route{
-		"GetCoverage",
+		"GetResource",
 		"GET",
-		"/api/rest/v1/Coverage/{resourceId}",
+		"/api/rest/v1/resource/{resource}/{resourceId}",
 		getResource,
 	},
 	Route{
@@ -122,6 +134,18 @@ var routes = Routes{
 		"GET",
 		"/api/rest/v1/Goal/{resourceId}",
 		getResource,
+	},
+	Route{
+		"FindMetadata",
+		"GET",
+		"/api/rest/v1/resource/{resource}",
+		findResource,
+	},
+	Route{
+		"GetMetadata",
+		"GET",
+		"/api/rest/v1/resource/{resource}",
+		findResource,
 	},
 	Route{
 		"FindObservations",

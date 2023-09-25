@@ -3,10 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
-	log "github.com/sirupsen/logrus"
+	log "github.com/dhf0820/vslog"
 
 	"github.com/davecgh/go-spew/spew"
 	// //"github.com/dhf0820/fhir4"
@@ -19,9 +19,10 @@ import (
 
 	// //"os"
 	// //"strconv"
-	jw_token "github.com/dhf0820/jwToken"
 	"strings"
 	"time"
+
+	jw_token "github.com/dhf0820/jwToken"
 )
 
 //####################################### Response Writers Functions #######################################
@@ -436,22 +437,29 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userId := Payload.UserId
+	Resource := ""
 	params := mux.Vars(r)
-	// url := r.URL
-	log.Printf("findResource:441  --  url = %s\n", r.URL.Path)
-	log.Printf("findResource:442  --  uri = %s\n", r.URL.RequestURI())
-	Resource := DetermineResource(r.URL.Path, "/api/rest/v1/")
-	if Resource == "" {
-		errMsg := "findResource:445 --  Resource not found in URL"
-		WriteFhirOperationOutcome(w, status, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
-		return
+	log.Debug3(fmt.Sprintf("Params: %v\n", params))
+	if params["resource"] != "" {
+		log.Debug3(" --  Using Resource in params")
+		Resource = params["resource"]
+	} else {
+		// url := r.URL
+		log.Debug2(fmt.Sprintf("--  url = %s", r.URL.Path))
+		log.Debug2(fmt.Sprintf("findResource:442  --  uri = %s", r.URL.RequestURI()))
+		Resource = DetermineResource(r.URL.Path, "/api/rest/v1/")
+		if Resource == "" {
+			errMsg := "findResource:445 --  Resource not found in URL"
+			WriteFhirOperationOutcome(w, status, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
+			return
+		}
 	}
-	fmt.Printf("findResource:449  --  Resource = %s\n", Resource)
-	fmt.Printf("findResource:450  --  params = %s\n", params)
-	fmt.Printf("findResource:451  --  being called for resource: [%s]\n", Resource)
-	fmt.Printf("findResource:452  --  Reading Body\n")
+	log.Debug1(" --  Resource = " + Resource)
+
+	//log.Debug1(" -- being called for resource: [%s]\n", Resource)
+	log.Debug2("--  Reading Body")
 	//fmt.Printf("findResource:453  --  r = %s\n", spew.Sdump(r))
-	body, err := ioutil.ReadAll(r.Body) // Should be ConnectorPayload
+	body, err := io.ReadAll(r.Body) // Should be ConnectorPayload
 	if err != nil {
 		fmt.Printf("findResource:456  --  ReadAll FhirSystem error %s\n", err.Error())
 		errMsg := err.Error()
@@ -460,17 +468,16 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	}
 	connectorPayload := common.ConnectorPayload{}
 
-	//fhirSystem := common.FhirSystem{}
+	//fmt.Printf("findResource:470  --  body = %s\n", string(body))
 	err = json.Unmarshal(body, &connectorPayload)
 	if err != nil {
-		fmt.Printf("\nfindResource:466  --  unmarshal err = %s\n", err.Error())
-		errMsg := err.Error()
+		errMsg := log.ErrMsg("--  unmarshal ConnectorPayload err = " + err.Error())
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
 
 	connectorConfig := connectorPayload.ConnectorConfig
-	fmt.Printf("findResource:473  -- ConnectorPayload = %s\n", spew.Sdump(connectorPayload))
+	log.Debug5("-- ConnectorPayload = " + spew.Sdump(connectorPayload))
 	uri := r.URL.RequestURI()
 	fmt.Printf("findResource:475  --  uri: %s\n", uri)
 	fmt.Printf("findResource:476  --  URL.Path() = %s\n", r.URL.Path)
@@ -588,32 +595,28 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	//fhirVersion := GetFHIRVersion(r)
 	//cacheBaseURL := fmt.Sprintf("%s/%s/v1/", r.Host, parts[0])
 	if err := r.ParseForm(); err != nil {
-		err = fmt.Errorf("error parsing query: %s", err.Error())
-		errMsg := err.Error()
-		fmt.Printf("findResource:593 - %s\n", errMsg)
+		errMsg := log.ErrMsg("error parsing query: " + err.Error())
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
 
 	queryStr := ""
-	fmt.Printf("findResource:599 -  [%s]\n", Resource)
-	switch Resource {
-	case "Patient":
-		fmt.Printf("findResource:602 -  case: %s\n", Resource)
+	log.Debug3("-- Resource  [%s]" + Resource)
+	switch strings.ToLower(Resource) {
+	case "patient":
+		log.Debug3("-  case: " + Resource)
 		queryStr = fmt.Sprintf("%s?%s", Resource, r.URL.RawQuery) //BuildPatientQuery(r)
-	case "DocumentReference":
-		fmt.Printf("findResource:605 -  case: [%s]\n", Resource)
+	case "documentreference":
+		log.Debug3("-  case: " + Resource)
 	default:
-		fmt.Printf("findResource:609 - default: [%s]\n", Resource)
+		log.Debug3("- default: " + Resource)
 	}
 
-	fmt.Printf("findResource:610  --  queryStr = %s\n", queryStr)
+	log.Debug3("  --  queryStr = " + queryStr)
 	if Resource == "Patient" {
 		urlA, err := r.URL.Parse(r.URL.RequestURI())
 		if err != nil {
-			err = fmt.Errorf("error parsing patient URI: %s", err.Error())
-			errMsg := err.Error()
-			fmt.Printf("findResource:616 - r.URL.Parse error = %s\n", errMsg)
+			errMsg := log.ErrMsg("error parsing patient URI: " + err.Error())
 			WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityFatal, &errMsg))
 			return
 		}
@@ -624,12 +627,10 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 		idSearch := uriValues.Get("identifier")
 		idValue := ""
 		if idSearch != "" { // There is identifier Search, use it
-			fmt.Printf("findResource:627 - using Identifier: %s to search\n", idSearch)
+			log.Debug3("- using Identifier: " + idSearch + " to search")
 			ids := strings.Split(idSearch, "|")
 			if len(ids) != 2 {
-				err = fmt.Errorf("invalid identifier: %s", idSearch)
-				errMsg := err.Error()
-				fmt.Printf("searchResource:632 - r.URL.Parse error = %s\n", errMsg)
+				errMsg := log.ErrMsg("invalid identifier: " + idSearch)
 				WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityFatal, &errMsg))
 				return
 			}
@@ -643,14 +644,12 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 			if idValue == "" { //Not configured identifier
-				err = fmt.Errorf("identifier type: %s is not configured", idName)
-				errMsg := err.Error()
-				fmt.Printf("findResource:648 - Identifiers = %s\n", errMsg)
+				errMsg := log.ErrMsg("identifier type: " + idName + " is not configured")
 				WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityFatal, &errMsg))
 				return
 			}
 			uri = fmt.Sprintf("Patient?identifier=%s", idValue+idSearchValue)
-			fmt.Printf("findResource:653 - New Identifier search Value: %s\n", uri)
+			log.Debug3(" - New Identifier search Value: " + uri)
 			// uriValues.Del("identifier")
 			// uriValues.Set("identifier", id)
 			// //urlB.RawQuery = uriValues.Encode()
@@ -660,44 +659,42 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 			// r.RequestURI = uriValues.Encode()
 			// fmt.Printf("\n\n$$$ searchResources: 188 - Updated request: %s\n\n", spew.Sdump(r))
 		} else {
-			fmt.Printf("findResource:663 - using other search params: %v\n", uriValues)
+			log.Debug3(fmt.Sprintf(" - using other search params: %v", uriValues))
 		}
 	}
 	var bundle *fhir.Bundle
 	var header *common.CacheHeader
 	//resourceId := r.Header.Get("Fhir-System")
-	fmt.Printf("\nfindResource:670  - connectorPayload = %s\n", spew.Sdump(connectorPayload))
+	log.Debug3(" - connectorPayload = " + spew.Sdump(connectorPayload))
 	qryStr := r.URL.RawQuery
 
-	fmt.Printf("\nfindResource:672 - resource = %s  uri = %s\n", Resource, qryStr)
+	log.Debug3(fmt.Sprintf(" - resource = %s  uri = %s\n", Resource, qryStr))
 	url := connectorPayload.ConnectorConfig.HostUrl + Resource + "?" + qryStr
 	//url := connectorPayload.System.Url + Resource + "?" + qryStr
-	fmt.Printf("findResource:675 - calling %s \n", url)
+	log.Debug3(" - calling " + url)
 	var totalPages int64
-	fmt.Printf("findResource:677  --  Search %s with %s\n", Resource, qryStr)
+	log.Debug3(fmt.Sprintf(" --  Search %s with %s", Resource, qryStr))
 	startTime := time.Now()
 	totalPages, bundle, header, err = FindResource(&connectorPayload, Resource, userId, qryStr, JWToken)
 	if err != nil {
-		err = fmt.Errorf("findResource:678  --  fhirSearch url: %s  --error:  %s", url, err.Error())
-		errMsg := err.Error()
-		fmt.Printf("%s\n", errMsg)
+		errMsg := log.ErrMsg(fmt.Sprintf("--  fhirSearch url: %s  --error:  %s", url, err.Error()))
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeNotFound, fhir.IssueSeverityInformation, &errMsg))
 		return
 	}
 	//}
-	fmt.Printf("findResource:688 - Get %s bundle successful in %s\n", Resource, time.Since(startTime))
-	fmt.Printf("findResource:689 - Total Pages: %d\n", totalPages)
-	fmt.Printf("findResource:690 - Number in page: %d\n", len(bundle.Entry))
-	fmt.Printf("findResource:691 - PageNumber: %d\n", header.PageId)
-	fmt.Printf("findResource:692 - QueryId: %s\n", header.QueryId)
+	log.Debug3(fmt.Sprintf(" - Get %s bundle successful in %s", Resource, time.Since(startTime)))
+	log.Debug3(fmt.Sprintf(" - Total Pages: %d", totalPages))
+	log.Debug3(fmt.Sprintf(" - Number in page: %d", len(bundle.Entry)))
+	log.Debug3(fmt.Sprintf(" - PageNumber: %d", header.PageId))
+	log.Debug3(fmt.Sprintf(" - QueryId: %s", header.QueryId))
 	resp := common.ResourceResponse{}
 	//fmt.Printf("findResource:628 - Header: %s\n", spew.Sdump(header))
 	host := connectorPayload.ConnectorConfig.HostUrl
 	//host := common.GetKVData(GetConfig().Data, "cacheHost")
-	fmt.Printf("\n\n\nfindResource:697 --  host: %s\n\n\n", host)
+	log.Debug3(" --  host: " + host)
 	cacheBundleUrl := fmt.Sprintf("%s/%s/BundleTransaction", connectorConfig.CacheUrl, header.QueryId)
 	//header.CacheUrl = fmt.Sprintf("%s%sv1/Cache/%s/", host, parts[0], header.QueryId)
-	fmt.Printf("findResource:700  --  CacheUrl = %s\n", cacheBundleUrl)
+	log.Debug3("  --  CacheUrl = " + cacheBundleUrl)
 	//resp.Resource = header.ResourceType
 	resp.BundleId = *bundle.Id
 	resp.ResourceType = Resource
@@ -709,11 +706,11 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	resp.Header = header
 	resp.Message = "Ok"
 	logTime := time.Now()
-	fmt.Printf("findResource:712  --  resp without bundle: %s\n", spew.Sdump(resp))
-	fmt.Printf("findResource:713  --  Time to log = %s\n\n", time.Since(logTime))
+	log.Debug3(fmt.Sprintf("--  resp without bundle: " + spew.Sdump(resp)))
+	log.Debug3(fmt.Sprintf("--  Time to log = %s", time.Since(logTime)))
 	resp.Bundle = bundle
-	fmt.Printf("findResource:715  --  Number of entries in buldle: %d\n", len(bundle.Entry))
-	fmt.Printf("findResource:716  --  QueryId: %s\n\n", header.QueryId)
+	log.Debug3(fmt.Sprintf("--  Number of entries in buldle: %d", len(bundle.Entry)))
+	log.Debug3(fmt.Sprintf("--  QueryId: " + header.QueryId))
 	FillResourceResponse(&resp, Resource)
 	//fmt.Printf("findResource:614  --  Returning Bundle: %s\n", spew.Sdump(bundle))
 	//WriteFhirResourceBundle(w, resp.Status, &resp)
@@ -729,10 +726,12 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	params := mux.Vars(r)
+	log.Debug1(fmt.Sprintf("Params: %v\n", params))
 	Resource := DetermineGetResource(r.URL.Path, "/")
 	resourceId := params["resourceId"]
-	log.Printf("getResource:734  --  params = %s\n", params)
-	fmt.Printf("getResource:735 param resource : %s   ResId: %s\n", Resource, resourceId)
+	resourceType := params["resourceType"]
+	log.Debug3(fmt.Sprintf("params = %s", params))
+	log.Debug3(fmt.Sprintf("param resource : %s - %s  ResId: %s", Resource, resourceType, resourceId))
 
 	// fmt.Printf("getResource:674 - Request - ")
 	// spew.Dump(r)
@@ -741,19 +740,15 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 	//x := *url
 	//fmt.Printf("getResource:679  --  url = %s\n", spew.Sdump(x))
 	//Resource := DetermineResource(x.Path, "/api/rest/v1/")
-	fmt.Printf("getResource:744  --  Resource = %s\n", Resource)
+	//fmt.Printf("getResource:744  --  Resource = %s", Resource)
 	if err := r.ParseForm(); err != nil {
-		err = fmt.Errorf("error parsing query: %s", err.Error())
-		errMsg := err.Error()
-		log.Printf("getResurce:748  - %s\n", errMsg)
+		errMsg := log.ErrMsg("error parsing query: " + err.Error())
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeInvalid, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
 	cp, err := GetConnectorPayload(r)
 	if err != nil {
-		err = fmt.Errorf("getResource:754  --  GetConnectorPayload error:  %s", err.Error())
-		errMsg := err.Error()
-		log.Printf("getResource:756 -  GetFhirSystem err = %s\n", errMsg)
+		errMsg := log.ErrMsg("gGetConnectorPayload error:  " + err.Error())
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
@@ -776,13 +771,11 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 	// params := mux.Vars(r)
 	// fmt.Printf("getResource:274 - params  %v\n", params)
 	// resourceId := params["id"]
-	log.Printf("getResource:779 - Retrieving %s Record for id: [%s]\n", Resource, resourceId)
+	log.Debug3(fmt.Sprintf("Retrieving %s Record for id: [%s]", resourceType, resourceId))
 	if resourceId == "" {
-		//fmt.Printf(":180 %s with [%s]\n", resource, resourceId)
-		err = fmt.Errorf("getResource:782  --  GetResource %s specific ID string is required", Resource)
-		errMsg := err.Error()
-		fmt.Printf("%s\n", errMsg)
+		errMsg := log.ErrMsg(fmt.Sprintf("GetResource %s specific ID string is required", Resource))
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverity(fhir.IssueTypeInvalid), &errMsg))
+		return
 	}
 	//TODO: Handle Get Resource by specific ID.  All Resources including Binary.
 	resp := common.ResourceResponse{}
@@ -791,19 +784,17 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		resp.Status = 200
 		resp.Message = "Ok"
 	} else {
-		fmt.Printf("\n\nGetResource:794 -  returned err: %v\n\n\n", err)
-		resp.Status = 400
-		resp.Message = err.Error()
+		errMsg := log.ErrMsg("GetResource error: " + err.Error())
+		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverity(fhir.IssueTypeInvalid), &errMsg))
+		return
 	}
 
 	switch strings.ToLower(Resource) {
 	case "patient":
-		fmt.Printf("GetResource:801  --  patient raw = %v\n", results)
+		//fmt.Printf("GetResource:801  --  patient raw = %v\n", results)
 		patient, err := fhir.UnmarshalPatient(results)
 		if err != nil {
-			err = fmt.Errorf("getResource:804  --  UnmarshalPatient error:  %s", err.Error())
-			errMsg := err.Error()
-			fmt.Printf("%s\n", errMsg)
+			errMsg := log.ErrMsg("UnmarshalPatient error:  " + err.Error())
 			WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityFatal, &errMsg))
 			return
 		}
@@ -831,9 +822,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		//fmt.Printf("GetResource:831  --  patient raw = %v\n", results)
 		binary, err := fhir.UnmarshalBinary(results)
 		if err != nil {
-			err = fmt.Errorf("getResource:804  --  UnmarshalPatient error:  %s", err.Error())
-			errMsg := err.Error()
-			fmt.Printf("%s\n", errMsg)
+			errMsg := log.ErrMsg("UnmarshalBinary error: " + err.Error())
 			WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityFatal, &errMsg))
 			return
 		}
@@ -852,7 +841,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 	}
 	// resp.ResourceType = Resource
 	// resp.Resource.Resource = results
-	fmt.Printf("getResource:855 - returning a %s resource\n", spew.Sdump(resp))
+	//fmt.Printf("getResource:855 - returning a %s resource\n", spew.Sdump(resp))
 	WriteFhirResponse(w, resp.Status, &resp)
 }
 
@@ -1019,19 +1008,20 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 func DetermineResource(url string, prefix string) string {
 	parts := strings.SplitAfter(url, prefix)
 	resourceType := parts[len(parts)-1]
-	fmt.Printf("DetermineResource:1011  --  resourceTye: %s\n", resourceType)
+	log.Debug3("DetermineResource:1011  --  resourceType: " + resourceType)
 	return resourceType
 }
 func DetermineGetResource(url string, prefix string) string {
+	log.Debug3(fmt.Sprintf("  --  url: " + url))
 	parts := strings.SplitAfter(url, prefix)
 	resourceType := strings.TrimRight(parts[len(parts)-2], "/")
 	// var subs []string
-	fmt.Printf("DetermineResource:1018  --  resourceType: %s\n", resourceType)
+	log.Debug3("--  resourceType: " + resourceType)
 	return resourceType
 }
 func FillResourceResponse(resp *common.ResourceResponse, resourceType string) error {
 	resType := strings.ToLower(resourceType)
-	fmt.Printf("FillResourceResponse:1023  --  resType: %s\n", resType)
+	log.Debug3("resType: " + resType)
 	resp.Status = 200
 	resp.Message = "Ok"
 	resp.ResourceType = resourceType
@@ -1043,39 +1033,39 @@ func FillResourceResponse(resp *common.ResourceResponse, resourceType string) er
 			resData := common.ResourceData{}
 			pat, err := fhir.UnmarshalPatient(item.Resource)
 			if err != nil {
-				return fmt.Errorf("FillResourceResponse:1035  -- error = %s", err.Error())
+				return log.Errorf("UnMarshal(Patient) error = " + err.Error())
 			}
 			resData.Patient = &pat
-			fmt.Printf("FillResourceResponse:1038  --  Added PatientId: %s\n", *pat.Id)
+			log.Debug3(" Added PatientId: " + *pat.Id)
 			resp.Resources = append(resp.Resources, resData)
 			//pats = append(resData.Patient, pat)
 		}
 		//resp.Resources = pats
-		fmt.Printf("FillResourceResponse:1043  -- Set %d Patients  Bundle had %d entries\n", len(resp.Resources), len(resp.Bundle.Entry))
+		log.Debug3(fmt.Sprintf("-- Set %d Patients  Bundle had %d entries\n", len(resp.Resources), len(resp.Bundle.Entry)))
 	case "documentreference":
 		for _, item := range resp.Bundle.Entry {
 			resData := common.ResourceData{}
 			docRef, err := fhir.UnmarshalDocumentReference(item.Resource)
 			if err != nil {
-				return fmt.Errorf("FillResourceResponse:1049  -- error = %s", err.Error())
+				return log.Errorf("Unmarshal DocumentReference error = " + err.Error())
 			}
 			resData.DocumentReference = &docRef
-			fmt.Printf("FillResourceResponse:1052  --  Added DocumentReferenceId: %s\n", *docRef.Id)
+			log.Debug3("Added DocumentReferenceId: " + *docRef.Id)
 			resp.Resources = append(resp.Resources, resData)
 		}
-		fmt.Printf("FillResourceResponse:1055  -- Set %d DocumentReferences  Bundle had %d entries\n", len(resp.Resources), len(resp.Bundle.Entry))
+		log.Debug3(fmt.Sprintf("-- Set %d DocumentReferences  Bundle had %d entries\n", len(resp.Resources), len(resp.Bundle.Entry)))
 	case "diagnosticreport":
 		for _, item := range resp.Bundle.Entry {
 			resData := common.ResourceData{}
 			data, err := fhir.UnmarshalDiagnosticReport(item.Resource)
 			if err != nil {
-				return fmt.Errorf("FillResourceResponse:1061  -- error = %s", err.Error())
+				return log.Errorf(" -- error = " + err.Error())
 			}
 			resData.DiagnosticReport = &data
 			fmt.Printf("FillResourceResponse:1064  --  Added DiagnosticReporteId: %s\n", *data.Id)
 			resp.Resources = append(resp.Resources, resData)
 		}
-		fmt.Printf("FillResourceResponse:1067  -- Set %d DiagnosticReport  Bundle had %d entries\n", len(resp.Resources), len(resp.Bundle.Entry))
+		log.Debug3(fmt.Sprintf("-- Set %d DiagnosticReport  Bundle had %d entries\n", len(resp.Resources), len(resp.Bundle.Entry)))
 	}
 	//TODO: Make Switch smarter.
 	return nil

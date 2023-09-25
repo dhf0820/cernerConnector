@@ -109,7 +109,7 @@ func (c *Connection) GetFhir(qry string, resourceType, token string) (json.RawMe
 	}
 	req.Header.Set("ACCEPT", "application/json+fhir")
 	req.Header.Set("AUTHORIZATION", token)
-	fmt.Printf("getFhir:112  --  req: %s\n", spew.Sdump(req))
+	//fmt.Printf("getFhir:112  --  req: %s\n", spew.Sdump(req))
 	resp, err := c.client.Do(req)
 	if err != nil {
 		logrus.Errorf("GetFhir:115  --  !!!fhir query returned err: %s", err.Error())
@@ -122,7 +122,7 @@ func (c *Connection) GetFhir(qry string, resourceType, token string) (json.RawMe
 		return nil, err
 	}
 	defer resp.Body.Close()
-	byte, err := ioutil.ReadAll(resp.Body)
+	byte, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("getFhir:127  --  Error readying body: %s", err.Error())
 	}
