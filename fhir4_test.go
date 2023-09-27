@@ -335,7 +335,7 @@ func TestGetRemoteFhirPatient(t *testing.T) {
 		patient, err := GetRemoteFhirPatient(query, ca3Url, newToken)
 		So(err, ShouldBeNil)
 		So(patient, ShouldNotBeNil)
-		fmt.Printf("TestGetRemoteFhirPatient:335  --  Patient: %s\n", spew.Sdump(patient))
+		//fmt.Printf("TestGetRemoteFhirPatient:335  --  Patient: %s\n", spew.Sdump(patient))
 		fmt.Printf("TestGetRemoteFhirPatient:336  --  Patient.Name: %s\n", spew.Sdump(patient.Name))
 		//fhir.HumanName.Given
 

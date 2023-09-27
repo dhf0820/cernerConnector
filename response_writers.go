@@ -13,7 +13,7 @@ import (
 	//"github.com/davecgh/go-spew/spew"
 	//"github.com/dhf0820/fhir4"
 	//cm "github.com/dhf0820/baseConnector/common"
-	"github.com/davecgh/go-spew/spew"
+	//"github.com/davecgh/go-spew/spew"
 	"github.com/dhf0820/fhir4"
 	fhir "github.com/dhf0820/fhir4"
 	common "github.com/dhf0820/uc_core/common"
@@ -170,7 +170,7 @@ func WriteFhirResponse(w http.ResponseWriter, status int, resp *common.ResourceR
 	w.Header().Set("Content-Type", "application/json")
 	log.Debug3(fmt.Sprint("--  Status: ", status))
 	//log.Debug3(fmt.Sprintf("WriteFhirResponse:170  --  Status: %d\n", status))
-	log.Debug3("Data:  " + spew.Sdump(resp))
+	//log.Debug3("Data:  " + spew.Sdump(resp))
 	switch status {
 	case 200:
 		w.WriteHeader(http.StatusOK)

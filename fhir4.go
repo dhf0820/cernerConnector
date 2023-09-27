@@ -159,7 +159,7 @@ func (c *Connection) GetFhirBytes(qry string, resourceType, token string) ([]byt
 
 		default:
 			log.Debug3("ResponseType --  Not supported: " + resourceType)
-			return byte, resourceType, resp.StatusCode, nil
+			return byte, resourceType, http.StatusNotImplemented, nil
 		}
 		// diagRept, err := fhir.UnmarshalDiagnosticReport(byte)
 		// if err != nil {

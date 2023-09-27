@@ -63,7 +63,7 @@ func HealthHandler(w http.ResponseWriter, r *http.Request) {
 	// 	WriteHealthResponse(w, 400, "Not Responding")
 	// 	return
 	// }
-	curVersion := os.Getenv("VERSION")
+	curVersion := version
 	version := fmt.Sprintf("OK: cernerConn Version %s  Environment: %s", curVersion, Env)
 	// version := fmt.Sprintf("OK: Version %s-%s Facility: %s at %s using FhirVersion: %s  URI: %s", "uc_Cache", os.Getenv("CodeVersion"),
 	// 		fhirSystem.DisplayName, fhirSystem.FacilityName,fhirSystem.FhirVersion, uri)

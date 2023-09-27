@@ -806,9 +806,10 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		ds = append(ds, common.KVData{Name: "id", Value: *patient.Id})
 		//TODO: Add MRN to display Fields
 		//TODO: Add DOB to display Fields
+
 		resp.Resource.ResourceHeader = &hdr
 		resp.Resource.ResourceHeader.DisplayFields = ds
-		resp.Patient = &patient
+		//resp.Patient = &patient
 		resp.ResourceType = resourceType
 		resp.Resource.ResourceType = resourceType
 		resp.Resource.Patient = &patient
