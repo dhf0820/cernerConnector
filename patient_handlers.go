@@ -10,17 +10,19 @@ import (
 	cm "github.com/dhf0820/baseConnector/common"
 	fhir "github.com/dhf0820/fhir4"
 	jw_token "github.com/dhf0820/jwToken"
-	common "github.com/dhf0820/uc_common"
+	common "github.com/dhf0820/uc_core/common"
+
 	//"github.com/gorilla/mux"
 
 	//"github.com/gorilla/schema"
-	log "github.com/dhf0820/vslog"
 	"net/http"
+
+	log "github.com/dhf0820/vslog"
 
 	//"os"
 	"reflect"
 	//"strconv"
-	"strings"
+	//"strings"
 	"time"
 )
 
@@ -217,7 +219,7 @@ func savePatient(w http.ResponseWriter, r *http.Request) {
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
-	fmt.Printf("savePatient:213  --  Check ConPayload\n")
+	log.Debug3("--  Check ConPayload")
 	if conPayload == nil {
 		fmt.Printf("\n\nconPayload is nil\n")
 	}
@@ -225,7 +227,7 @@ func savePatient(w http.ResponseWriter, r *http.Request) {
 	if conPayload.SavePayload == nil {
 		fmt.Printf("\n\nconPayload.SavePayload is nil\n")
 	}
-	fmt.Printf("\n\nsavePatient:221  --  conPayload: %s\n", spew.Sdump(conPayload))
+	log.Debug3("--  conPayload: " + spew.Sdump(conPayload))
 	//
 	//fmt.Printf("SavePatient:223  --  Check ConPayload srcPatient: %s\n", spew.Sdump(conPayload))
 	// if conPayload.SavePayload.SrcPatient == nil {
@@ -826,53 +828,53 @@ func findPatient(w http.ResponseWriter, r *http.Request) {
 	WriteFhirResponse(w, 200, &resp)
 }
 
-func GetConnectorPayload(r *http.Request) (*common.ConnectorPayload, error) {
-	body, err := io.ReadAll(r.Body) // Should be ConnectorPayload
-	if err != nil {
-		return nil, log.Errorf("ReadAll FhirSystem error " + err.Error())
-	}
-	//mt.Printf("GetConnectorPayload:717  -- Got Body Now Unmarshal ConnectorPayload\n")
-	b := string(body)
-	fmt.Printf("GetConnectorPayload:845  Body: %s\n", b)
-	conPayload := &common.ConnectorPayload{}
-	err = json.Unmarshal(body, &conPayload)
-	if err != nil {
-		fmt.Printf("\nGetConnectorPayload:849  --  unmarshal err = %s\n", err.Error())
-		// errMsg := err.Error()
-		// WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
-		return nil, err
-	}
-	log.Info("Check ConPayload")
-	if conPayload == nil {
-		return nil, log.Errorf("conPayload is nil ")
-	}
-	//fmt.Printf("GetConnectorPayload:860  --  ConnectorPayLoad = %s\n", spew.Sdump(conPayload))
-	return conPayload, err
-}
+// func GetConnectorPayload(r *http.Request) (*common.ConnectorPayload, error) {
+// 	body, err := io.ReadAll(r.Body) // Should be ConnectorPayload
+// 	if err != nil {
+// 		return nil, log.Errorf("ReadAll FhirSystem error " + err.Error())
+// 	}
+// 	//mt.Printf("GetConnectorPayload:717  -- Got Body Now Unmarshal ConnectorPayload\n")
+// 	b := string(body)
+// 	fmt.Printf("GetConnectorPayload:845  Body: %s\n", b)
+// 	conPayload := &common.ConnectorPayload{}
+// 	err = json.Unmarshal(body, &conPayload)
+// 	if err != nil {
+// 		fmt.Printf("\nGetConnectorPayload:849  --  unmarshal err = %s\n", err.Error())
+// 		// errMsg := err.Error()
+// 		// WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
+// 		return nil, err
+// 	}
+// 	log.Info("Check ConPayload")
+// 	if conPayload == nil {
+// 		return nil, log.Errorf("conPayload is nil ")
+// 	}
+// 	//fmt.Printf("GetConnectorPayload:860  --  ConnectorPayLoad = %s\n", spew.Sdump(conPayload))
+// 	return conPayload, err
+// }
 
-func CreateFhirQuery(r *http.Request) (string, error) {
-	query := ""
-	values := r.URL.Query()
-	log.Info(fmt.Sprintf("CreateFhirQuery  values : %v", values))
-	if len(values) < 1 {
-		err := log.Errorf("Url.Querys are missing")
-		return "", err
-	}
-	//fmt.Printf("\nCreateFhirQuery:713  --  Keys : %v\n\n", keys)
-	for k, v := range values {
-		log.Info("Key:  " + k + " => " + v[0])
-		s := strings.TrimLeft(v[0], "[]")
-		if query == "" {
-			//for _, kv := range v {
-			query = fmt.Sprintf("%s=%s", k, s)
-			//}
-		} else {
-			query = fmt.Sprintf("%s&%s=%s", query, k, s)
-		}
-		log.Info("CreateFhirQuery = " + query)
-	}
-	return query, nil
-}
+// func CreateFhirQuery(r *http.Request) (string, error) {
+// 	query := ""
+// 	values := r.URL.Query()
+// 	log.Info(fmt.Sprintf("CreateFhirQuery  values : %v", values))
+// 	if len(values) < 1 {
+// 		err := log.Errorf("Url.Querys are missing")
+// 		return "", err
+// 	}
+// 	//fmt.Printf("\nCreateFhirQuery:713  --  Keys : %v\n\n", keys)
+// 	for k, v := range values {
+// 		log.Info("Key:  " + k + " => " + v[0])
+// 		s := strings.TrimLeft(v[0], "[]")
+// 		if query == "" {
+// 			//for _, kv := range v {
+// 			query = fmt.Sprintf("%s=%s", k, s)
+// 			//}
+// 		} else {
+// 			query = fmt.Sprintf("%s&%s=%s", query, k, s)
+// 		}
+// 		log.Info("CreateFhirQuery = " + query)
+// 	}
+// 	return query, nil
+// }
 
 func HandleOperationOutcome(w http.ResponseWriter, body []byte) {
 	fmt.Printf("HandleOperationOutcome:892  --  body = %s\n", string(body))

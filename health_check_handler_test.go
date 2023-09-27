@@ -21,7 +21,7 @@ package main
 // 	"time"
 
 // 	"github.com/dhf0820/token"
-// 	//"github.com/dhf0820/uc_common"
+// 	//"github.com/dhf0820/uc_core/common"
 // 	//"github.com/dhf0820/uc_core/service"
 
 // 	//"github.com/davecgh/go-spew/spew"

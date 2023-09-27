@@ -35,7 +35,7 @@ var routes = Routes{
 	Route{
 		"GetPatient",
 		"GET",
-		"/api/rest/v1/Patient/{resourceId}",
+		"/api/rest/v1/{Resource}/{resourceId}",
 		getResource,
 		//getPatient,
 	},

@@ -4,7 +4,7 @@ package main
 // 	//"context"
 
 // 	fhir "github.com/dhf0820/fhir4"
-// 	//common "github.com/dhf0820/uc_common"
+// 	//common "github.com/dhf0820/uc_core/common"
 // 	//"github.com/samply/golang-fhir-models/fhir-models/fhir"
 // 	//log "github.com/sirupsen/logrus"
 // 	//. "github.com/smartystreets/goconvey/convey"
@@ -19,7 +19,7 @@ package main
 // 	"github.com/dhf0820/token"
 // 	"github.com/dhf0820/uc_core/util"
 
-// 	common "github.com/dhf0820/uc_common"
+// 	common "github.com/dhf0820/uc_core/common"
 // 	//log "github.com/sirupsen/logrus"
 // 	. "github.com/smartystreets/goconvey/convey"
 // 	"go.mongodb.org/mongo-driver/bson/primitive"

@@ -28,7 +28,7 @@ const baseurl = "http://universalcharts.com:4000/api/rest/v1"
 
 func TestQuery(t *testing.T) {
 	fmt.Printf("Test run a FHIR query")
-	c := New(baseurl)
+	c := New(baseurl, "application/json+fhir")
 	Convey("Run a query", t, func() {
 		newToken, payload, err := jw_token.CreateTestJWToken("10s")
 		So(err, ShouldBeNil)
@@ -47,7 +47,7 @@ func TestQuery(t *testing.T) {
 
 func TestDocumentReferenceQuery(t *testing.T) {
 	fmt.Printf("\n\n\n\nFhir4Test:38  --  Test run a FHIR query")
-	c := New(baseurl)
+	c := New(baseurl, "application/json+fhir")
 	Convey("Run a query", t, func() {
 		newToken, payload, err := jw_token.CreateTestJWToken("10s")
 		So(err, ShouldBeNil)
@@ -88,7 +88,7 @@ func TestGetFHIR(t *testing.T) {
 		fmt.Printf("TestGetFHIR:86  --  baseURL: %s\n", baseurl)
 		//url := "http://universalcharts.com:4000/api/rest/v1/Patient/180275"
 		query := "/Patient/180275"
-		c := New("http://192.168.1.152:30300/api/rest/v1")
+		c := New("http://192.168.1.152:30300/api/rest/v1", "application/json+fhir")
 		//query := "/Patient?family=SMART&given=ANNE"
 		//url := "/Patient?family=smart&given=ANNE"
 		rawJson, err := c.GetFhir(query, "Patient", newToken)
@@ -123,7 +123,7 @@ func TestGetSrcFHIRBundle(t *testing.T) {
 		So(payload, ShouldNotBeNil)
 		fmt.Printf("TestGetSrcFHIRBundle:122  --  baseURL: %s\n", srcBaseUrl)
 		//url := "http://universalcharts.com:4000/api/rest/v1/Patient?family=SMART&given=ANNE"
-		c := New(srcBaseUrl)
+		c := New(srcBaseUrl, "application/json+fhir")
 		//query := "/Patient?family=SMART&given=ANNE"
 		//url := "/Patient/63ed93c8bd78ae6b013a502b"
 		url := "Patient?family=SMART&given=ANNE"

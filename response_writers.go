@@ -7,7 +7,8 @@ import (
 	//"io/ioutil"
 	"net/http"
 
-	//log "github.com/sirupsen/logrus"
+	log "github.com/dhf0820/vslog"
+	//"github.com/sirupsen/logrus"
 
 	//"github.com/davecgh/go-spew/spew"
 	//"github.com/dhf0820/fhir4"
@@ -15,7 +16,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/dhf0820/fhir4"
 	fhir "github.com/dhf0820/fhir4"
-	common "github.com/dhf0820/uc_common"
+	common "github.com/dhf0820/uc_core/common"
 	//"github.com/gorilla/mux"
 	//"go.mongodb.org/mongo-driver/bson/primitive"
 	//"os"
@@ -167,8 +168,9 @@ func WriteFhirBundle(w http.ResponseWriter, status int, resp *fhir4.Bundle) erro
 
 func WriteFhirResponse(w http.ResponseWriter, status int, resp *common.ResourceResponse) error {
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Printf("WriteFhirResponse:170  --  Status: %d\n", status)
-	fmt.Printf("WriteFhirResponse:171  --  Data:  %s\n", spew.Sdump(resp.Resource.Binary))
+	log.Debug3(fmt.Sprint("--  Status: ", status))
+	//log.Debug3(fmt.Sprintf("WriteFhirResponse:170  --  Status: %d\n", status))
+	log.Debug3("Data:  " + spew.Sdump(resp))
 	switch status {
 	case 200:
 		w.WriteHeader(http.StatusOK)

@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+
 	//"github.com/davecgh/go-spew/spew"
 	fhir "github.com/dhf0820/fhir4"
 	//log "github.com/sirupsen/logrus"
@@ -17,7 +18,7 @@ import (
 	//"time"
 
 	jw_token "github.com/dhf0820/jwToken"
-	common "github.com/dhf0820/uc_common"
+	common "github.com/dhf0820/uc_core/common"
 
 	"github.com/davecgh/go-spew/spew"
 	//"github.com/dhf0820/uc_core/util"

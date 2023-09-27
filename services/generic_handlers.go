@@ -10,21 +10,22 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	common "github.com/dhf0820/uc_common"
-	//logging "github.com/dhf0820/uc_common/logging"
+	common "github.com/dhf0820/uc_core/common"
+
+	//logging "github.com/dhf0820/uc_core/common/logging"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	//m "github.com/dhf0820/ROIPrint/pkg/model"
 )
 
-//####################################### Structures #######################################
-//GenericResponse struct the resultant message being returned
+// ####################################### Structures #######################################
+// GenericResponse struct the resultant message being returned
 type GenericResponse struct {
 	Status  int    `json:"status"`
 	Message string `json:"message"`
 }
 
-//####################################### Response Functions #######################################
+// ####################################### Response Functions #######################################
 func WriteGenericResponse(w http.ResponseWriter, status int, message string) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
@@ -58,7 +59,7 @@ func WriteGenericResponse(w http.ResponseWriter, status int, message string) err
 	return nil
 }
 
-//####################################### Route Handlers #######################################
+// ####################################### Route Handlers #######################################
 func HealthCheck(w http.ResponseWriter, r *http.Request) {
 
 	version := fmt.Sprintf("OK: Connector: %s,  Version %s", os.Getenv("ServiceName"), os.Getenv("CodeVersion"))
@@ -126,8 +127,8 @@ func NewLogLevel(w http.ResponseWriter, r *http.Request) {
 
 //func HeaderStatus(code int)
 
-//HandleFhirError extracts the acutal error code and message from err. It send the message to
-//the genericResponse Writer providing the proper code and message. The result is a usable api message
+// HandleFhirError extracts the acutal error code and message from err. It send the message to
+// the genericResponse Writer providing the proper code and message. The result is a usable api message
 func HandleFhirError(from string, w http.ResponseWriter, err error) {
 	log.Infof("FHIR Error Handler: %v\n", err)
 	code, message := extractErrorDetails(err.Error())
@@ -139,8 +140,8 @@ func HandleFhirError(from string, w http.ResponseWriter, err error) {
 	return
 }
 
-//HandleError extracts the acutal error code and message from err. It send the message to
-//the genericResponse Writer providing the proper code and message. The result is a usable api message
+// HandleError extracts the acutal error code and message from err. It send the message to
+// the genericResponse Writer providing the proper code and message. The result is a usable api message
 func HandleError(w http.ResponseWriter, from string, err error) {
 	//log.Infof("Generic-HandlerError-78: %v", err)
 	code, message := extractErrorDetails(err.Error())

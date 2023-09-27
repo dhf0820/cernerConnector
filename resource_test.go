@@ -1,6 +1,5 @@
 package main
 
-import (
 // 	//"encoding/json"
 
 // 	//"context"
@@ -15,7 +14,7 @@ import (
 //"testing"
 
 //"github.com/dhf0820/token"
-// 	//common "github.com/dhf0820/uc_common"
+// 	//common "github.com/dhf0820/uc_core/common"
 // 	"github.com/dhf0820/uc_core/util"
 
 //"time"
@@ -24,7 +23,6 @@ import (
 // 	//log "github.com/sirupsen/logrus"
 //. "github.com/smartystreets/goconvey/convey"
 // 	//"go.mongodb.org/mongo-driver/bson/primitive"
-)
 
 // func TestGetResource(t *testing.T) {
 // 	fmt.Printf("Test run a FHIR query")

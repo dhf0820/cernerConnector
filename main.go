@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	//"github.com/davecgh/go-spew/spew"
-	//common "github.com/dhf0820/uc_common"
+	//common "github.com/dhf0820/uc_core/common"
 	//"github.com/joho/godotenv"
 	//"github.com/ory/dockertest/docker/types/versions"
 	"github.com/joho/godotenv"
@@ -12,7 +12,8 @@ import (
 	"os"
 
 	//service "github.com/dhf0820/baseConnector/services"
-	log "github.com/sirupsen/logrus"
+	log "github.com/dhf0820/vslog"
+	//"github.com/sirupsen/logrus"
 	// "strings"
 )
 
@@ -23,7 +24,8 @@ var Mode string
 var Env string
 
 func main() {
-	version = "230924.0"
+	version = "230926.0"
+	log.SetDebuglevel("DEBUG3")
 	log.Info("run mode: " + os.Getenv("MODE"))
 	switch os.Getenv("MODE") {
 	case "local":
@@ -68,7 +70,7 @@ func main() {
 	// }
 
 	os.Setenv("CodeVersion", version)
-	log.Printf("main:43  --  Starting cernerConnector %s\n\n", version)
+	log.Debug3("Starting cernerConnector version" + version)
 	// port := os.Getenv("PORT")
 	// if port == "" {
 	// 	port = "12113"
@@ -91,7 +93,7 @@ func main() {
 		os.Setenv("ACCESS_SECRET", secretKey)
 	}
 
-	log.Printf("main:66  --  Calling service Start for %s  version: %s\n", serviceName, version)
+	log.Debug3(fmt.Sprintf("Calling service Start for %s  version: %s", serviceName, version))
 	log.Info("Service Starting with mode: " + os.Getenv("MODE") + "  env: " + Env)
 	Start(serviceName, version) //Should Not Return
 

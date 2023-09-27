@@ -1,6 +1,5 @@
 package services
 
-import (
 // "encoding/json"
 // "io"
 // "io/ioutil"
@@ -17,7 +16,7 @@ import (
 // "time"
 
 // "github.com/dhf0820/token"
-// common "github.com/dhf0820/uc_common"
+// common "github.com/dhf0820/uc_core/common"
 
 // "github.com/davecgh/go-spew/spew"
 // "github.com/dhf0820/uc_core/util"
@@ -25,7 +24,6 @@ import (
 // //log "github.com/sirupsen/logrus"
 // . "github.com/smartystreets/goconvey/convey"
 // //"go.mongodb.org/mongo-driver/bson/primitive"
-)
 
 // func TestPostPatient(t *testing.T) {
 // 	fmt.Printf("Test Add a new patient to Server")

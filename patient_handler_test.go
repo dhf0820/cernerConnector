@@ -25,7 +25,7 @@ import (
 	//"time"
 
 	//"github.com/dhf0820/token"
-	common "github.com/dhf0820/uc_common"
+	common "github.com/dhf0820/uc_core/common"
 	//"github.com/dhf0820/uc_core/service"
 	jw_token "github.com/dhf0820/jwToken"
 	//"github.com/davecgh/go-spew/spew"

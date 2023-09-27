@@ -6,13 +6,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
+
 	"net"
 	"net/http"
 
 	"github.com/davecgh/go-spew/spew"
 	fhir "github.com/dhf0820/fhir4"
-	//common "github.com/dhf0820/uc_common"
+
+	//common "github.com/dhf0820/uc_core/common"
 	"strings"
 	//"github.com/davecgh/go-spew/spew"
 	"time"
@@ -37,13 +38,15 @@ type RetData map[string]interface{}
 type Connection struct {
 	BaseURL string
 	client  *http.Client
+	Accept  string
 }
 
 // TODO: Consider including the FhirSystem in the Connection
 // New creates a new connection
-func New(baseurl string) *Connection {
+func New(baseurl, accept string) *Connection {
 	return &Connection{
 		BaseURL: baseurl,
+		Accept:  accept,
 		client: &http.Client{
 			Transport: &http.Transport{
 				Dial: (&net.Dialer{
@@ -98,6 +101,78 @@ func (c *Connection) Query(q, token string) (*fhir.Bundle, error) {
 
 // func (c *Connection) GetById(id string)([]byte, error ) {
 // }
+func (c *Connection) GetFhirBytes(qry string, resourceType, token string) ([]byte, string, int, error) {
+	log.Debug3(fmt.Sprintf("ResourceType = %s Query = %s  BaseUrl = %s", resourceType, qry, c.BaseURL))
+	fullUrl := fmt.Sprintf("%s/%s/%s", c.BaseURL, resourceType, qry)
+	log.Debug3("--  FullURL Requested: " + fullUrl)
+	req, err := http.NewRequest("GET", fullUrl, nil)
+	if err != nil {
+		errMsg := log.ErrMsg("NewRequest failed: " + err.Error())
+		log.Debug3(errMsg)
+		return nil, resourceType, 400, log.Errorf(errMsg)
+	}
+	req.Header.Set("Accept", "application/json+fhir")
+	//req.Header.Set("AUTHORIZATION", token)
+	//fmt.Printf("getFhir:112  --  req: %s\n", spew.Sdump(req))
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return nil, resourceType, 500, log.Errorf("!!!fhir query returned err: " + err.Error())
+	}
+	byte := []byte{}
+
+	if resp.Body != nil {
+		byte, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, resourceType, 400, log.Errorf("Response  --  Error readying body: " + err.Error())
+		}
+		log.Debug3("Response --  Raw body: " + string(byte))
+		switch resourceType {
+		case "OperationOutcome":
+			opOut, err := fhir.UnmarshalOperationOutcome(byte)
+			if err != nil {
+				log.Debug3("Response --  Error Decoding OperationOutcone: " + err.Error())
+				return byte, resourceType, resp.StatusCode, log.Errorf("Response --  Error Decoding Patient: " + err.Error())
+			}
+			log.Debug3("Response --  OperationOutcome: " + spew.Sdump(opOut))
+
+		case "Patient":
+			patient, err := fhir.UnmarshalPatient(byte)
+			if err != nil {
+				log.Debug3("Response --  Error Decoding Patient: " + err.Error())
+				return byte, resourceType, resp.StatusCode, log.Errorf("Response --  Error Decoding Patient: " + err.Error())
+			}
+			log.Debug3("Response --  Patient: " + spew.Sdump(patient))
+		case "DocumentReference":
+			docRef, err := fhir.UnmarshalDocumentReference(byte)
+			if err != nil {
+				log.Debug3("Response --  Error Decoding DocumentReference: " + err.Error())
+				return byte, resourceType, resp.StatusCode, log.Errorf("Response --  Error Decoding DocumentReference: " + err.Error())
+			}
+			log.Debug3("Response --  DocumentReference: " + spew.Sdump(docRef))
+		case "DiagnosticReport":
+			diagRept, err := fhir.UnmarshalDiagnosticReport(byte)
+			if err != nil {
+				log.Debug3("Response --  Error Decoding DiagnosticReport: " + err.Error())
+				return byte, resourceType, resp.StatusCode, log.Errorf("Response --  Error Decoding DiagnosticReport: " + err.Error())
+			}
+			log.Debug3("Response --  DiagnosticReport: " + spew.Sdump(diagRept))
+
+		default:
+			log.Debug3("ResponseType --  Not supported: " + resourceType)
+			return byte, resourceType, resp.StatusCode, nil
+		}
+		// diagRept, err := fhir.UnmarshalDiagnosticReport(byte)
+		// if err != nil {
+		// 	log.Debug3("Response --  Error Decoding DiagnosticReport: " + err.Error())
+		// 	return byte, 400, log.Errorf("Response --  Error Decoding DiagnosticReport: " + err.Error())
+		// }
+		//log.Debug3("Response --  DiagnosticReport: " + spew.Sdump(diagRept))
+		return byte, resourceType, resp.StatusCode, nil
+
+	} else {
+		return nil, resourceType, resp.StatusCode, log.Errorf("Response body is nil ")
+	}
+}
 func (c *Connection) GetFhir(qry string, resourceType, token string) (json.RawMessage, error) {
 	logrus.Printf("GetFhir:102  --  ResourceType = %s Query = %s  BaseUrl = %s", resourceType, qry, c.BaseURL)
 	fullUrl := fmt.Sprintf("%s/%s/%s", c.BaseURL, resourceType, qry)
@@ -107,25 +182,43 @@ func (c *Connection) GetFhir(qry string, resourceType, token string) (json.RawMe
 		logrus.Errorf("GetFhir:107  --  !!!NewRequest failed: %s\n", err.Error())
 		return nil, err
 	}
-	req.Header.Set("ACCEPT", "application/json+fhir")
-	req.Header.Set("AUTHORIZATION", token)
+	req.Header.Set("Accept", "application/json+fhir")
+	//req.Header.Set("AUTHORIZATION", token)
 	//fmt.Printf("getFhir:112  --  req: %s\n", spew.Sdump(req))
 	resp, err := c.client.Do(req)
 	if err != nil {
 		logrus.Errorf("GetFhir:115  --  !!!fhir query returned err: %s", err.Error())
 		return nil, err
 	}
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		logrus.Errorf("GetFhir:119  --  returned error of %d - %n", resp.StatusCode, resp.Status)
-		err = fmt.Errorf("%d|GetFhir: %s", resp.StatusCode, resp.Status)
-		//log.Errorf("%s", err.Error())
-		return nil, err
+	byte := []byte{}
+	if resp.Body != nil {
+		byte, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, log.Errorf("Response  --  Error readying body: " + err.Error())
+		}
+		return byte, nil
+		// log.Debug3("Response --  Raw body: " + string(byte))
+		// docRef, err := fhir.UnmarshalDocumentReference(byte)
+		// if err != nil {
+		// 	log.Debug3("Response --  Error Decoding DocumentReference: " + err.Error())
+		// 	return byte, nil
+		// } else {
+		// 	log.Debug3("Response --  DocumentReference: " + spew.Sdump(docRef))
+
+		// }
 	}
-	defer resp.Body.Close()
-	byte, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("getFhir:127  --  Error readying body: %s", err.Error())
-	}
+	return nil, log.Errorf("Response body is nil ")
+	// if resp.StatusCode < 200 || resp.StatusCode > 299 {
+	// 	errMsg := log.Errorf("GetFhir returned error of: " + resp.Status)
+	// 	err = fmt.Errorf("%d|GetFhir: %s", resp.StatusCode, resp.Status)
+	// 	//log.Errorf("%s", err.Error())
+	// 	return nil, errMsg
+	// }
+	//defer resp.Body.Close()
+	// byte, err := io.ReadAll(resp.Body)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("getFhir:127  --  Error readying body: %s", err.Error())
+	// }
 	return byte, nil
 	// fmt.Printf("GetFhir:124  --  Raw bundle: %s\n", string(byte))
 	// bundle, err := fhir.UnmarshalBundle(byte)
@@ -189,7 +282,7 @@ func (c *Connection) GetFhirBundle(url string, token string) (*fhir.Bundle, erro
 	}
 	//tbundle := &fhir.Bundle{}
 	defer resp.Body.Close()
-	byte, err := ioutil.ReadAll(resp.Body)
+	byte, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("GetFhirBundle:194  --  Error Decoding bundle: %s", err.Error())
 	}
@@ -244,7 +337,7 @@ func (c *Connection) QueryBundle(q string, token string) (*fhir.Bundle, error) {
 
 func GetRemoteFhirPatient(qry string, fhirUrl string, token string) (*fhir.Patient, error) {
 	fmt.Printf("GetRemotePatient:245  --  fhirUrl = %s\n", fhirUrl)
-	c := New(fhirUrl)
+	c := New(fhirUrl, "application/json+fhir")
 	rawPatient, err := c.GetFhir(qry, "Patient", token)
 	if err != nil {
 		return nil, err
@@ -279,7 +372,7 @@ func (c *Connection) PostFhir(qry, resourceType, token string, patient *fhir.Pat
 		return nil, err
 	}
 	defer resp.Body.Close()
-	byte, err := ioutil.ReadAll(resp.Body)
+	byte, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("PostFhir:283  --  Error readying body: %s", err.Error())
 	}
@@ -324,12 +417,12 @@ func (c *Connection) postFhir(qry, resourceType, token string, patient *fhir.Pat
 		//err = fmt.Errorf("%d|postFhir:275 %s", resp.StatusCode, resp.Status)
 		//log.Errorf("%s", err.Error())
 		defer resp.Body.Close()
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		bodyBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
 			fmt.Printf("postFhir:327  --  Error readying body: %s\n", err.Error())
 			return nil, fmt.Errorf("postFhir:327  --  Error readying body: %s", err.Error())
 		}
-		resp.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+		resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 		fmt.Printf("postFhir:331  --  ReSet resp.Body to initial value\n")
 		fmt.Printf("postFhir:332  --  Raw body: %s\n", string(bodyBytes))
 		//resp.Body.Close()

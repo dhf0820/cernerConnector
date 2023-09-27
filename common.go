@@ -4,18 +4,23 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+
 	"github.com/davecgh/go-spew/spew"
 	"github.com/google/uuid"
-	//common "github.com/dhf0820/uc_common"
+
+	//common "github.com/dhf0820/uc_core/common"
 	// db "github.com/dhf0820/cadatabase"
 	// fhir "github.com/dhf0820/fhirR2go"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
+
 	//"github.com/dhf0820/ids_model/common"
 	// "github.com/oleiade/reflections"
+	"net/http"
+
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"net/http"
+
 	// "strconv"
 	"strings"
 	"time"
@@ -206,14 +211,15 @@ type ConnectorConfig struct {
 	//MyEndPoints     []*EndPoint        `json:"my_end_points" bson:"my_endpoints"`
 }
 
-//
 type ConnectorResponse struct {
 	Status    int              `json:"status"`
 	Message   string           `json:"message"`
 	Connector *ConnectorConfig `json:"connector"`
 }
 
-/* ConnectAddress defines the external service used by the connector to actually delivery the release.
+/*
+	ConnectAddress defines the external service used by the connector to actually delivery the release.
+
 For example, smtp mail server, configured mail api, configured fax api, EMR connection details
 */
 type ConnectAddress struct {

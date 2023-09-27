@@ -3,38 +3,168 @@ package main
 import (
 	// 	//"context"
 	// 	"encoding/json"
-
+	//"bytes"
 	"encoding/json"
+	"net/http"
 	// 	//"errors"
 	"fmt"
-	//"strings"
-	"time"
-
 	"github.com/davecgh/go-spew/spew"
-	fhir4 "github.com/dhf0820/fhir4"
-	common "github.com/dhf0820/uc_common"
+	fhir "github.com/dhf0820/fhir4"
+	common "github.com/dhf0820/uc_core/common"
 	log "github.com/dhf0820/vslog"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"io"
+	"strings"
+	"time"
 )
+
+func GetResourceBytes(cp *common.ConnectorPayload, resourceName, resourceId string, token string) ([]byte, int, error) {
+	//startTime := time.Now()
+	//log.Printf("GetResource:23 - cp: %s\n\n", spew.Sdump(cp))
+	//url := fmt.Sprintf("%s/%s%s", fhirSystem.FhirUrl, resourceName, resourceId)
+	qry := resourceId //fmt.Sprintf("%s", resourceId)
+	log.Debug3("accept: " + cp.ConnectorConfig.AcceptValue)
+	log.Debug3("Final Query: " + qry)
+	log.Info("cp.System.Url: " + cp.ConnectorConfig.HostUrl)
+	c := New(cp.ConnectorConfig.HostUrl, cp.ConnectorConfig.AcceptValue)
+	logrus.Printf("GetResource:31  --  Calling c.GetFhir with qry: %s  resource: %s", qry, resourceName)
+	bodyBytes, resourceType, status, err := c.GetFhirBytes(qry, resourceName, token)
+	log.Debug3(fmt.Sprintf("resourceType: %s status: %d", resourceType, status))
+	if bodyBytes != nil {
+		log.Debug3("bodyBytes: " + string(bodyBytes))
+		switch strings.ToLower(resourceName) {
+		case "OperationOutcome":
+			opOut, err := fhir.UnmarshalOperationOutcome(bodyBytes)
+			if err != nil {
+				log.Debug3("Response --  Error Decoding OperationOutcone: " + err.Error())
+				return bodyBytes, status, log.Errorf("Response --  Error Decoding Patient: " + err.Error())
+			}
+			log.Debug3("Response --  OperationOutcome: " + spew.Sdump(opOut))
+			return bodyBytes, status, nil
+		case "patient":
+			patient, err := fhir.UnmarshalPatient(bodyBytes)
+			if err != nil {
+				log.Debug3("Response --  Error Decoding Patient: " + err.Error())
+				return bodyBytes, status, log.Errorf("Response --  Error Decoding Patient: " + err.Error())
+			}
+			log.Debug3("Response --  Patient: " + spew.Sdump(patient))
+			return bodyBytes, status, nil
+
+		case "documentreference":
+			docRef, err := fhir.UnmarshalDocumentReference(bodyBytes)
+			if err != nil {
+				log.Debug3("Response --  Error Decoding DocumentReference: " + err.Error())
+				return bodyBytes, status, log.Errorf("Response --  Error Decoding DocumentReference: " + err.Error())
+			}
+			log.Debug3("Response --  DocumentReference: " + spew.Sdump(docRef))
+			return bodyBytes, status, nil
+		case "diagnosticreport":
+			diagRept, err := fhir.UnmarshalDiagnosticReport(bodyBytes)
+			if err != nil {
+				log.Debug3("Response --  Error Decoding DiagnosticReport: " + err.Error())
+				return bodyBytes, status, log.Errorf("Response --  Error Decoding DiagnosticReport: " + err.Error())
+			}
+			log.Debug3("Response --  DiagnosticReport: " + spew.Sdump(diagRept))
+			return bodyBytes, status, nil
+
+		default:
+			log.Debug3("ResponseType --  Not supported: " + resourceName)
+			return bodyBytes, 400, log.Errorf("ResponseType --  Not supported: " + resourceName)
+
+		}
+		// diagRept, err := fhir.UnmarshalDiagnosticReport(byte)
+		// if err != nil {
+		// 	log.Debug3("Response --  Error Decoding DiagnosticReport: " + err.Error())
+		// 	return byte, 400, log.Errorf("Response --  Error Decoding DiagnosticReport: " + err.Error())
+		// }
+		// log.Debug3("Response --  DiagnosticReport: " + spew.Sdump(diagRept))
+		// return byte, resp.StatusCode, nil
+
+		//TODO: Write test for this
+	}
+	//rawMessage, err := c.GetFhir(qry, resourceName, token)
+
+	return nil, 400, err
+
+}
 
 // //Request a specific resource by id
 func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, token string) (json.RawMessage, error) {
 	//startTime := time.Now()
 	//log.Printf("GetResource:23 - cp: %s\n\n", spew.Sdump(cp))
 	//url := fmt.Sprintf("%s/%s%s", fhirSystem.FhirUrl, resourceName, resourceId)
-	qry := fmt.Sprintf("%s", resourceId)
-	logrus.Printf("GetResource:26 final Query: %s\n", qry)
-	logrus.Printf("GetResource:27  --  cp.System.Url: %s\n", cp.ConnectorConfig.HostUrl)
-	c := New(cp.ConnectorConfig.HostUrl)
-	logrus.Printf("GetResource:29  --  Calling c.GetFhir with qry: %s  resource: %s", qry, resourceName)
-	rawMessage, err := c.GetFhir(qry, resourceName, token)
+	qry := resourceId //fmt.Sprintf("%s", resourceId)
+	log.Debug3("accept: " + cp.ConnectorConfig.AcceptValue)
+	log.Debug3("Final Query: " + qry)
+	log.Info("cp.System.Url: " + cp.ConnectorConfig.HostUrl)
+	c := New(cp.ConnectorConfig.HostUrl, cp.ConnectorConfig.AcceptValue)
+	log.Debug3(fmt.Sprintf("Calling c.GetFhir with qry: %s  resource: %s", qry, resourceName))
+	bodyBytes, resourceType, status, err := c.GetFhirBytes(qry, resourceName, token)
 	if err != nil {
-		return nil, err
+		errMsg := log.ErrMsg("Error calling GetFhirBytes: " + err.Error())
+		log.Error(errMsg)
+		return nil, log.Errorf(errMsg)
 	}
-	err = nil
-	//fmt.Printf("GetResource:33  --  bundle: %s\n", spew.Sdump(bundle))
-	return rawMessage, nil
+
+	if bodyBytes != nil {
+		log.Debug3("bodyBytes: " + string(bodyBytes))
+		log.Debug3("resourceType: " + resourceType)
+		log.Debug3("status: " + fmt.Sprint(status))
+		if bodyBytes != nil {
+			log.Debug3("bodyBytes: " + string(bodyBytes))
+			switch strings.ToLower(resourceName) {
+			case "OperationOutcome":
+				opOut, err := fhir.UnmarshalOperationOutcome(bodyBytes)
+				if err != nil {
+					log.Debug3("Response --  Error Decoding OperationOutcone: " + err.Error())
+					return bodyBytes, log.Errorf("Response --  Error Decoding Patient: " + err.Error())
+				}
+				log.Debug3("Response --  OperationOutcome: " + spew.Sdump(opOut))
+				return bodyBytes, nil
+			case "patient":
+				patient, err := fhir.UnmarshalPatient(bodyBytes)
+				if err != nil {
+					log.Debug3("Response --  Error Decoding Patient: " + err.Error())
+					return bodyBytes, log.Errorf("Response --  Error Decoding Patient: " + err.Error())
+				}
+				log.Debug3("Response --  Patient: " + spew.Sdump(patient))
+				return bodyBytes, nil
+
+			case "documentreference":
+				docRef, err := fhir.UnmarshalDocumentReference(bodyBytes)
+				if err != nil {
+					log.Debug3("Response --  Error Decoding DocumentReference: " + err.Error())
+					return bodyBytes, log.Errorf("Response --  Error Decoding DocumentReference: " + err.Error())
+				}
+				log.Debug3("Response --  DocumentReference: " + spew.Sdump(docRef))
+				return bodyBytes, nil
+			case "diagnosticreport":
+				diagRept, err := fhir.UnmarshalDiagnosticReport(bodyBytes)
+				if err != nil {
+					log.Debug3("Response --  Error Decoding DiagnosticReport: " + err.Error())
+					return bodyBytes, log.Errorf("Response --  Error Decoding DiagnosticReport: " + err.Error())
+				}
+				log.Debug3("Response --  DiagnosticReport: " + spew.Sdump(diagRept))
+				return bodyBytes, nil
+
+			default:
+				log.Debug3("ResponseType --  Not supported: " + resourceName)
+				return bodyBytes, log.Errorf("ResponseType --  Not supported: " + resourceName)
+
+			}
+		}
+		return bodyBytes, nil
+	}
+	return nil, log.Errorf("No body read from GetFhirBytes")
+	// if bodyBytes != nil {
+	// rawMessage, err := c.GetFhir(qry, resourceName, token)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// err = nil
+	// //fmt.Printf("GetResource:33  --  bundle: %s\n", spew.Sdump(bundle))
+	// return rawMessage, nil
 
 	// var res interface{}
 	// //var binary *fhir4.Binary
@@ -75,7 +205,7 @@ func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, t
 }
 
 // //Search for Resources matching url filters or id
-func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query, JWToken string) (int64, *fhir4.Bundle, *common.CacheHeader, error) {
+func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query, JWToken string) (int64, *fhir.Bundle, *common.CacheHeader, error) {
 	page := 1
 	connConfig := connPayLoad.ConnectorConfig
 	//systemCfg := connPayLoad.System
@@ -96,7 +226,7 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	//Once background is started wait in a loop checking the ResourceCache Status using the assigned cacheId until either
 	// Have count documents or status is finished.
 	// check every 10 seconds.  Should be a FhirSystem variable value to avoid code change
-	c := New(connPayLoad.ConnectorConfig.HostUrl)
+	c := New(connPayLoad.ConnectorConfig.HostUrl, "application/json")
 	startTime := time.Now()
 	bundle, err := c.GetFhirBundle(fullQuery, JWToken)
 	if err != nil {
@@ -165,7 +295,7 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	return 0, bundle, cacheBundle.Header, err
 }
 
-func GetNextResourceUrl(link []fhir4.BundleLink) string {
+func GetNextResourceUrl(link []fhir.BundleLink) string {
 	for _, lnk := range link {
 		if lnk.Relation == "next" {
 			fmt.Printf("$$$$  GetNextResourceUrl:146  --  There is  next page to get\n")
@@ -311,3 +441,51 @@ func (c *Connection) GetNextResource(header *common.CacheHeader, url, resource, 
 // 	// _, err = client.Do(req)
 // 	return 0
 // }
+
+func GetConnectorPayload(r *http.Request) (*common.ConnectorPayload, error) {
+	body, err := io.ReadAll(r.Body) // Should be ConnectorPayload
+	if err != nil {
+		return nil, log.Errorf("ReadAll FhirSystem error " + err.Error())
+	}
+	//mt.Printf("GetConnectorPayload:717  -- Got Body Now Unmarshal ConnectorPayload\n")
+	b := string(body)
+	log.Debug3("GetConnectorPayload Body: " + b)
+	conPayload := &common.ConnectorPayload{}
+	err = json.Unmarshal(body, &conPayload)
+	if err != nil {
+		fmt.Printf("\nGetConnectorPayload:849  --  unmarshal err = %s\n", err.Error())
+		// errMsg := err.Error()
+		// WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
+		return nil, err
+	}
+	log.Info("Check ConPayload")
+	if conPayload == nil {
+		return nil, log.Errorf("conPayload is nil ")
+	}
+	//fmt.Printf("GetConnectorPayload:860  --  ConnectorPayLoad = %s\n", spew.Sdump(conPayload))
+	return conPayload, err
+}
+
+func CreateFhirQuery(r *http.Request) (string, error) {
+	query := ""
+	values := r.URL.Query()
+	log.Debug3(fmt.Sprintf("CreateFhirQuery  values : %v", values))
+	if len(values) < 1 {
+		err := log.Errorf("Url.Querys are missing")
+		return "", err
+	}
+	//fmt.Printf("\nCreateFhirQuery:713  --  Keys : %v\n\n", keys)
+	for k, v := range values {
+		log.Info("Key:  " + k + " => " + v[0])
+		s := strings.TrimLeft(v[0], "[]")
+		if query == "" {
+			//for _, kv := range v {
+			query = fmt.Sprintf("%s=%s", k, s)
+			//}
+		} else {
+			query = fmt.Sprintf("%s&%s=%s", query, k, s)
+		}
+		log.Info("CreateFhirQuery = " + query)
+	}
+	return query, nil
+}

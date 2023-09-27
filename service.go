@@ -1,20 +1,22 @@
 package main
 
 import (
-	"context"
+	// "context"
 	"encoding/json"
+
 	//"errors"
 	"fmt"
 	//jw_token "github.com/dhf0820/jwToken"
 	//"github.com/davecgh/go-spew/spew"
 
-	"io/ioutil"
+	"io"
 	"strings"
 
-	common "github.com/dhf0820/uc_common"
+	common "github.com/dhf0820/uc_core/common"
 	log "github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	// "go.mongodb.org/mongo-driver/bson"
+	// "go.mongodb.org/mongo-driver/bson/primitive"
+
 	//"github.com/dhf0820/ids_model/common"
 	//"net"
 	"net/http"
@@ -135,7 +137,7 @@ func GetServiceConfig(name, version, company string) (*common.ServiceConfig, err
 	fmt.Printf("GetServiceConfig:134  --  status : %d\n", resp.StatusCode)
 	defer resp.Body.Close()
 	//cfg = mod.ServiceConfig{}
-	bdy, err = ioutil.ReadAll(resp.Body)
+	bdy, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -211,39 +213,39 @@ func GetConfigDataElement(name string) string {
 
 }
 
-func GetFhirSystem(id string) (*common.FhirSystem, error) {
-	//fmt.Printf("\n\n\nGetFhirSystem:277 - for %s\n\n", id)
-	//fmt.Printf("GetFhirSystem:278 - GetCollection\n")
-	startTime := time.Now()
-	collection, err := GetCollection("fhirSystem")
-	if err != nil {
-		return nil, err
-	}
-	fmt.Printf("GetFhirSystem:221 - Elapsed time: %s\n", time.Since(startTime))
-	oid, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, fmt.Errorf("GetFhirSystem:224  -  invalid FhirId: [%s]", id)
-	}
-	query := bson.D{{"_id", oid}}
-	fmt.Printf("Query: %v\n", query)
-	//filter := bson.D{{"name", "demo.Cerner"}}
-	filter := bson.D{{"_id", oid}}
-	//filterM := bson.M{"_id": oid}
-	fhirSystem := &common.FhirSystem{}
-	startTime = time.Now()
-	fmt.Printf("\n\n\nGetFhirSystem:233 -  FindOne fhirConnector: bson.D %v\n", filter)
-	err = collection.FindOne(context.Background(), filter).Decode(fhirSystem)
-	//fmt.Printf("GetFhirSystem:290 - Elapsed Time: %s\n", time.Since(startTime))
-	// if err != nil {
-	// 	fmt.Printf("   Now Calling GetFhirConnector FindOne SvcConfig: bson.M %v\n", filterM)
-	// 	err = collection.FindOne(context.Background(), filterM).Decode(fhirConfig)
-	// }
-	if err != nil {
-		log.Errorf("GetFhirSystem:241 FindOne %v NotFound\n", filter)
-		return nil, fmt.Errorf("GetFhirSystem:304  FindOne %v NotFound\n", filter)
-	}
-	return fhirSystem, nil
-}
+// func GetFhirSystem(id string) (*common.FhirSystem, error) {
+// 	//fmt.Printf("\n\n\nGetFhirSystem:277 - for %s\n\n", id)
+// 	//fmt.Printf("GetFhirSystem:278 - GetCollection\n")
+// 	startTime := time.Now()
+// 	collection, err := GetCollection("fhirSystem")
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	fmt.Printf("GetFhirSystem:221 - Elapsed time: %s\n", time.Since(startTime))
+// 	oid, err := primitive.ObjectIDFromHex(id)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("GetFhirSystem:224  -  invalid FhirId: [%s]", id)
+// 	}
+// 	query := bson.D{{"_id", oid}}
+// 	fmt.Printf("Query: %v\n", query)
+// 	//filter := bson.D{{"name", "demo.Cerner"}}
+// 	filter := bson.D{{"_id", oid}}
+// 	//filterM := bson.M{"_id": oid}
+// 	fhirSystem := &common.FhirSystem{}
+// 	startTime = time.Now()
+// 	fmt.Printf("\n\n\nGetFhirSystem:233 -  FindOne fhirConnector: bson.D %v\n", filter)
+// 	err = collection.FindOne(context.Background(), filter).Decode(fhirSystem)
+// 	//fmt.Printf("GetFhirSystem:290 - Elapsed Time: %s\n", time.Since(startTime))
+// 	// if err != nil {
+// 	// 	fmt.Printf("   Now Calling GetFhirConnector FindOne SvcConfig: bson.M %v\n", filterM)
+// 	// 	err = collection.FindOne(context.Background(), filterM).Decode(fhirConfig)
+// 	// }
+// 	if err != nil {
+// 		log.Errorf("GetFhirSystem:241 FindOne %v NotFound\n", filter)
+// 		return nil, fmt.Errorf("GetFhirSystem:304  FindOne %v NotFound\n", filter)
+// 	}
+// 	return fhirSystem, nil
+// }
 
 // func CreateJWToken() (string, error) {
 // 	err := os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")

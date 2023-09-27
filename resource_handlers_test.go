@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 
 	//"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -23,7 +22,7 @@ import (
 	//"time"
 
 	jw_token "github.com/dhf0820/jwToken"
-	"github.com/dhf0820/uc_common"
+	common "github.com/dhf0820/uc_core/common"
 
 	//"github.com/dhf0820/uc_core/service"
 
@@ -61,10 +60,10 @@ func TestSimpleFindResource(t *testing.T) {
 		checkResponseCode(t, http.StatusOK, rr.Code)
 		resp := rr.Result()
 		defer resp.Body.Close()
-		byte, err := ioutil.ReadAll(resp.Body)
+		byte, err := io.ReadAll(resp.Body)
 		So(err, ShouldBeNil)
 		So(byte, ShouldNotBeNil)
-		resResp := &uc_common.ResourceResponse{}
+		resResp := &common.ResourceResponse{}
 		err = json.Unmarshal(byte, resResp)
 		//patient, err := fhir.UnmarshalPatient(byte)
 		So(err, ShouldBeNil)
@@ -101,7 +100,7 @@ func TestResourceHandlerGet(t *testing.T) {
 		checkResponseCode(t, http.StatusOK, rr.Code)
 		resp := rr.Result()
 		defer resp.Body.Close()
-		byte, err := ioutil.ReadAll(resp.Body)
+		byte, err := io.ReadAll(resp.Body)
 		So(err, ShouldBeNil)
 		So(byte, ShouldNotBeNil)
 		//bundle := fhir.Bundle{}
@@ -144,7 +143,7 @@ func TestResourceHandlerGet(t *testing.T) {
 		// // //}`
 
 		// // fsByte := []byte(fs)
-		// // fhirSystem := &uc_common.FhirSystem{}
+		// // fhirSystem := &uc_core/common.FhirSystem{}
 		// // err := json.Unmarshal(fsByte, fhirSystem)
 		// // So(err, ShouldBeNil)
 		// // fmt.Printf("\n\nTest:89  --  fhirSystem = %s\n", spew.Sdump(fhirSystem))
@@ -156,22 +155,22 @@ func TestResourceHandlerGet(t *testing.T) {
 		// // // json.Unmarshal(fsBody, &fst)
 		// // //So(err, ShouldBeNil)
 		// // //fmt.Printf("\n\ntest:106 -- FhirSystem = %s\n", spew.Sdump(fhirSystem))
-		// // cp := uc_common.ConnectorPayload{}
+		// // cp := uc_core/common.ConnectorPayload{}
 		// // cp.FhirSystem = fhirSystem
 		// // //cp := common.ConnectorPayload{}
-		// // cc := uc_common.ConnectorConfig{}
+		// // cc := uc_core/common.ConnectorConfig{}
 		// // cc.ID, _ = primitive.ObjectIDFromHex("62f1c5dab3070d0b40e7aac1")
 		// // cc.Name = "uc_ca3"
 		// // cc.Version = "local_test"
 		// // cc.CacheUrl = "http://localhost:30201"
 		// // // "cacheurl" : "http://uc_cache:9200",
 		// // // "cache_url" : "http://uc_cache:9200"
-		// // data := []*uc_common.KVData{}
-		// // cacheServer := uc_common.KVData{}
+		// // data := []*uc_core/common.KVData{}
+		// // cacheServer := uc_core/common.KVData{}
 		// // cacheServer.Name = "cacheServer"
 		// // cacheServer.Value = "http://192.168.1.152:30201"
 		// // data = append(data, &cacheServer)
-		// // hostServer := uc_common.KVData{}
+		// // hostServer := uc_core/common.KVData{}
 		// // hostServer.Name = "cacheHost"
 		// // hostServer.Value = "http://ucCache:9200"
 		// // data = append(data, &hostServer)
@@ -275,7 +274,7 @@ func TestFindCa3ResourceHandler(t *testing.T) {
 			defer resp.Body.Close()
 			//byte, err := ioutil.ReadAll(resp.Body)
 			//bundle := fhir.Bundle{}
-			resResp := &uc_common.ResourceResponse{}
+			resResp := &common.ResourceResponse{}
 			err = json.NewDecoder(resp.Body).Decode(resResp)
 			So(err, ShouldBeNil)
 			So(resResp, ShouldNotBeNil)
@@ -411,7 +410,7 @@ func TestFhirDocumentForPatient(t *testing.T) {
 			resp := w.Result()
 			So(resp.StatusCode, ShouldEqual, http.StatusOK)
 			//var bundle []fhir4.Bundle
-			var resResp uc_common.ResourceResponse
+			var resResp common.ResourceResponse
 
 			err = json.NewDecoder(w.Body).Decode(&resResp)
 			So(err, ShouldBeNil)
@@ -449,7 +448,7 @@ func TestFhirEncountersForPatient(t *testing.T) {
 			findResource(w, req)
 			resp := w.Result()
 			So(resp.StatusCode, ShouldEqual, http.StatusOK)
-			var resResp uc_common.ResourceResponse
+			var resResp common.ResourceResponse
 			err = json.NewDecoder(w.Body).Decode(&resResp)
 			So(err, ShouldBeNil)
 			fmt.Printf("TestFhirEncountersForPatient:441  --  ResResp: %s\n", spew.Sdump(resResp))
@@ -485,7 +484,7 @@ func TestFhirProceduresForPatient(t *testing.T) {
 			findResource(w, req)
 			resp := w.Result()
 			So(resp.StatusCode, ShouldEqual, http.StatusOK)
-			var resResp uc_common.ResourceResponse
+			var resResp common.ResourceResponse
 			err = json.NewDecoder(w.Body).Decode(&resResp)
 			So(err, ShouldBeNil)
 			fmt.Printf("TestFhirProceduresForPatient:447  --  ResResp: %s\n", spew.Sdump(resResp))
@@ -493,62 +492,62 @@ func TestFhirProceduresForPatient(t *testing.T) {
 	})
 }
 
-func CreateTestFhirSystem() *uc_common.FhirSystem {
-	// fs1 := `{
-	// 	"_id" : ObjectId("6329112852f3616990e2f763"),
-	// 	"facilityId" : ObjectId("62d0af5dec383ade03a96b7f"),
-	// 	"facilityName" : "Harman Clinic",
-	// 	"displayName" : "Harman ChartArchive",
-	// 	"description" : "Current records for Dr. Harman",
-	// 	"fhirVersion" : "r4",
-	// 	"identifiers" : [
-	// 		{
-	// 			"name" : "mrn",
-	// 			"value" : "mrn|"
-	// 		},
-	// 		{
-	// 			"name" : "ssn",
-	// 			"value" : "ssn|"
-	// 		},
-	// 		{
-	// 			"name" : "id",
-	// 			"value" : "id|"
-	// 		}
-	// 	],
-	// 	"authUrl" : "",
-	// 	"fhirUrl" : "http://universalcharts.com:4000/api/rest/v1",
-	// 	"insert" : "true",
-	// 	"ucUrl" : "http://test.universalcharts.com/6329112852f3616990e2f763",
-	// 	"facilityCode" : "harman",
-	// 	"baseUrl" : "https://UniversalCharts/api/rest/v1",
-	// 	"cacheUrl" : "http://UniversalCharts.com:30201",
-	// 	"connector" : "uc_ca3:cloud",
-	// 	"returnBundle" : "true",
-	// 	"serviceName" : "uc_ca3"
-	// }`
+//func CreateTestFhirSystem() *common.FhirSystem {
+// fs1 := `{
+// 	"_id" : ObjectId("6329112852f3616990e2f763"),
+// 	"facilityId" : ObjectId("62d0af5dec383ade03a96b7f"),
+// 	"facilityName" : "Harman Clinic",
+// 	"displayName" : "Harman ChartArchive",
+// 	"description" : "Current records for Dr. Harman",
+// 	"fhirVersion" : "r4",
+// 	"identifiers" : [
+// 		{
+// 			"name" : "mrn",
+// 			"value" : "mrn|"
+// 		},
+// 		{
+// 			"name" : "ssn",
+// 			"value" : "ssn|"
+// 		},
+// 		{
+// 			"name" : "id",
+// 			"value" : "id|"
+// 		}
+// 	],
+// 	"authUrl" : "",
+// 	"fhirUrl" : "http://universalcharts.com:4000/api/rest/v1",
+// 	"insert" : "true",
+// 	"ucUrl" : "http://test.universalcharts.com/6329112852f3616990e2f763",
+// 	"facilityCode" : "harman",
+// 	"baseUrl" : "https://UniversalCharts/api/rest/v1",
+// 	"cacheUrl" : "http://UniversalCharts.com:30201",
+// 	"connector" : "uc_ca3:cloud",
+// 	"returnBundle" : "true",
+// 	"serviceName" : "uc_ca3"
+// }`
 
-	fs := &uc_common.FhirSystem{}
-	fs.ID, _ = primitive.ObjectIDFromHex("6329112852f3616990e2f763")
-	fs.FacilityId, _ = primitive.ObjectIDFromHex("62d0af5dec383ade03a96b7f")
-	fs.FacilityName = "Harman Clinic"
-	fs.DisplayName = "Harman ChartArchive"
-	fs.Description = "Current records for Dr. Harman"
-	fs.FhirVersion = "r4"
-	fs.Identifiers = []*uc_common.KVData{}
-	mrn := uc_common.KVData{}
-	mrn.Name = "mrn"
-	mrn.Value = "mrn|"
-	fs.Identifiers = append(fs.Identifiers, &mrn)
-	fs.FhirUrl = "http://192.168.1.152:4000/api/rest/v1"
-	fs.Insert = "true"
-	fs.UcUrl = "http://192.168.1.152/6329112852f3616990e2f763"
-	fs.FacilityCode = "harman"
-	fs.Facility.BaseUrl = "http://192.168.1.152/api/rest/v1"
-	fs.Connector = "uc_ca3:cloud"
-	fhirSystem := fs
-	fmt.Printf("CreateTestFhirSystem:505  --  fhirSystem: %s\n", spew.Sdump(fhirSystem))
-	return fhirSystem
-}
+// 	fs := &common.FhirSystem{}
+// 	fs.ID, _ = primitive.ObjectIDFromHex("6329112852f3616990e2f763")
+// 	fs.FacilityId, _ = primitive.ObjectIDFromHex("62d0af5dec383ade03a96b7f")
+// 	fs.FacilityName = "Harman Clinic"
+// 	fs.DisplayName = "Harman ChartArchive"
+// 	fs.Description = "Current records for Dr. Harman"
+// 	fs.FhirVersion = "r4"
+// 	fs.Identifiers = []*uc_core/common.KVData{}
+// 	mrn := uc_core/common.KVData{}
+// 	mrn.Name = "mrn"
+// 	mrn.Value = "mrn|"
+// 	fs.Identifiers = append(fs.Identifiers, &mrn)
+// 	fs.FhirUrl = "http://192.168.1.152:4000/api/rest/v1"
+// 	fs.Insert = "true"
+// 	fs.UcUrl = "http://192.168.1.152/6329112852f3616990e2f763"
+// 	fs.FacilityCode = "harman"
+// 	fs.Facility.BaseUrl = "http://192.168.1.152/api/rest/v1"
+// 	fs.Connector = "uc_ca3:cloud"
+// 	fhirSystem := fs
+// 	fmt.Printf("CreateTestFhirSystem:505  --  fhirSystem: %s\n", spew.Sdump(fhirSystem))
+// 	return fhirSystem
+// }
 
 func CreateTestFileCloser() io.ReadCloser {
 	cp := CreateCP(false)
@@ -587,27 +586,27 @@ func TestDeterminePatientResource(t *testing.T) {
 	})
 }
 
-// func CreateCP() *uc_common.ConnectorPayload {
-// 	sc := uc_common.SystemConfig{}
+// func CreateCP() *uc_core/common.ConnectorPayload {
+// 	sc := uc_core/common.SystemConfig{}
 // 	sc.Name = "uc_ca3"
-// 	ids := []*uc_common.KVData{}
+// 	ids := []*uc_core/common.KVData{}
 
-// 	mrnIdent := uc_common.KVData{}
+// 	mrnIdent := uc_core/common.KVData{}
 // 	mrnIdent.Name = "mrn"
 // 	mrnIdent.Value = "mrn|"
 // 	ids = append(ids, &mrnIdent)
-// 	ssnIdent := uc_common.KVData{}
+// 	ssnIdent := uc_core/common.KVData{}
 // 	ssnIdent.Name = "ssn"
 // 	ssnIdent.Value = "ssn|"
 // 	ids = append(ids, &ssnIdent)
-// 	idIdent := uc_common.KVData{}
+// 	idIdent := uc_core/common.KVData{}
 // 	idIdent.Name = "id"
 // 	idIdent.Value = "id|"
 // 	ids = append(ids, &idIdent)
 // 	sc.Identifiers = ids
 
-// 	cp := uc_common.ConnectorPayload{}
-// 	cc := uc_common.ConnectorConfig{}
+// 	cp := uc_core/common.ConnectorPayload{}
+// 	cc := uc_core/common.ConnectorConfig{}
 // 	cc.ID, _ = primitive.ObjectIDFromHex("62f1c5dab3070d0b40e7aac1")
 // 	cc.Name = "uc_ca3"
 // 	cc.Version = "local"
@@ -615,12 +614,12 @@ func TestDeterminePatientResource(t *testing.T) {
 // 	cc.Credentials = ""
 // 	cc.HostUrl = "http://192.168.1.148:4100/system/640ba66cbd4105586a6dda75"
 // 	cc.URL = "192.168.1.152:20103"
-// 	data := []*uc_common.KVData{}
-// 	cacheServer := uc_common.KVData{}
+// 	data := []*uc_core/common.KVData{}
+// 	cacheServer := uc_core/common.KVData{}
 // 	cacheServer.Name = "cacheServer"
 // 	cacheServer.Value = "http://universalcharts.com:30201"
 // 	data = append(data, &cacheServer)
-// 	hostServer := uc_common.KVData{}
+// 	hostServer := uc_core/common.KVData{}
 // 	hostServer.Name = "cacheHost"
 // 	hostServer.Value = "http://ucCache:9200"
 // 	data = append(data, &hostServer)
@@ -630,7 +629,7 @@ func TestDeterminePatientResource(t *testing.T) {
 // 	//TODO: AddFhirAuthToken
 // 	cp.ConnectorConfig = &cc
 // 	cp.System = &sc
-// 	cp.SavePayload = &uc_common.SavePayload{}
+// 	cp.SavePayload = &uc_core/common.SavePayload{}
 // 	cp.SavePayload.SrcResource = SamplePatient()
 // 	cp.SavePayload.ResourceType = "Patient"
 // 	cp.SavePayload.SrcPatient = SampleFhirPatient()
@@ -663,20 +662,20 @@ func TestDeterminePatientResource(t *testing.T) {
 // 	return jwt, nil
 // }
 
-func GetSystemConfigById(id primitive.ObjectID) (*uc_common.SystemConfig, error) {
+func GetSystemConfigById(id primitive.ObjectID) (*common.SystemConfig, error) {
 	fmt.Printf("GetSystemConfig:12 --   Id: %s\n", id)
 	collection, err := GetCollection("systemConfig")
 	if err != nil {
 		return nil, err
 	}
 	filter := bson.D{bson.E{"_id", id}}
-	sysConfig := &uc_common.SystemConfig{}
+	sysConfig := &common.SystemConfig{}
 	fmt.Printf("GetSystemConfig:24  --  Calling FindOne SystemConfig: %v\n", filter)
 	err = collection.FindOne(context.Background(), filter).Decode(&sysConfig)
 	return sysConfig, err
 }
 
-func CreateCP(includeSave bool) *uc_common.ConnectorPayload {
+func CreateCP(includeSave bool) *common.ConnectorPayload {
 	fmt.Printf("CreateCP:248  --  includeSave: %v\n", includeSave)
 	id, _ := primitive.ObjectIDFromHex("640ba5e3bd4105586a6dda74")
 	sc, err := GetSystemConfigById(id)
@@ -684,26 +683,26 @@ func CreateCP(includeSave bool) *uc_common.ConnectorPayload {
 		log.Errorf("CreateCP:663  --  GetSystemConfigById error: %s\n", err.Error())
 		return nil
 	}
-	// sc := uc_common.SystemConfig{}
+	// sc := uc_core/common.SystemConfig{}
 	// sc.Name = "uc_ca3"
-	// ids := []*uc_common.KVData{}
+	// ids := []*uc_core/common.KVData{}
 
-	// mrnIdent := uc_common.KVData{}
+	// mrnIdent := uc_core/common.KVData{}
 	// mrnIdent.Name = "mrn"
 	// mrnIdent.Value = "mrn|"
 	// ids = append(ids, &mrnIdent)
-	// ssnIdent := uc_common.KVData{}
+	// ssnIdent := uc_core/common.KVData{}
 	// ssnIdent.Name = "ssn"
 	// ssnIdent.Value = "ssn|"
 	// ids = append(ids, &ssnIdent)
-	// idIdent := uc_common.KVData{}
+	// idIdent := uc_core/common.KVData{}
 	// idIdent.Name = "id"
 	// idIdent.Value = "id|"
 	// ids = append(ids, &idIdent)
 	// sc.Identifiers = ids
 
-	cp := uc_common.ConnectorPayload{}
-	cc := uc_common.ConnectorConfig{}
+	cp := common.ConnectorPayload{}
+	cc := common.ConnectorConfig{}
 	cc.ID, _ = primitive.ObjectIDFromHex("62f1c5dab3070d0b40e7aac1")
 	cc.Name = "uc_ca3"
 	cc.Version = "local"
@@ -711,12 +710,12 @@ func CreateCP(includeSave bool) *uc_common.ConnectorPayload {
 	cc.Credentials = ""
 	cc.HostUrl = "http://192.168.1.148:4100/system/640ba66cbd4105586a6dda75"
 	cc.URL = "192.168.1.152:20103"
-	data := []*uc_common.KVData{}
-	cacheServer := uc_common.KVData{}
+	data := []*common.KVData{}
+	cacheServer := common.KVData{}
 	cacheServer.Name = "cacheServer"
 	cacheServer.Value = "http://universalcharts.com:30201"
 	data = append(data, &cacheServer)
-	hostServer := uc_common.KVData{}
+	hostServer := common.KVData{}
 	hostServer.Name = "cacheHost"
 	hostServer.Value = "http://ucCache:9200"
 	data = append(data, &hostServer)
@@ -727,7 +726,7 @@ func CreateCP(includeSave bool) *uc_common.ConnectorPayload {
 	cp.ConnectorConfig = &cc
 	cp.System = sc
 	if includeSave {
-		cp.SavePayload = &uc_common.SavePayload{}
+		cp.SavePayload = &common.SavePayload{}
 		cp.SavePayload.SrcResource = SamplePatient()
 		cp.SavePayload.ResourceType = "Patient"
 		cp.SavePayload.SrcPatient = SampleFhirPatient()
@@ -746,7 +745,7 @@ func CreateCP(includeSave bool) *uc_common.ConnectorPayload {
 	return &cp
 }
 
-func CreateCernerCP(includeSave bool) *uc_common.ConnectorPayload {
+func CreateCernerCP(includeSave bool) *common.ConnectorPayload {
 	fmt.Printf("CreateCernerCP:744  --  includeSave: %v\n", includeSave)
 	id, _ := primitive.ObjectIDFromHex("640ba5e3bd4105586a6dda74")
 	sc, err := GetSystemConfigById(id)
@@ -754,24 +753,24 @@ func CreateCernerCP(includeSave bool) *uc_common.ConnectorPayload {
 		fmt.Printf("CreateCernerCP:729  --  GetSystemConfigById error: %s\n", err.Error())
 		return nil
 	}
-	//ids := []*uc_common.KVData{}
+	//ids := []*uc_core/common.KVData{}
 
-	// mrnIdent := uc_common.KVData{}
+	// mrnIdent := uc_core/common.KVData{}
 	// mrnIdent.Name = "mrn"
 	// mrnIdent.Value = "mrn|"
 	// ids = append(ids, &mrnIdent)
-	// ssnIdent := uc_common.KVData{}
+	// ssnIdent := uc_core/common.KVData{}
 	// ssnIdent.Name = "ssn"
 	// ssnIdent.Value = "ssn|"
 	// ids = append(ids, &ssnIdent)
-	// idIdent := uc_common.KVData{}
+	// idIdent := uc_core/common.KVData{}
 	// idIdent.Name = "id"
 	// idIdent.Value = "id|"
 	// ids = append(ids, &idIdent)
 	// sc.Identifiers = ids
 
-	cp := uc_common.ConnectorPayload{}
-	cc := uc_common.ConnectorConfig{}
+	cp := common.ConnectorPayload{}
+	cc := common.ConnectorConfig{}
 	cc.ID, _ = primitive.ObjectIDFromHex("6488a9580403ff647fca2f7e")
 	cc.Name = "uc_cerner"
 	cc.Version = "local"
@@ -780,12 +779,12 @@ func CreateCernerCP(includeSave bool) *uc_common.ConnectorPayload {
 	cc.HostUrl = "https://fhir-open.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d"
 	//cc.HostUrl = "http://192.168.1.148:4100/system/640ba66cbd4105586a6dda75"
 	cc.URL = "192.168.1.152:20103"
-	data := []*uc_common.KVData{}
-	cacheServer := uc_common.KVData{}
+	data := []*common.KVData{}
+	cacheServer := common.KVData{}
 	cacheServer.Name = "cacheServer"
 	cacheServer.Value = "http://universalcharts.com:30201"
 	data = append(data, &cacheServer)
-	hostServer := uc_common.KVData{}
+	hostServer := common.KVData{}
 	hostServer.Name = "cacheHost"
 	hostServer.Value = "http://ucCache:9200"
 	data = append(data, &hostServer)
@@ -796,7 +795,7 @@ func CreateCernerCP(includeSave bool) *uc_common.ConnectorPayload {
 	cp.ConnectorConfig = &cc
 	cp.System = sc
 	if includeSave {
-		cp.SavePayload = &uc_common.SavePayload{}
+		cp.SavePayload = &common.SavePayload{}
 		cp.SavePayload.SrcResource = SamplePatient()
 		cp.SavePayload.ResourceType = "Patient"
 		cp.SavePayload.SrcPatient = SampleFhirPatient()
@@ -954,10 +953,10 @@ func TestCernerPatientResourceSearch(t *testing.T) {
 		checkResponseCode(t, http.StatusOK, rr.Code)
 		resp := rr.Result()
 		defer resp.Body.Close()
-		byte, err := ioutil.ReadAll(resp.Body)
+		byte, err := io.ReadAll(resp.Body)
 		So(err, ShouldBeNil)
 		So(byte, ShouldNotBeNil)
-		resResp := &uc_common.ResourceResponse{}
+		resResp := &common.ResourceResponse{}
 		err = json.Unmarshal(byte, resResp)
 		//patient, err := fhir.UnmarshalPatient(byte)
 		So(err, ShouldBeNil)
@@ -1002,7 +1001,7 @@ func TestCernerResourceHandlerGet(t *testing.T) {
 		checkResponseCode(t, http.StatusOK, rr.Code)
 		resp := rr.Result()
 		defer resp.Body.Close()
-		byte, err := ioutil.ReadAll(resp.Body)
+		byte, err := io.ReadAll(resp.Body)
 		So(err, ShouldBeNil)
 		So(byte, ShouldNotBeNil)
 		//bundle := fhir.Bundle{}

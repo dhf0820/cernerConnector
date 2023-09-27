@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+
 	//"io/ioutil"
 
 	"fmt"
@@ -13,9 +14,9 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	//"github.com/dhf0820/fhir4"
 	fhir "github.com/dhf0820/fhir4"
-	//"github.com/dhf0820/uc_common"
+	//"github.com/dhf0820/uc_core/common"
 	//"github.com/samply/golang-fhir-models/fhir-models/fhir"
-	common "github.com/dhf0820/uc_common"
+	common "github.com/dhf0820/uc_core/common"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -51,7 +52,7 @@ func SavePatient(mrn string, cp *common.ConnectorPayload, JWToken string) (*http
 	url := fmt.Sprintf("/%s", "Patient")
 	log.Printf("SavePatient:51 final Query: %s\n", url)
 	//log.Infof("SavePatient:52  --  cp: %s\n", spew.Sdump(cp.ConnectorConfig)) // cp.ConnectorConfig.HostUrl)
-	c := New(cp.ConnectorConfig.HostUrl)
+	c := New(cp.ConnectorConfig.HostUrl, "application/json+fhir")
 	fmt.Printf("SavePatient:54  --  Calling postFhir\n")
 	resp, err := c.postFhir(url, "Patient", JWToken, patient)
 	if err != nil {
@@ -286,14 +287,14 @@ func PatientSearch(cp *common.ConnectorPayload, query, resource, token string) (
 	log.Printf("PatientSearch:231  --  cp.ConnectorConfig = %s\n", spew.Sdump(cp.ConnectorConfig))
 	fmt.Printf("PatientSearch:232  --  URL = %s\n", cp.ConnectorConfig.HostUrl)
 	baseUrl := cp.ConnectorConfig.HostUrl
-	c := New(baseUrl)
+	c := New(baseUrl, "application/json+fhir")
 	fmt.Printf("PatientSearch:235  --  CallGetFhirBundle at %s  with %s\n", c.BaseURL, qry)
 	bundle, err := c.GetFhirBundle(qry, token)
 	if err != nil {
 		fmt.Printf("PatientSearch:238  --  getFhirBundle error %s\n", err.Error())
 	}
 	bundle.ResourceType = StrPtr("Bundle")
-	// cb := uc_common.CacheBundle{}
+	// cb := uc_core/common.CacheBundle{}
 	// cb.
 	// 	CacheResourceBundleAndEntries(bundle, JWToken, 1)
 	//fmt.Printf("PatientSearch:237  --  Bundle= %s\n\n\n", spew.Sdump(bundle))
