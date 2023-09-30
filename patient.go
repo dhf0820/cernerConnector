@@ -17,7 +17,8 @@ import (
 	//"github.com/dhf0820/uc_core/common"
 	//"github.com/samply/golang-fhir-models/fhir-models/fhir"
 	common "github.com/dhf0820/uc_core/common"
-	log "github.com/sirupsen/logrus"
+	log "github.com/dhf0820/vslog"
+	//"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
@@ -35,13 +36,15 @@ type PostPatientPayload struct {
 
 // patId, patMrn, text, err
 func SavePatient(mrn string, cp *common.ConnectorPayload, JWToken string) (*http.Response, error) {
-	var patient *fhir.Patient
+	var patient fhir.Patient
+	patBytes := []byte{}
 	//var err error
-	if cp.SavePayload.SrcPatient != nil { // Actual patient is provided use it
-		patient = cp.SavePayload.SrcPatient
+	if cp.SavePayload.RawResource != nil { // Actual patient is provided use it
+		patBytes = cp.SavePayload.RawResource
 	} else {
 		return nil, fmt.Errorf("No patient information provided.")
 	}
+	patient, err := fhir.UnmarshalPatient(patBytes)
 	//fmt.Printf("SavePatient:43  --  patient: %s\n", spew.Sdump(patient))
 	id := primitive.NewObjectID().Hex()
 	ident := CreateIdentifier(id)
@@ -50,14 +53,13 @@ func SavePatient(mrn string, cp *common.ConnectorPayload, JWToken string) (*http
 	patient.Identifier = append(patient.Identifier, ident)
 	//fmt.Printf("SavePatient:49 --  New Identifiers: %s\n", spew.Sdump(patient.Identifier))
 	url := fmt.Sprintf("/%s", "Patient")
-	log.Printf("SavePatient:51 final Query: %s\n", url)
+	log.Debug3("final Query: " + url)
 	//log.Infof("SavePatient:52  --  cp: %s\n", spew.Sdump(cp.ConnectorConfig)) // cp.ConnectorConfig.HostUrl)
 	c := New(cp.ConnectorConfig.HostUrl, "application/json+fhir")
-	fmt.Printf("SavePatient:54  --  Calling postFhir\n")
-	resp, err := c.postFhir(url, "Patient", JWToken, patient)
+	log.Debug3(fmt.Sprintf("Calling postFhir at %s  with %s\n", c.BaseURL, url))
+	resp, err := c.postFhir(url, "Patient", JWToken, &patient)
 	if err != nil {
-		log.Errorf("SavePatient:58  --  !!!fhir query returned err: %s\n", err)
-		return resp, err
+		return resp, log.Errorf("!!!fhir query returned err: " + err.Error())
 	}
 	//fmt.Printf("SavePatient:61  --  postFhir returned: %s\n", spew.Sdump(resp))
 	fmt.Printf("SavePatient:62  --  resp.Status: %s\n", resp.Status)
@@ -284,14 +286,14 @@ func PatientSearch(cp *common.ConnectorPayload, query, resource, token string) (
 	qry := fmt.Sprintf("Patient?%s", query)
 	fmt.Printf("PatientSearch:229  --  Final url to query: %s\n", qry)
 
-	log.Printf("PatientSearch:231  --  cp.ConnectorConfig = %s\n", spew.Sdump(cp.ConnectorConfig))
-	fmt.Printf("PatientSearch:232  --  URL = %s\n", cp.ConnectorConfig.HostUrl)
+	log.Debug3("cp.ConnectorConfig = " + spew.Sdump(cp.ConnectorConfig))
+	log.Debug3("URL = " + cp.ConnectorConfig.HostUrl)
 	baseUrl := cp.ConnectorConfig.HostUrl
 	c := New(baseUrl, "application/json+fhir")
-	fmt.Printf("PatientSearch:235  --  CallGetFhirBundle at %s  with %s\n", c.BaseURL, qry)
+	log.Debug3(fmt.Sprintf("CallGetFhirBundle at %s  with %s", c.BaseURL, qry))
 	bundle, err := c.GetFhirBundle(qry, token)
 	if err != nil {
-		fmt.Printf("PatientSearch:238  --  getFhirBundle error %s\n", err.Error())
+		log.Error("getFhirBundle error: " + err.Error())
 	}
 	bundle.ResourceType = StrPtr("Bundle")
 	// cb := uc_core/common.CacheBundle{}
@@ -460,28 +462,27 @@ func (pf *PatientFilter) FindById() (*fhir.Patient, error) {
 	fmt.Printf("FindById:404  --  Calling FindOne with Filter: %v\n", filter)
 	err := collection.FindOne(context.TODO(), filter).Decode(pat) // See if the user already has a session
 	if err != nil {
-		fmt.Printf("FindById:407  -- FindOne error: %s\n", err.Error())
-		return nil, err
+		return nil, log.Errorf("FindOne error: " + err.Error())
 	}
 	//fmt.Printf("GetPatient:158  -- FindOne Patient: %s\n", spew.Sdump(pat))
 	return pat, err
-	return nil, fmt.Errorf("Find not implemented")
+	//return nil, fmt.Errorf("Find not implemented")
 }
 
 func (c *Connection) PostPatient(cp *common.ConnectorPayload, mrn string, patient *fhir.Patient) (*fhir.Patient, error) {
 	if cp == nil {
-		return nil, errors.New("ConnectorPayload must be provided")
+		return nil, log.Errorf("ConnectorPayload must be provided")
 	}
 	systemURL := cp.ConnectorConfig.HostUrl
 	if systemURL == "" {
 		//if systemURL == "" {
-		return nil, errors.New("cp.SystemUrl to add patient to must be specified")
+		return nil, log.Errorf("cp.SystemUrl to add patient to must be specified")
 	}
 	if mrn == "" { // For now use the provided MRN, if not there error //Generate a new MRN and insert into Identifiers.
-		return nil, errors.New("new UNIQUE MRN for the patient must be specified")
+		return nil, log.Errorf("new UNIQUE MRN for the patient must be specified")
 	}
 	if patient == nil {
-		return nil, errors.New("FHIR (R4) patient must be provided")
+		return nil, log.Errorf("FHIR (R4) patient must be provided")
 	}
 	patient.Id = StrPtr(primitive.NewObjectID().Hex())
 	patient.Meta = &fhir.Meta{}
@@ -529,12 +530,11 @@ func (c *Connection) PostPatient(cp *common.ConnectorPayload, mrn string, patien
 	resp, err := client.Do(req)
 
 	if err != nil {
-		log.Println("Error Posting new Patient:", err.Error())
-		return nil, err
+		return nil, log.Errorf("Error Posting new Patient: " + err.Error())
 	}
 	//fmt.Printf("length of ressponse Body = %d\n", len(resp.Body) )
 	defer resp.Body.Close()
-	fmt.Printf("resp.StatusCode = %d - %s\n", resp.StatusCode, resp.Status)
+	log.Debug3(fmt.Sprintf("resp.StatusCode = %d - %s", resp.StatusCode, resp.Status))
 	// body, err := ioutil.ReadAll(resp.Body)
 	// if err != nil {
 	// 	fmt.Printf("Query Error: %v\n", err)

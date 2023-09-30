@@ -91,9 +91,6 @@ func GetResourceBytes(cp *common.ConnectorPayload, resourceName, resourceId stri
 
 // //Request a specific resource by id
 func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, token string) (json.RawMessage, error) {
-	//startTime := time.Now()
-	//log.Printf("GetResource:23 - cp: %s\n\n", spew.Sdump(cp))
-	//url := fmt.Sprintf("%s/%s%s", fhirSystem.FhirUrl, resourceName, resourceId)
 	qry := resourceId //fmt.Sprintf("%s", resourceId)
 	log.Debug3("accept: " + cp.ConnectorConfig.AcceptValue)
 	log.Debug3("Final Query: " + qry)

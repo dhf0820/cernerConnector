@@ -18,6 +18,8 @@ github.com/dhf0820/jwToken v0.0.0-20230925172019-4a0bd9a36193 h1:4sPfSmAEikZrQ2D
 github.com/dhf0820/jwToken v0.0.0-20230925172019-4a0bd9a36193/go.mod h1:rc67qRhBTF6epk6Ed+8eWl25Vy3ELXDzqZYcgd8b/rk=
 github.com/dhf0820/uc_core v0.0.0-20230927042508-7fb769b711cd h1:2iTowLFF7UJNu9MlvEF4Yim5JVXr5t1dEiWXGVOTXDY=
 github.com/dhf0820/uc_core v0.0.0-20230927042508-7fb769b711cd/go.mod h1:5zNWvIUBDzJI3bYz3fhOIxtRHKEPEZbggfuuUhwtvL8=
+github.com/dhf0820/uc_core v0.0.0-20230930044131-a0984d178c36 h1:YLvbrp+RGHZEyVVAuLTqbPbZHRfd2viZIiPWW6vcYKg=
+github.com/dhf0820/uc_core v0.0.0-20230930044131-a0984d178c36/go.mod h1:5zNWvIUBDzJI3bYz3fhOIxtRHKEPEZbggfuuUhwtvL8=
 github.com/dhf0820/vslog v0.0.0-20230915162210-6b57c819c640 h1:L8A8NbTixUkA52jCZ34SQALPQQDliCqkYxZijcwWN7c=
 github.com/dhf0820/vslog v0.0.0-20230915162210-6b57c819c640/go.mod h1:blpTi2lVYBB7f49692KhhaPW6XIUP8zSl+AlihQiwmM=
 github.com/golang/snappy v0.0.1 h1:Qgr9rKW7uDUkrbSmQeiDsGa8SjGyCOGtuasMWwvp2P4=

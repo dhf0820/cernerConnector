@@ -785,7 +785,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverity(fhir.IssueTypeInvalid), &errMsg))
 		return
 	}
-
+	//TODO: unmarshal into a basic fhir resource (id, text)
 	log.Debug3("FillResourceResponse for " + strings.ToLower(resourceType))
 	switch strings.ToLower(resourceType) {
 	case "patient":
@@ -812,7 +812,9 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		//resp.Patient = &patient
 		resp.ResourceType = resourceType
 		resp.Resource.ResourceType = resourceType
-		resp.Resource.Patient = &patient
+		rawPat, err := json.Marshal(patient)
+		resp.Resource.Resource = rawPat
+		resp.RawResource = results
 		resp.Resource.ResourceId = *patient.Id
 		resp.ResourceId = *patient.Id
 		resp.Message = "Ok"
@@ -834,7 +836,8 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		//mt.Printf("GetResource:840  --  Binary: %s\n", spew.Sdump(binary))
 		resp.ResourceType = resourceType
 		resp.Resource.ResourceType = resourceType
-		resp.Resource.Binary = binary
+		resp.Resource.Resource = results
+		resp.RawResource = results
 		resp.Resource.ResourceId = *binary.Id
 		resp.ResourceId = *binary.Id
 		resp.Message = "Ok"
@@ -844,8 +847,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		resp.QueryId = primitive.NewObjectID().Hex()
 		resp.Status = 200
 	case "documentreference":
-		log.Debug3("Processing DocumentReference")
-		//fmt.Printf("GetResource:831  --  patient raw = %v\n", results)
+		log.Debug3("Processing DocumentReference results: " + spew.Sdump(results))
 		data, err := fhir.UnmarshalDocumentReference(results)
 		if err != nil {
 			errMsg := log.ErrMsg(fmt.Sprintf("Unmarshal %s error: %s", resourceType, err.Error()))
@@ -856,7 +858,8 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		resp.ResourceType = resourceType
 		resp.Resource.ResourceType = resourceType
 
-		resp.Resource.DocumentReference = &data
+		resp.Resource.Resource = results
+		resp.RawResource = results
 		resp.Resource.ResourceId = *data.Id
 		resp.ResourceId = *data.Id
 		resp.Message = "Ok"
@@ -868,7 +871,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 	}
 	// resp.ResourceType = Resource
 	// resp.Resource.Resource = results
-	//log.Debug3("returning resource: " + spew.Sdump(resp))
+	log.Debug1("returning resource: " + spew.Sdump(resp))
 	WriteFhirResponse(w, resp.Status, &resp)
 }
 
