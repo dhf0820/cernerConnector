@@ -125,7 +125,7 @@ func (c *Connection) GetFhirBytes(qry string, resourceType, token string) ([]byt
 		if err != nil {
 			return nil, resourceType, 400, log.Errorf("Response  --  Error readying body: " + err.Error())
 		}
-		log.Debug3("Response --  Raw body: " + string(byte))
+		//log.Debug3("Response --  Raw body: " + string(byte))
 		switch resourceType {
 		case "OperationOutcome":
 			opOut, err := fhir.UnmarshalOperationOutcome(byte)
@@ -158,8 +158,9 @@ func (c *Connection) GetFhirBytes(qry string, resourceType, token string) ([]byt
 			log.Debug3("Response --  DiagnosticReport: " + spew.Sdump(diagRept))
 
 		default:
-			log.Debug3("ResponseType --  Not supported: " + resourceType)
-			return byte, resourceType, http.StatusNotImplemented, nil
+			log.Debug3("ResponseType --  " + resourceType)
+			//return byte, resourceType, resp.StatusCode, nil
+			//return byte, resourceType, http.StatusNotImplemented, nil
 		}
 		// diagRept, err := fhir.UnmarshalDiagnosticReport(byte)
 		// if err != nil {

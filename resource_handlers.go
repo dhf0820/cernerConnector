@@ -714,6 +714,12 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	WriteFhirResponse(w, resp.Status, &resp)
 }
 
+type BasicResource struct {
+	Id           string         `json:"id"`
+	Text         fhir.Narrative `json:"text"`
+	ResourceType string         `json:"resourceType"`
+}
+
 func getResource(w http.ResponseWriter, r *http.Request) {
 	log.Debug3("getResource  Start")
 	JWToken = r.Header.Get("Authorization")
@@ -729,7 +735,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 	resourceType := params["Resource"]
 	log.Debug3(fmt.Sprintf("params = %s", params))
 	log.Debug3(fmt.Sprintf("param resource : %s - %s  ResId: %s", Resource, resourceType, resourceId))
-
+	results := json.RawMessage{}
 	// fmt.Printf("getResource:674 - Request - ")
 	// spew.Dump(r)
 	// Resource = r.Header.Get("Resource")
@@ -776,7 +782,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 	}
 	//TODO: Handle Get Resource by specific ID.  All Resources including Binary.
 	resp := common.ResourceResponse{}
-	results, err := GetResource(cp, Resource, resourceId, JWToken)
+	results, err = GetResource(cp, Resource, resourceId, JWToken)
 	if err == nil {
 		resp.Status = 200
 		resp.Message = "Ok"
@@ -785,6 +791,15 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverity(fhir.IssueTypeInvalid), &errMsg))
 		return
 	}
+	basicResource := BasicResource{}
+	err = json.Unmarshal(results, &basicResource)
+	if err != nil {
+		errMsg := log.ErrMsg("UnmarshalBasicResource error:  " + err.Error())
+		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityError, &errMsg))
+		return
+	}
+	log.Debug3("Basic Resource: " + spew.Sdump(basicResource))
+	resourceType = basicResource.ResourceType
 	//TODO: unmarshal into a basic fhir resource (id, text)
 	log.Debug3("FillResourceResponse for " + strings.ToLower(resourceType))
 	switch strings.ToLower(resourceType) {
@@ -794,7 +809,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		patient, err := fhir.UnmarshalPatient(results)
 		if err != nil {
 			errMsg := log.ErrMsg("UnmarshalPatient error:  " + err.Error())
-			WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityFatal, &errMsg))
+			WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityError, &errMsg))
 			return
 		}
 		hdr := common.ResourceHeader{}
@@ -811,11 +826,10 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		resp.Resource.ResourceHeader.DisplayFields = ds
 		//resp.Patient = &patient
 		resp.ResourceType = resourceType
-		resp.Resource.ResourceType = resourceType
-		rawPat, err := json.Marshal(patient)
-		resp.Resource.Resource = rawPat
+		//resp.Resource.ResourceType = resourceType
+		//rawPat, err := json.Marshal(patient)
+		//resp.Resource.Resource = rawPat
 		resp.RawResource = results
-		resp.Resource.ResourceId = *patient.Id
 		resp.ResourceId = *patient.Id
 		resp.Message = "Ok"
 		resp.PageNumber = 1
@@ -835,10 +849,9 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		}
 		//mt.Printf("GetResource:840  --  Binary: %s\n", spew.Sdump(binary))
 		resp.ResourceType = resourceType
-		resp.Resource.ResourceType = resourceType
-		resp.Resource.Resource = results
+		//resp.Resource.ResourceType = resourceType
+		//resp.Resource.Resource = results
 		resp.RawResource = results
-		resp.Resource.ResourceId = *binary.Id
 		resp.ResourceId = *binary.Id
 		resp.Message = "Ok"
 		resp.PageNumber = 1
@@ -856,12 +869,35 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		}
 		log.Debug3(fmt.Sprintf("Resource %s   contains: %s", resourceType, spew.Sdump(data)))
 		resp.ResourceType = resourceType
-		resp.Resource.ResourceType = resourceType
+		//resp.Resource.ResourceType = resourceType
 
-		resp.Resource.Resource = results
+		//resp.Resource.Resource = results
 		resp.RawResource = results
-		resp.Resource.ResourceId = *data.Id
+		//resp.Resource.ResourceId = *data.Id
 		resp.ResourceId = *data.Id
+		resp.Message = "Ok"
+		resp.PageNumber = 1
+		resp.TotalPages = 1
+		resp.CountInPage = 1
+		resp.QueryId = primitive.NewObjectID().Hex()
+		resp.Status = 200
+	default:
+		log.Debug3("Processing default: " + resourceType)
+		basicResource := BasicResource{}
+		err = json.Unmarshal(results, &basicResource)
+		if err != nil {
+			errMsg := log.ErrMsg("UnmarshalBasicResource error:  " + err.Error())
+			WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityError, &errMsg))
+			return
+		}
+		log.Debug3("Basic Resource: " + spew.Sdump(basicResource))
+		resp.ResourceType = resourceType
+		//resp.Resource.ResourceType = resourceType
+
+		//resp.Resource.Resource = results
+		resp.RawResource = results
+		//resp.Resource.ResourceId = basicResource.Id
+		resp.ResourceId = basicResource.Id
 		resp.Message = "Ok"
 		resp.PageNumber = 1
 		resp.TotalPages = 1
@@ -871,7 +907,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 	}
 	// resp.ResourceType = Resource
 	// resp.Resource.Resource = results
-	log.Debug1("returning resource: " + spew.Sdump(resp))
+	log.Debug5("returning resource: " + spew.Sdump(resp))
 	WriteFhirResponse(w, resp.Status, &resp)
 }
 

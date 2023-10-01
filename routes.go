@@ -32,12 +32,18 @@ var routes = Routes{
 		findResource,
 		//findPatient,
 	},
+	// Route{
+	// 	"GetPatient",
+	// 	"GET",
+	// 	"/api/rest/v1/{Resource}/{resourceId}",
+	// 	getResource,
+	// 	//getPatient,
+	// },
 	Route{
-		"GetPatient",
+		"GetNutritionOrder",
 		"GET",
-		"/api/rest/v1/{Resource}/{resourceId}",
+		"/api/rest/v1/NutritionOrder/{resourceId}",
 		getResource,
-		//getPatient,
 	},
 	Route{
 		"FindAllergyIntolerance",
@@ -78,7 +84,7 @@ var routes = Routes{
 	Route{
 		"GetDocumentReference",
 		"GET",
-		"/api/rest/v1/DocumentReference/{resourceId}",
+		"/api/rest/v1/{Resource}/{resourceId}",
 		getResource,
 	},
 	Route{
@@ -90,7 +96,7 @@ var routes = Routes{
 	Route{
 		"GetDiagnosticReport",
 		"GET",
-		"/api/rest/v1/DiagnosticReport/{resourceId}",
+		"/api/rest/v1/{Resource}/{resourceId}",
 		getResource,
 	},
 	Route{
@@ -120,7 +126,7 @@ var routes = Routes{
 	Route{
 		"GetResource",
 		"GET",
-		"/api/rest/v1/resource/{resource}/{resourceId}",
+		"/api/rest/v1/resource/{Resource}/{resourceId}",
 		getResource,
 	},
 	Route{
@@ -187,6 +193,12 @@ var routes = Routes{
 		"FindQuestionaireResponse",
 		"GET",
 		"/api/rest/v1/QuestionaireResponse{resourceId}",
+		getResource,
+	},
+	Route{
+		"GetResource",
+		"GET",
+		"/api/rest/v1/{Resource}/{resourceId}",
 		getResource,
 	},
 	// Route{

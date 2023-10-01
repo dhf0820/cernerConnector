@@ -146,8 +146,8 @@ func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, t
 				return bodyBytes, nil
 
 			default:
-				log.Debug3("ResponseType --  Not supported: " + resourceName)
-				return bodyBytes, log.Errorf("ResponseType --  Not supported: " + resourceName)
+				log.Debug3("ResponseType:  " + resourceName)
+				return bodyBytes, nil //log.Errorf("ResponseType --  Not supported: " + resourceName)
 
 			}
 		}
