@@ -177,12 +177,12 @@ var routes = Routes{
 		"/api/rest/v1/Procedure",
 		findResource,
 	},
-	Route{
-		"GetProcedure",
-		"GET",
-		"/api/rest/v1/Procedure{resourceId}",
-		getResource,
-	},
+	// Route{
+	// 	"GetProcedure",
+	// 	"GET",
+	// 	"/api/rest/v1/{Resource}/{resourceId}",
+	// 	getResource,
+	// },
 	Route{
 		"FindQuestionaireResponse",
 		"GET",
