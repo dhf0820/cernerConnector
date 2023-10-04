@@ -24,7 +24,7 @@ var Mode string
 var Env string
 
 func main() {
-	version = "231004.0"
+	version = "231004.1"
 	log.SetDebuglevel("DEBUG3")
 	log.Info("run mode: " + os.Getenv("MODE"))
 	switch os.Getenv("MODE") {
