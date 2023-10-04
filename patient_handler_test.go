@@ -4,7 +4,6 @@ import (
 	//"bytes"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 
 	"github.com/joho/godotenv"
 
@@ -33,7 +32,8 @@ import (
 
 	//fhirR4go "github.com/dhf0820/fhirR4go"
 	//"go.mongodb.org/mongo-driver/bson/primitive"
-	log "github.com/sirupsen/logrus"
+	log "github.com/dhf0820/vslog"
+	//"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 
 	"github.com/davecgh/go-spew/spew"
@@ -51,7 +51,7 @@ func TestSearchPatient(t *testing.T) {
 		So(jwt, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
 		req.Header.Set("Authorization", jwt)
-		fmt.Printf("\nTestSearchPatient:49  --  Calling Router\n")
+		log.Debug3("Calling Router")
 		cp := CreateCP(false)
 		fmt.Printf("\nTestSearchPatient:51  --  cp: %s\n", spew.Sdump(cp))
 		cpb, err := json.Marshal(cp)
@@ -65,7 +65,7 @@ func TestSearchPatient(t *testing.T) {
 		checkResponseCode(t, http.StatusOK, rr.Code)
 		resp := rr.Result()
 		defer resp.Body.Close()
-		byte, err := ioutil.ReadAll(resp.Body)
+		byte, err := io.ReadAll(resp.Body)
 		So(err, ShouldBeNil)
 		So(resp.StatusCode, ShouldEqual, 200)
 		So(byte, ShouldNotBeNil)
@@ -174,9 +174,9 @@ func TestPatientGet(t *testing.T) {
 		//in the back ground check on the size of the results aver couple of seconds.  When the number _count requested, Return them
 		// in a new standart cache results
 
-		log.Printf("\n\n\ntesting TestGetPatient\n\n\n")
+		fmt.Printf("\n\n\ntesting TestGetPatient\n\n\n")
 		Convey("Given a valid patient ID", func() {
-			log.Printf("\n\nTestPatientGet:173  --  Given a valid PatientId\n\n\n")
+			fmt.Printf("\n\nTestPatientGet:173  --  Given a valid PatientId\n\n\n")
 
 			fmt.Printf("TestPatientGet:175  --  Creating Get Request\n")
 			//req := httptest.NewRequest("GET", "/62f14531ba5395278cd530c4/Patient/12724066", nil)
@@ -323,7 +323,7 @@ func TestCernerSearchPatient(t *testing.T) {
 		checkResponseCode(t, http.StatusOK, rr.Code)
 		resp := rr.Result()
 		defer resp.Body.Close()
-		byte, err := ioutil.ReadAll(resp.Body)
+		byte, err := io.ReadAll(resp.Body)
 		So(err, ShouldBeNil)
 		So(resp.StatusCode, ShouldEqual, 200)
 		So(byte, ShouldNotBeNil)

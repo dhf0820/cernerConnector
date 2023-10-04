@@ -48,7 +48,7 @@ func GetResourceBytes(cp *common.ConnectorPayload, resourceName, resourceId stri
 				log.Debug3("Response --  Error Decoding Patient: " + err.Error())
 				return bodyBytes, status, log.Errorf("Response --  Error Decoding Patient: " + err.Error())
 			}
-			log.Debug3("Response --  Patient: " + spew.Sdump(patient))
+			log.Debug5("Response --  Patient: " + spew.Sdump(patient))
 			return bodyBytes, status, nil
 
 		case "documentreference":
@@ -57,7 +57,7 @@ func GetResourceBytes(cp *common.ConnectorPayload, resourceName, resourceId stri
 				log.Debug3("Response --  Error Decoding DocumentReference: " + err.Error())
 				return bodyBytes, status, log.Errorf("Response --  Error Decoding DocumentReference: " + err.Error())
 			}
-			log.Debug3("Response --  DocumentReference: " + spew.Sdump(docRef))
+			log.Debug5("Response --  DocumentReference: " + spew.Sdump(docRef))
 			return bodyBytes, status, nil
 		case "diagnosticreport":
 			diagRept, err := fhir.UnmarshalDiagnosticReport(bodyBytes)
@@ -65,7 +65,7 @@ func GetResourceBytes(cp *common.ConnectorPayload, resourceName, resourceId stri
 				log.Debug3("Response --  Error Decoding DiagnosticReport: " + err.Error())
 				return bodyBytes, status, log.Errorf("Response --  Error Decoding DiagnosticReport: " + err.Error())
 			}
-			log.Debug3("Response --  DiagnosticReport: " + spew.Sdump(diagRept))
+			log.Debug5("Response --  DiagnosticReport: " + spew.Sdump(diagRept))
 			return bodyBytes, status, nil
 
 		default:
@@ -117,7 +117,7 @@ func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, t
 					log.Debug3("Response --  Error Decoding OperationOutcone: " + err.Error())
 					return bodyBytes, log.Errorf("Response --  Error Decoding Patient: " + err.Error())
 				}
-				log.Debug3("Response --  OperationOutcome: " + spew.Sdump(opOut))
+				log.Debug5("Response --  OperationOutcome: " + spew.Sdump(opOut))
 				return bodyBytes, nil
 			case "patient":
 				patient, err := fhir.UnmarshalPatient(bodyBytes)
@@ -125,7 +125,7 @@ func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, t
 					log.Debug3("Response --  Error Decoding Patient: " + err.Error())
 					return bodyBytes, log.Errorf("Response --  Error Decoding Patient: " + err.Error())
 				}
-				log.Debug3("Response --  Patient: " + spew.Sdump(patient))
+				log.Debug5("Response --  Patient: " + spew.Sdump(patient))
 				return bodyBytes, nil
 
 			case "documentreference":
@@ -134,7 +134,7 @@ func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, t
 					log.Debug3("Response --  Error Decoding DocumentReference: " + err.Error())
 					return bodyBytes, log.Errorf("Response --  Error Decoding DocumentReference: " + err.Error())
 				}
-				log.Debug3("Response --  DocumentReference: " + spew.Sdump(docRef))
+				log.Debug5("Response --  DocumentReference: " + spew.Sdump(docRef))
 				return bodyBytes, nil
 			case "diagnosticreport":
 				diagRept, err := fhir.UnmarshalDiagnosticReport(bodyBytes)
@@ -142,7 +142,7 @@ func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, t
 					log.Debug3("Response --  Error Decoding DiagnosticReport: " + err.Error())
 					return bodyBytes, log.Errorf("Response --  Error Decoding DiagnosticReport: " + err.Error())
 				}
-				log.Debug3("Response --  DiagnosticReport: " + spew.Sdump(diagRept))
+				log.Debug5("Response --  DiagnosticReport: " + spew.Sdump(diagRept))
 				return bodyBytes, nil
 
 			default:
@@ -209,14 +209,14 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	fmt.Printf("FindResource:81	 --  resource: %s\n", resource)
 	fmt.Printf("FindResource:82	 --  query: %s\n", query)
 	fullQuery := fmt.Sprintf("%s?%s", resource, query)
-	fmt.Printf("FindRecource:84  --  ConectorPayload: %s\n", spew.Sdump(connPayLoad))
+	//fmt.Printf("FindRecource:84  --  ConectorPayload: %s\n", spew.Sdump(connPayLoad))
 	fmt.Printf("\n\n@@@@@@FindResource:85  --  Resource: %s\n", resource)
 	fmt.Printf("FindResource:86  --  UserId: %s\n", userId)
 	fmt.Printf("FindResource:88  --  fullQuery: %s\n", fullQuery)
 	// fmt.Printf("FindResource:87  --  FhirSystem: %s\n", spew.Sdump(fhirSystem))
 
 	fmt.Printf("FindResource:89  -- Page: %d\n", page)
-	fmt.Printf("FindResource:90  --  ConnectorConfig: %s\n", spew.Sdump(connConfig))
+	//fmt.Printf("FindResource:90  --  ConnectorConfig: %s\n", spew.Sdump(connConfig))
 	//fmt.Printf("FindResource:91  --  query: %s\n", query)
 
 	//TODO: Process the query in the background filling the resourceCache and BundleCache. Assign a cacheId on the call
@@ -235,7 +235,7 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	// if err != nil {
 	// 	return 0, nil, nil, err
 	// }
-	fmt.Printf("FindResource:110  --  bundle: %s\n", spew.Sdump(bundle))
+	log.Debug5("bundle: " + spew.Sdump(bundle))
 	header := &common.CacheHeader{}
 	header.SystemCfg = connPayLoad.System
 	header.ResourceType = resource
@@ -243,7 +243,7 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	header.PageId = page
 	queryId := primitive.NewObjectID().Hex()
 	header.QueryId = queryId
-	fmt.Printf("FindResource:118  --  connConfig: %s\n", spew.Sdump(connConfig))
+	log.Debug5("connConfig: " + spew.Sdump(connConfig))
 	//header.CacheBase = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
 	//header.ResourceCacheBase = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
 	//header.GetBundleCacheBase = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheBase, header.SystemCfg.ID.Hex())

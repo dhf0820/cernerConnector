@@ -662,7 +662,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	var bundle *fhir.Bundle
 	var header *common.CacheHeader
 	//resourceId := r.Header.Get("Fhir-System")
-	log.Debug3(" - connectorPayload = " + spew.Sdump(connectorPayload))
+	log.Debug5(" - connectorPayload = " + spew.Sdump(connectorPayload))
 	qryStr := r.URL.RawQuery
 
 	log.Debug3(fmt.Sprintf(" - resource = %s  uri = %s", resourceType, qryStr))
@@ -837,7 +837,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		resp.CountInPage = 1
 		resp.QueryId = primitive.NewObjectID().Hex()
 		resp.Status = 200
-		log.Debug3("Patient case final " + spew.Sdump(resp))
+		log.Debug5("Patient case final " + spew.Sdump(resp))
 	case "binary":
 		log.Debug3("Processing Binary")
 		//fmt.Printf("GetResource:831  --  patient raw = %v\n", results)
@@ -860,7 +860,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		resp.QueryId = primitive.NewObjectID().Hex()
 		resp.Status = 200
 	case "documentreference":
-		log.Debug3("Processing DocumentReference results: " + spew.Sdump(results))
+		log.Debug5("Processing DocumentReference results: " + spew.Sdump(results))
 		data, err := fhir.UnmarshalDocumentReference(results)
 		if err != nil {
 			errMsg := log.ErrMsg(fmt.Sprintf("Unmarshal %s error: %s", resourceType, err.Error()))

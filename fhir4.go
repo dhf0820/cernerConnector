@@ -112,8 +112,6 @@ func (c *Connection) GetFhirBytes(qry string, resourceType, token string) ([]byt
 		return nil, resourceType, 400, log.Errorf(errMsg)
 	}
 	req.Header.Set("Accept", "application/json+fhir")
-	//req.Header.Set("AUTHORIZATION", token)
-	//fmt.Printf("getFhir:112  --  req: %s\n", spew.Sdump(req))
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, resourceType, 500, log.Errorf("!!!fhir query returned err: " + err.Error())
@@ -141,21 +139,21 @@ func (c *Connection) GetFhirBytes(qry string, resourceType, token string) ([]byt
 				log.Debug3("Response --  Error Decoding Patient: " + err.Error())
 				return byte, resourceType, resp.StatusCode, log.Errorf("Response --  Error Decoding Patient: " + err.Error())
 			}
-			log.Debug3("Response --  Patient: " + spew.Sdump(patient))
+			log.Debug5("Response --  Patient: " + spew.Sdump(patient))
 		case "DocumentReference":
 			docRef, err := fhir.UnmarshalDocumentReference(byte)
 			if err != nil {
 				log.Debug3("Response --  Error Decoding DocumentReference: " + err.Error())
 				return byte, resourceType, resp.StatusCode, log.Errorf("Response --  Error Decoding DocumentReference: " + err.Error())
 			}
-			log.Debug3("Response --  DocumentReference: " + spew.Sdump(docRef))
+			log.Debug5("Response --  DocumentReference: " + spew.Sdump(docRef))
 		case "DiagnosticReport":
 			diagRept, err := fhir.UnmarshalDiagnosticReport(byte)
 			if err != nil {
 				log.Debug3("Response --  Error Decoding DiagnosticReport: " + err.Error())
 				return byte, resourceType, resp.StatusCode, log.Errorf("Response --  Error Decoding DiagnosticReport: " + err.Error())
 			}
-			log.Debug3("Response --  DiagnosticReport: " + spew.Sdump(diagRept))
+			log.Debug5("Response --  DiagnosticReport: " + spew.Sdump(diagRept))
 
 		default:
 			log.Debug3("ResponseType --  " + resourceType)
@@ -184,8 +182,6 @@ func (c *Connection) GetFhir(qry string, resourceType, token string) (json.RawMe
 		return nil, err
 	}
 	req.Header.Set("Accept", "application/json+fhir")
-	//req.Header.Set("AUTHORIZATION", token)
-	//fmt.Printf("getFhir:112  --  req: %s\n", spew.Sdump(req))
 	resp, err := c.client.Do(req)
 	if err != nil {
 		logrus.Errorf("GetFhir:115  --  !!!fhir query returned err: %s", err.Error())
@@ -198,59 +194,8 @@ func (c *Connection) GetFhir(qry string, resourceType, token string) (json.RawMe
 			return nil, log.Errorf("Response  --  Error readying body: " + err.Error())
 		}
 		return byte, nil
-		// log.Debug3("Response --  Raw body: " + string(byte))
-		// docRef, err := fhir.UnmarshalDocumentReference(byte)
-		// if err != nil {
-		// 	log.Debug3("Response --  Error Decoding DocumentReference: " + err.Error())
-		// 	return byte, nil
-		// } else {
-		// 	log.Debug3("Response --  DocumentReference: " + spew.Sdump(docRef))
-
-		// }
 	}
 	return nil, log.Errorf("Response body is nil ")
-	// if resp.StatusCode < 200 || resp.StatusCode > 299 {
-	// 	errMsg := log.Errorf("GetFhir returned error of: " + resp.Status)
-	// 	err = fmt.Errorf("%d|GetFhir: %s", resp.StatusCode, resp.Status)
-	// 	//log.Errorf("%s", err.Error())
-	// 	return nil, errMsg
-	// }
-	//defer resp.Body.Close()
-	// byte, err := io.ReadAll(resp.Body)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("getFhir:127  --  Error readying body: %s", err.Error())
-	// }
-	return byte, nil
-	// fmt.Printf("GetFhir:124  --  Raw bundle: %s\n", string(byte))
-	// bundle, err := fhir.UnmarshalBundle(byte)
-	// if err != nil {
-	// 	fmt.Printf("GetFhir:127  --  Error Decoding bundle: %s\n", err.Error())
-	// 	return nil, err
-	// }
-	// // err = json.NewDecoder(resp.Body).Decode(&data)
-	// // if err != nil {
-	// // 	fmt.Printf("NewDecoder error: %s\n", err.Error())
-	// // }
-	// // fmt.Printf("NewDecoder: %s\n\n", spew.Sdump(data))
-	// // bundle := &fhir.Bundle{}
-	// // err = json.NewDecoder(resp.Body).Decode(bundle)
-	// // if err != nil {
-	// // 	fmt.Printf("GetFhir:131  --  Error Decoding bundle: %s\n", err.Error())
-	// // 	return nil, err
-	// // }
-
-	// fmt.Printf("GetFhir:135  --  Bundle: %s\n", spew.Sdump(bundle))
-	// patient, err := fhir.UnmarshalPatient(bundle.Entry[0].Resource)
-	// fmt.Printf("GetFhir:137  --  patient:  %s\n", spew.Sdump(patient))
-	// return &bundle, nil
-	// // body, err := ioutil.ReadAll(resp.Body)
-	// // if err != nil {
-	// // 	fmt.Printf("ReadBody Error:119 %s\n", err.Error())
-	// // 	return nil, err
-	// // }
-	// // fmt.Printf("\nGetFhir:129  -- %s\n", string(body))
-	// // fmt.Printf("GetFhir:130 returning no error and length of data: %d\n", len(body))
-	// // return body, nil
 }
 func (c *Connection) GetFhirBundle(url string, token string) (*fhir.Bundle, error) {
 	fmt.Printf("GetFhirBundle:162  --  BaseUrl - %s  add url: %s\n", c.BaseURL, url)
@@ -267,14 +212,11 @@ func (c *Connection) GetFhirBundle(url string, token string) (*fhir.Bundle, erro
 		return nil, err
 	}
 	req.Header.Set("Accept", "application/json+fhir")
-	//req.Header.Set("AUTHORIZATION", token)
-	//fmt.Printf("GetFhirBundle:175  --  req: %s\n", spew.Sdump(req))
 	resp, err := c.client.Do(req)
 	if err != nil {
 		logrus.Errorf("GetFhirBundle:180  --  !!!fhir query returned err: %s\n", err)
 		return nil, err
 	}
-	//fmt.Printf("GetFhir:181  --  resp = %s\n", spew.Sdump(resp))
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		logrus.Errorf("GetFhirBundle:185  --  returned error of %d - %s\n", resp.StatusCode, resp.Status)
 		err = fmt.Errorf("%d|GetFhirBundle:186 %s", resp.StatusCode, resp.Status)
@@ -360,7 +302,7 @@ func (c *Connection) PostFhir(qry, resourceType, token string, patient *fhir.Pat
 	}
 	req.Header.Add("Accept", "application/json")
 	req.Header.Set("AUTHORIZATION", token)
-	//fmt.Printf("getFhir:102  --  req: %s\n", spew.Sdump(req))
+
 	resp, err := c.client.Do(req)
 	if err != nil {
 		logrus.Errorf("PostFhir:271  --  !!!fhir query returned err: %s\n", err)
@@ -379,12 +321,11 @@ func (c *Connection) PostFhir(qry, resourceType, token string, patient *fhir.Pat
 	}
 	//fmt.Printf("PostFhir:284  --  Raw body: %s\n", string(byte))
 
-	pat, err := fhir.UnmarshalPatient(byte)
+	_, err = fhir.UnmarshalPatient(byte) // Validate that it is a patient
 	if err != nil {
 		fmt.Printf("PostFhir:289  --  Error Decoding Patient: %s\n", err.Error())
 		return nil, err
 	}
-	fmt.Printf("PostFhir:292  --  Patient =  %s\n", spew.Sdump(pat))
 	return byte, nil
 }
 
@@ -405,7 +346,6 @@ func (c *Connection) postFhir(qry, resourceType, token string, patient *fhir.Pat
 	}
 	req.Header.Add("Accept", "application/json")
 	req.Header.Set("AUTHORIZATION", token)
-	//fmt.Printf("getFhir:102  --  req: %s\n", spew.Sdump(req))
 	resp, err := c.client.Do(req)
 
 	if err != nil {
@@ -437,13 +377,7 @@ func (c *Connection) postFhir(qry, resourceType, token string, patient *fhir.Pat
 	// }
 	// fmt.Printf("postFhir:331  --  Raw body: %s\n", string(byte))
 	return resp, err
-	// pat, err := fhir.UnmarshalPatient(byte)
-	// if err != nil {
-	// 	fmt.Printf("postFhir:288  --  Error Decoding Patient: %s\n", err.Error())
-	// 	return nil, err
-	// }
-	// fmt.Printf("postFhir:291  --  Patient =  %s\n", spew.Sdump(pat))
-	// return byte, nil
+
 }
 
 // https://fhir-open.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d/Binary/XR-197574792

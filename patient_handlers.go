@@ -36,7 +36,6 @@ import (
 var JWToken string
 
 func getPatient(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("getPatient:36 - req: %s\n", spew.Sdump(r))
 	//Resource := "Patient"
 	//buildFieldsByTagMap("schema", *psp)
 	JWToken = r.Header.Get("Authorization")
@@ -189,7 +188,7 @@ func getPatient(w http.ResponseWriter, r *http.Request) {
 }
 
 // postPatient: Stores the fhir patient payload in the url {Fhir-System} specified fhirSystem.
-func savePatient(w http.ResponseWriter, r *http.Request) {
+/* func savePatient(w http.ResponseWriter, r *http.Request) {
 	//Resource := "Patient"
 	//fmt.Printf("postPatient:182 - Post: %s \n", spew.Sdump(r))
 	JWToken := r.Header.Get("Authorization")
@@ -418,7 +417,7 @@ func savePatient(w http.ResponseWriter, r *http.Request) {
 	// resp.ResourceId = *patient.Id
 	// log.Printf("\nGetPatient:204  --  resp: %s\n", spew.Sdump(resp))
 	// WriteFhirResourceBundle(w, resp.Status, &resp)
-}
+} */
 
 // searchPatient uses the systemId url parameter to determin the FhirSystem to use
 func searchPatient(w http.ResponseWriter, r *http.Request) {
