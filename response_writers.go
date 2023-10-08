@@ -194,7 +194,7 @@ func WriteFhirResponse(w http.ResponseWriter, status int, resp *common.ResourceR
 //################################### FHIR Responses ####################################
 
 func CreateOperationOutcome(code fhir.IssueType, severity fhir.IssueSeverity, details *string) *fhir.OperationOutcome {
-	fmt.Printf("CreateOperationOutcome:179  --  Code: %s   Error Message : %s\n", code, *details)
+	log.ErrMsg(fmt.Sprintf("Code: %s   Error Message : %s", code, *details))
 	s := *details
 	outcome := fhir.OperationOutcome{}
 	issue := fhir.OperationOutcomeIssue{}

@@ -15,7 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	// //"os"
-	// //"strconv"
+	"strconv"
 	"strings"
 	"time"
 
@@ -673,9 +673,22 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	log.Debug3(fmt.Sprintf(" --  Search %s with %s", resourceType, qryStr))
 	startTime := time.Now()
 	totalPages, bundle, header, err = FindResource(&connectorPayload, resourceType, userId, qryStr, JWToken)
+	log.Debug3(" - FindResource returned")
+	finalStatus := status
 	if err != nil {
-		errMsg := log.ErrMsg(fmt.Sprintf("--  fhirSearch url: %s  --error:  %s", url, err.Error()))
-		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeNotFound, fhir.IssueSeverityInformation, &errMsg))
+		errMsg := fmt.Sprintf("findResource:678 - fhirSearch url: %s  error:  %s", url, err.Error())
+		fmt.Println(errMsg)
+		errParts := strings.Split(err.Error(), "|")
+		log.Debug3(" - errParts = " + spew.Sdump(errParts))
+		if len(errParts) > 1 { //Not a valid error message
+			errMsg = errParts[1]
+			finalStatus, err = strconv.Atoi(errParts[0])
+			if err != nil {
+				finalStatus = 413
+			}
+			log.Debug3("finalStatus: " + fmt.Sprint(finalStatus))
+		}
+		WriteFhirOperationOutcome(w, finalStatus, CreateOperationOutcome(fhir.IssueTypeNotFound, fhir.IssueSeverityInformation, &errMsg))
 		return
 	}
 	//}
@@ -706,7 +719,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	log.Debug3(fmt.Sprintf("--  resp without bundle: " + spew.Sdump(resp)))
 	log.Debug3(fmt.Sprintf("--  Time to log = %s", time.Since(logTime)))
 	resp.Bundle = bundle
-	log.Debug3(fmt.Sprintf("--  Number of entries in buldle: %d", len(bundle.Entry)))
+	log.Debug3(fmt.Sprintf("--  Number of entries in bundle: %d", len(bundle.Entry)))
 	log.Debug3(fmt.Sprintf("--  QueryId: " + header.QueryId))
 	FillResourceResponse(&resp, resourceType)
 	//fmt.Printf("findResource:614  --  Returning Bundle: %s\n", spew.Sdump(bundle))

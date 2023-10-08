@@ -227,8 +227,9 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	startTime := time.Now()
 	bundle, err := c.GetFhirBundle(fullQuery, JWToken)
 	if err != nil {
-		msg := fmt.Sprintf("GetNextResource:10  --  error: %s", err.Error())
+		msg := log.ErrMsg("GetNextResource error: " + err.Error())
 		fmt.Println(msg)
+		fmt.Printf("error: %s\n", err.Error())
 		return 0, nil, nil, err
 	}
 	// bundle, err := c.Query(query, JWToken) // Perform the actul query of the fhir server
@@ -289,6 +290,12 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	// There is one full page and possibley more. Respond with two aso they user will create two page buttons and update every
 	// 10 secnds.
 	//return int64(page), bundle, cacheBundle.Header, err
+	if len(bundle.Entry) == 0 {
+		return 0, bundle, cacheBundle.Header, log.Errorf("No resources found")
+	} else {
+		return int64(len(bundle.Entry)), bundle, cacheBundle.Header, err
+
+	}
 	return 0, bundle, cacheBundle.Header, err
 }
 

@@ -218,7 +218,7 @@ func (c *Connection) GetFhirBundle(url string, token string) (*fhir.Bundle, erro
 		return nil, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		logrus.Errorf("GetFhirBundle:185  --  returned error of %d - %s\n", resp.StatusCode, resp.Status)
+		log.Error("GetFhirBundle returned error of " + fmt.Sprint(resp.StatusCode))
 		err = fmt.Errorf("%d|GetFhirBundle:186 %s", resp.StatusCode, resp.Status)
 		//log.Errorf("%s", err.Error())
 		return nil, err

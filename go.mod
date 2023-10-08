@@ -10,7 +10,7 @@ require (
 	github.com/dhf0820/fhir4 v0.0.0-20230622231015-fd9396d145c7
 	github.com/dhf0820/jwToken v0.0.0-20231004025559-35bfe987e1dd
 	github.com/dhf0820/uc_core v0.0.0-20230930204750-8223b69d4796
-	github.com/dhf0820/vslog v0.0.0-20231002221045-b14c5b859933
+	github.com/dhf0820/vslog v0.0.0-20231007220019-758899f13b4a
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/schema v1.2.0
