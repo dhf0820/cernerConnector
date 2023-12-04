@@ -9,8 +9,11 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	common "github.com/dhf0820/uc_core/common"
-	log "github.com/sirupsen/logrus"
+	log "github.com/dhf0820/vslog"
+
+	//"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -64,7 +67,7 @@ func OpenDBUrl(dbURL string) *MongoDB {
 	err = mongoClient.Ping(context.TODO(), nil)
 	if err != nil {
 		//fmt.Printf("Database did not connect:62 %v\n", err)
-		log.Errorf("vsMongo:65  --Database did not connect:63 %s", err.Error())
+		log.Error("--Database did not connect:   " + err.Error())
 		return nil
 	}
 	Company := os.Getenv("COMPANY")
@@ -133,7 +136,7 @@ func OpenMongoDB() (*MongoDB, error) {
 	err = mongoClient.Ping(context.TODO(), nil)
 	if err != nil {
 		//fmt.Printf("Database did not connect: %v\n", err)
-		log.Errorf("Database:131 did not connect by ping:129 %v", err)
+		log.Errorf("did not connect by ping: " + err.Error())
 		return nil, err
 	}
 
@@ -149,7 +152,7 @@ func OpenMongoDB() (*MongoDB, error) {
 	//fmt.Printf("Client: %s\n", spew.Sdump(client))
 
 	DB.Collection = DB.Client.Database(DB.DatabaseName).Collection(GetDbField("collection"))
-	fmt.Printf("vsmongo:147 - DBOpen -- took %d ms\n", time.Since(startTime).Milliseconds())
+	fmt.Printf("vsmongo:153 - DBOpen -- took %d ms\n", time.Since(startTime).Milliseconds())
 	return &DB, err
 }
 
@@ -157,9 +160,10 @@ func DBUrl() string {
 
 	//cacheDB := os.Getenv("CACHE_DB")
 	var err error
-	fmt.Printf("vsmongo.DBUrl:157 - GetDatabaseByName\n")
+	log.Info(" GetDatabaseByName Conf: " + spew.Sdump(Conf))
 	dbConnector, err = common.GetDatabaseByName(Conf.DataConnectors, "mongo")
 	if err != nil {
+		log.Info("GetDatabaseByName error: " + err.Error())
 		return ""
 	}
 	//fmt.Printf("vsmongo.DBUrl:162 - GotDataConnector: %s\n", spew.Sdump(dbConnector))
@@ -178,7 +182,8 @@ func ConnectToMongoDB() (*MongoDB, error) {
 	// fmt.Printf("Using database: %s\n", coreDB)
 	url := DBUrl()
 	if url == "" {
-		log.Panic("coreDB is not defined. Should contain the name of the actual Database to use\n")
+		log.Error("coreDB is not defined. Should contain the name of the actual Database to use")
+		panic("coreDB is not defined")
 	}
 
 	fmt.Printf("Use DB URL: %s\n", url)
@@ -242,7 +247,7 @@ func GetCollection(collection string) (*mongo.Collection, error) {
 	db, err := Current() //"mongodb://admin:Sacj0nhat1@cat.vertisoft.com:27017")
 	if err != nil {
 		fmt.Printf("Current DB returned error: %s\n", err)
-		log.Fatal(err)
+		log.Fatal(err.Error())
 		//return nil, err
 	}
 	client := db.Client

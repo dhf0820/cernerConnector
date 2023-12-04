@@ -18,6 +18,7 @@ import (
 	//"github.com/samply/golang-fhir-models/fhir-models/fhir"
 	common "github.com/dhf0820/uc_core/common"
 	log "github.com/dhf0820/vslog"
+
 	//"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -39,8 +40,8 @@ func SavePatient(mrn string, cp *common.ConnectorPayload, JWToken string) (*http
 	var patient fhir.Patient
 	patBytes := []byte{}
 	//var err error
-	if cp.SavePayload.RawResource != nil { // Actual patient is provided use it
-		patBytes = cp.SavePayload.RawResource
+	if cp.SavePayload.SrcResource != nil { // Actual patient is provided use it
+		patBytes = cp.SavePayload.SrcResource
 	} else {
 		return nil, fmt.Errorf("No patient information provided.")
 	}
@@ -245,12 +246,12 @@ func CreateIdentifier(id string) fhir.Identifier {
 // }
 
 func GetPatient(patId string) (*fhir.Patient, error) {
-	fmt.Printf("GetPatient:190  -- retrieving a patient by id: %s\n", patId)
+	log.Debug3("-- retrieving a patient by id: " + patId)
 
-	filter := bson.D{{"id", patId}}
+	filter := bson.M{"id": patId}
 	collection, _ := GetCollection("Patients")
 	pat := &fhir.Patient{}
-	fmt.Printf("GetPatient:195  --  Calling FindOne with Filter: %v\n", filter)
+	fmt.Printf("GetPatient:195  --  Calling FindOne with Filter: " + filter)
 	err := collection.FindOne(context.TODO(), filter).Decode(pat) // See if the user already has a session
 	if err != nil {
 		fmt.Printf("GetPatient:198  -- FindOne error: %s\n", err.Error())

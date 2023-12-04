@@ -205,17 +205,16 @@ func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, t
 func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query, JWToken string) (int64, *fhir.Bundle, *common.CacheHeader, error) {
 	page := 1
 	connConfig := connPayLoad.ConnectorConfig
-	//systemCfg := connPayLoad.System
-	fmt.Printf("FindResource:81	 --  resource: %s\n", resource)
-	fmt.Printf("FindResource:82	 --  query: %s\n", query)
+	systemCfg := connPayLoad.System
+	log.Debug3("resource: " + resource)
+	log.Debug3("query: " + query)
 	fullQuery := fmt.Sprintf("%s?%s", resource, query)
 	//fmt.Printf("FindRecource:84  --  ConectorPayload: %s\n", spew.Sdump(connPayLoad))
-	fmt.Printf("\n\n@@@@@@FindResource:85  --  Resource: %s\n", resource)
-	fmt.Printf("FindResource:86  --  UserId: %s\n", userId)
-	fmt.Printf("FindResource:88  --  fullQuery: %s\n", fullQuery)
+	log.Debug3("UserId: " + userId)
+	log.Debug3("fullQuery: " + fullQuery)
 	// fmt.Printf("FindResource:87  --  FhirSystem: %s\n", spew.Sdump(fhirSystem))
 
-	fmt.Printf("FindResource:89  -- Page: %d\n", page)
+	//log.Debug3("FindResource:89  -- Page: %d\n", page)
 	//fmt.Printf("FindResource:90  --  ConnectorConfig: %s\n", spew.Sdump(connConfig))
 	//fmt.Printf("FindResource:91  --  query: %s\n", query)
 
@@ -257,8 +256,8 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	//fmt.Printf("\n\n\n\n$$$ FindResource:110 calling CacheResourceBundleAndEntries (without bundle) - %s \n", spew.Sdump(cacheBundle))
 	//fmt.Printf("FindResource:126  --  bundle = %s\n", spew.Sdump(bundle))
 	//Cache the first bundle(page)
-	fmt.Printf("\n\n FindResource:128  --  Query %s for %ss took %s\n\n\n", connPayLoad.ConnectorConfig.Label, resource, time.Since(startTime))
-	fmt.Printf("FindResource:129 --  UnmarshalBundle\n\n")
+	log.Debug3(fmt.Sprintf("Query %s for %ss took %s", connPayLoad.ConnectorConfig.Label, resource, time.Since(startTime)))
+	log.Debug3("UnmarshalBundle")
 	// bundle := fhir4.Bundle{}
 	// bundle, err = fhir4.UnmarshalBundle(byte)
 	// if err != nil {
@@ -266,35 +265,38 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	// }
 	cacheBundle.Bundle = bundle
 	startTime = time.Now()
-	// pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
-	// fmt.Printf("FindResource:131 CacheResource returned %d %ss in page: %d for %s  took %s\n", len(cacheBundle.Bundle.Entry), resource, page, systemCfg.DisplayName, time.Since(startTime))
-	// if err != nil {
-	// 	//return err and done
-	// 	return int64(pg + 1), bundle, cacheBundle.Header, err
-	// }
-	// fmt.Printf("FindResource:143  --  links: %s\n", spew.Sdump(bundle.Link))
-	// //Follow the bundle links to retrieve all bundles(pages) in the query response
-	// nextURL := GetNextResourceUrl(bundle.Link)
-	// total := int64(0)
-	// if nextURL == "" {
-	// 	msg := fmt.Sprintf("FindResource:147 -- GetNext%sUrl initialy No Next - One page only ", resource)
-	// 	fmt.Println(msg)
-	// 	total, err = TotalCacheForQuery(cacheBundle.QueryId)
-	// 	cacheBundle.Header.PageId = pg
-	// 	//page++
-	// 	return int64(pg), bundle, cacheBundle.Header, err
-	// }
-	// page++
-	// go c.GetNextResource(header, nextURL, resource, JWToken, page)
-	fmt.Printf("FindResource:157  --  Page 1 total time: %s\n", time.Since(startTime))
+	pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
+	log.Debug3(fmt.Sprintf("CacheResource returned %d %ss in page: %d for %s  took %s\n", len(cacheBundle.Bundle.Entry), resource, page, systemCfg.DisplayName, time.Since(startTime)))
+	if err != nil {
+		//return err and done
+		return int64(pg + 1), bundle, cacheBundle.Header, err
+	}
+	fmt.Printf("FindResource:143  --  links: %s\n", spew.Sdump(bundle.Link))
+	//Follow the bundle links to retrieve all bundles(pages) in the query response
+	nextURL := GetNextResourceUrl(bundle.Link)
+	total := int64(0)
+	if nextURL == "" {
+		log.Debug3("-- GetNext" + resource + " initialy No Next - One page only ")
+
+		total, err = TotalCacheForQuery(cacheBundle.QueryId)
+		cacheBundle.Header.PageId = pg
+		//page++
+		log.Debug3("total: " + fmt.Sprint(total))
+		return int64(pg), bundle, cacheBundle.Header, err
+	}
+	page++
+	go c.GetNextResource(header, nextURL, resource, JWToken, page)
+	log.Debug3(fmt.Sprintf("Page 1 total time: %s", time.Since(startTime)))
 	// There is one full page and possibley more. Respond with two aso they user will create two page buttons and update every
 	// 10 secnds.
 	//return int64(page), bundle, cacheBundle.Header, err
+	if bundle == nil {
+		return 0, nil, nil, log.Errorf("Bundle is nil")
+	}
 	if len(bundle.Entry) == 0 {
 		return 0, bundle, cacheBundle.Header, log.Errorf("No resources found")
 	} else {
 		return int64(len(bundle.Entry)), bundle, cacheBundle.Header, err
-
 	}
 	return 0, bundle, cacheBundle.Header, err
 }

@@ -1,10 +1,10 @@
 version: "3.7"
 
 services:
-  cerner_connector:
-    image: dhf0820/cerner_connector:230927.1    #dhf0820/uc_ca3_arm64:220925.0
+  cernerConnector:
+    image: dhf0820/cerner_connector:231126.2    #dhf0820/uc_ca3_arm64:220925.0
     ports:
-      - "0.0.0.0:40103:9200"
+      - "0.0.0.0:20103:9200"
     environment:
       LISTEN_PORT: 9200
       CONFIG_ADDRESS: "http://dev.vertisoft.com:30300/api/rest/v1"

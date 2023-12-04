@@ -3,11 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	//"io/ioutil"
 	"net/http"
 
+	"github.com/davecgh/go-spew/spew"
 	log "github.com/dhf0820/vslog"
+
 	//"github.com/sirupsen/logrus"
 
 	//"github.com/davecgh/go-spew/spew"
@@ -29,7 +32,13 @@ import (
 // ####################################### Response Writers Functions #######################################
 func WriteFhirOperationOutcome(w http.ResponseWriter, status int, resp *fhir.OperationOutcome) error {
 	w.Header().Set("Content-Type", "application/json")
-
+	//log.Debug3("resp: " + spew.Sdump(resp))
+	resResp := common.ResourceResponse{}
+	resResp.Status = status
+	resResp.ResourceType = "OperationOutcome"
+	resResp.Message = *resp.Issue[0].Details.Text
+	resResp.OpOutcome = resp
+	//resResp.OperationOutcome = resp
 	switch status {
 	case 200:
 		w.WriteHeader(http.StatusOK)
@@ -42,9 +51,10 @@ func WriteFhirOperationOutcome(w http.ResponseWriter, status int, resp *fhir.Ope
 	default:
 		w.WriteHeader(status)
 	}
-	err := json.NewEncoder(w).Encode(resp)
+	log.Debug3("resResp: " + spew.Sdump(resResp))
+	err := json.NewEncoder(w).Encode(resResp)
 	if err != nil {
-		fmt.Println("WriteFhirOperationOutcome:42  --  Error marshaling JSON:", err)
+		log.Error("WriteFhirOperationOutcome  Error marshaling JSON:" + err.Error())
 		return err
 	}
 	return nil
@@ -194,20 +204,28 @@ func WriteFhirResponse(w http.ResponseWriter, status int, resp *common.ResourceR
 //################################### FHIR Responses ####################################
 
 func CreateOperationOutcome(code fhir.IssueType, severity fhir.IssueSeverity, details *string) *fhir.OperationOutcome {
+	log.Debug3(fmt.Sprintf("Code: %s   Error Message : %s", code, *details))
 	log.ErrMsg(fmt.Sprintf("Code: %s   Error Message : %s", code, *details))
-	s := *details
+	parts := strings.Split(*details, "--")
+	fmt.Printf("\n\n")
+	log.Debug3("Parts : " + spew.Sdump(parts))
+	fmt.Printf("\n\n")
+	t := parts[len(parts)-1]
+
+	s := fmt.Sprintf("Query: %s -- %s", QueryString, *details)
 	outcome := fhir.OperationOutcome{}
 	issue := fhir.OperationOutcomeIssue{}
 	issue.Code = code
 	issue.Severity = severity
 	issue.Details = &fhir.CodeableConcept{}
-	issue.Details.Text = &s
+	issue.Details.Text = &t
+	issue.Diagnostics = &s
 	outcome.Issue = append(outcome.Issue, issue)
 	return &outcome
 }
 
 func CreateOpOutcome(srcIssues []fhir.OperationOutcomeIssue) *fhir.OperationOutcome {
-	fmt.Printf("CreateOpOutcome:192  --  Error Message : %s\n", *srcIssues[0].Details.Text)
+	log.Debug3("--  Error Message : %s" + *srcIssues[0].Details.Text)
 	//s := *details
 	outcome := fhir.OperationOutcome{}
 	outcome.Issue = srcIssues

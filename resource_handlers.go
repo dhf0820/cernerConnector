@@ -15,7 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	// //"os"
-	"strconv"
+	//"strconv"
 	"strings"
 	"time"
 
@@ -479,6 +479,8 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("findResource:475  --  uri: %s\n", uri)
 	fmt.Printf("findResource:476  --  URL.Path() = %s\n", r.URL.Path)
 	fmt.Printf("findResource:477  --  query = %s\n", r.URL.RawQuery)
+	QueryString = r.URL.RawQuery
+	log.Debug3("QueryString: " + QueryString)
 	//r.URL.RawQuery
 	// uri = parts[1]
 	// // p0 := parts[1]
@@ -676,22 +678,26 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	log.Debug3(" - FindResource returned")
 	finalStatus := status
 	if err != nil {
-		errMsg := fmt.Sprintf("findResource:678 - fhirSearch url: %s  error:  %s", url, err.Error())
+		errMsg := log.ErrMsg(fmt.Sprintf("error:  %s", err.Error()))
 		fmt.Println(errMsg)
-		errParts := strings.Split(err.Error(), "|")
-		log.Debug3(" - errParts = " + spew.Sdump(errParts))
-		if len(errParts) > 1 { //Not a valid error message
-			errMsg = errParts[1]
-			finalStatus, err = strconv.Atoi(errParts[0])
-			if err != nil {
-				finalStatus = 413
-			}
-			log.Debug3("finalStatus: " + fmt.Sprint(finalStatus))
-		}
-		WriteFhirOperationOutcome(w, finalStatus, CreateOperationOutcome(fhir.IssueTypeNotFound, fhir.IssueSeverityInformation, &errMsg))
+		// errParts := strings.Split(err.Error(), "|")
+		// log.Debug3(" - errParts = " + spew.Sdump(errParts))
+		// if len(errParts) > 1 { //Not a valid error message
+		// 	errMsg = errParts[1]
+		// 	finalStatus, err = strconv.Atoi(errParts[0])
+		// 	if err != nil {
+		// 		finalStatus = 413
+		// 	}
+		// 	log.Debug3("finalStatus: " + fmt.Sprint(finalStatus))
+		// }
+		oo := CreateOperationOutcome(fhir.IssueTypeNotFound, fhir.IssueSeverityInformation, &errMsg)
+		//log.Debug3("OpOutcome: " + spew.Sdump(oo))
+		WriteFhirOperationOutcome(w, finalStatus, oo)
+		//CreateOperationOutcome(fhir.IssueTypeNotFound, fhir.IssueSeverityInformation, &errMsg))
 		return
 	}
-	//}
+
+	//finalStatus = status
 	log.Debug3(fmt.Sprintf(" - Get %s bundle successful in %s", resourceType, time.Since(startTime)))
 	log.Debug3(fmt.Sprintf(" - Total Pages: %d", totalPages))
 	log.Debug3(fmt.Sprintf(" - Number in page: %d", len(bundle.Entry)))

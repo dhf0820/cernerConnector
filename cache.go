@@ -19,7 +19,8 @@ import (
 	//"time"
 
 	common "github.com/dhf0820/uc_core/common"
-	log "github.com/sirupsen/logrus"
+	log "github.com/dhf0820/vslog"
+	//"github.com/sirupsen/logrus"
 	//"github.com/samply/golang-fhir-models/fhir-models/fhir"
 	//fhir "github.com/dhf0820/fhir4"
 	//"go.mongodb.org/mongo-driver/bson"
@@ -70,9 +71,9 @@ import (
 // // sends bundle to cache which caches the Bundle  in BundleCache, then caches each entry in ResourceCacheCaches both the bundle and the individual entries cached in
 func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page int) (int, error) {
 	header := *cbdl.Header
-	fmt.Printf("CacheResourceBundleAndEntries:76  --  Starting for ResourceType: %s  Page: %d\n", header.ResourceType, page)
+	log.Debug3(fmt.Sprintf("--  Starting for ResourceType: %s  Page: %d", header.ResourceType, page))
 	//fmt.Printf("CacheResourceBundleAndEntries:77  -- Header = %s\n", spew.Sdump(header))
-	fmt.Printf("CacheResourceBundleAndEntries:78  == CashBase: %s\n", header.CacheBase)
+	log.Debug3("CashBase: " + header.CacheBase)
 	//fhirSystem := header.FhirSystem
 	// fhirSystem, err := GetFhirSystem(header.FhirSystem.Hex())
 	// if err != nil {
@@ -84,7 +85,7 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 	header.PageId = page
 	//header.CacheUrl = fmt.Sprintf("%s/ResourceCache/%s", CacheServer, header.QueryId)
 	//fmt.Printf("CacheResourceBundleAndEntries:89  --  CacheUrl = %s\n", header.CacheUrl)
-	fmt.Printf("CacheResourceBundleAndEntries:90  --  Number of Entries = %d\n", len(cbdl.Bundle.Entry))
+	log.Debug3("--  Number of Entries: " + fmt.Sprint(len(cbdl.Bundle.Entry)))
 	cacheBundle, err := json.Marshal(cbdl)
 	if err != nil {
 		err = fmt.Errorf("CacheResourceBundleAndEntries:93  -- Error marshaling CacheBundle into json: %s", err.Error())
@@ -113,11 +114,11 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 		return 0, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		err = fmt.Errorf("CacheResourceBundleAndEntries:109  -- Invalid uc_ache Status: %d  --  %s", resp.StatusCode, resp.Status)
+		err = log.Errorf("-- Invalid uc_ache Status: " + resp.Status)
 		fmt.Printf("\n%s\n\n\n", err.Error())
 		return 0, err
 	}
-	log.Printf("CacheResourceBundleAndEntries:121  --  Bundle Sent to uc_cache Successful\n")
+	log.Debug3("--  Bundle Sent to uc_cache Successful")
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		err = fmt.Errorf("CacheResourceBundleAndEntries:124  --  ReadAllBody : error: %s\n", err.Error())

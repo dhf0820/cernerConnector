@@ -22,9 +22,11 @@ var err error
 var version string
 var Mode string
 var Env string
+var ResponseType string
+var QueryString string
 
 func main() {
-	version = "231009.0"
+	version = "231203.0"
 	log.SetDebuglevel("DEBUG3")
 	log.Info("run mode: " + os.Getenv("MODE"))
 	switch os.Getenv("MODE") {

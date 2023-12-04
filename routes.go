@@ -40,6 +40,43 @@ var routes = Routes{
 	// 	//getPatient,
 	// },
 	Route{
+		"FindDiagnosticReports",
+		"GET",
+		"/api/rest/v1/DiagnosticReport",
+		findDiagnosticRept,
+	},
+	Route{
+		"GetDiagnosticReport",
+		"GET",
+		"/api/rest/v1/{Resource}/{resourceId}",
+		getDiagnosticRept,
+	},
+	Route{
+		"FindObservation",
+		"GET",
+		"/api/rest/v1/Observation",
+		findObservation,
+	},
+	Route{
+		"GetObservation",
+		"GET",
+		"/api/rest/v1/Observation/{resourceId}",
+		getObservation,
+	},
+	Route{
+		"FindConditions",
+		"GET",
+		"/api/rest/v1/Condition",
+		findCondition,
+	},
+	Route{
+		"GetCondition",
+		"GET",
+		"/api/rest/v1/Condition/{resourceId}",
+		getCondition,
+	},
+
+	Route{
 		"GetNutritionOrder",
 		"GET",
 		"/api/rest/v1/NutritionOrder/{resourceId}",
@@ -67,7 +104,13 @@ var routes = Routes{
 		"FindDocumentReferences",
 		"GET",
 		"/api/rest/v1/DocumentReference",
-		findResource,
+		findDocumentReference,
+	},
+	Route{
+		"GetDocumentReferences",
+		"GET",
+		"/api/rest/v1/DocumentReference/{resourceId}",
+		findDocumentReference,
 	},
 	Route{
 		"FindCoverage",
@@ -88,35 +131,12 @@ var routes = Routes{
 		getResource,
 	},
 	Route{
-		"FindDiagnosticReports",
-		"GET",
-		"/api/rest/v1/DiagnosticReport",
-		findResource,
-	},
-	Route{
-		"GetDiagnosticReport",
-		"GET",
-		"/api/rest/v1/{Resource}/{resourceId}",
-		getResource,
-	},
-	Route{
 		"FindEncounters",
 		"GET",
 		"/api/rest/v1/Encounter",
 		findResource,
 	},
-	Route{
-		"FindConditions",
-		"GET",
-		"/api/rest/v1/Condition",
-		findResource,
-	},
-	Route{
-		"GetCondition",
-		"GET",
-		"/api/rest/v1/Condition/{resourceId}",
-		getResource,
-	},
+
 	Route{
 		"FindResource",
 		"GET",

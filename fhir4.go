@@ -197,42 +197,63 @@ func (c *Connection) GetFhir(qry string, resourceType, token string) (json.RawMe
 	}
 	return nil, log.Errorf("Response body is nil ")
 }
+
+func (c *Connection) GetFhirReq(req *http.Request) (*http.Response, error) {
+	req.Header.Set("Accept", "application/json+fhir")
+	resp, err := c.client.Do(req)
+	if err != nil {
+		log.Error("--  !!!fhir query returned err: " + err.Error())
+		return nil, err
+	}
+
+	return resp, err
+}
+
 func (c *Connection) GetFhirBundle(url string, token string) (*fhir.Bundle, error) {
-	fmt.Printf("GetFhirBundle:162  --  BaseUrl - %s  add url: %s\n", c.BaseURL, url)
+	log.Debug3(fmt.Sprintf("--  BaseUrl - %s  add url: %s\n", c.BaseURL, url))
 	//besure first character of partial url is /
 	// if url[0:1] != "/" {
 	// 	url = "/" + url
 	// }
-	fmt.Printf("GetFhirBundle:167  --  url = %s\n", url)
 	fullUrl := c.BaseURL + "/" + url
-	log.Info("GetFhirBundle:169 FullURL Requested: " + fullUrl)
+	log.Info("GetFhirBundle FullURL Requested: " + fullUrl)
 	req, err := http.NewRequest("GET", fullUrl, nil)
 	if err != nil {
-		logrus.Errorf("GetFhirBundle:172  --  !!!NewRequest failed: %s\n", err.Error())
+		log.Error("--  !!!NewRequest failed: " + err.Error())
 		return nil, err
 	}
-	req.Header.Set("Accept", "application/json+fhir")
-	resp, err := c.client.Do(req)
+	log.Info("Calling c.GetFhirReq")
+	resp, err := c.GetFhirReq(req)
+	// req.Header.Set("Accept", "application/json+fhir")
+	// resp, err := c.client.Do(req)
 	if err != nil {
-		logrus.Errorf("GetFhirBundle:180  --  !!!fhir query returned err: %s\n", err)
+		log.Error("--  !!!fhir query returned err: " + err.Error())
 		return nil, err
+	}
+	log.Debug3("resp.StatusCode: " + fmt.Sprint(resp.StatusCode))
+	if resp.StatusCode == 401 {
+		defer resp.Body.Close()
+		byte, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, log.Errorf("--  Error Reading resp.Body: " + err.Error())
+		}
+		log.Debug3("body: " + string(byte))
+		return nil, log.Errorf("--401 unauthorized")
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		log.Error("GetFhirBundle returned error of " + fmt.Sprint(resp.StatusCode))
-		err = fmt.Errorf("%d|GetFhirBundle:186 %s", resp.StatusCode, resp.Status)
-		//log.Errorf("%s", err.Error())
+		log.Error("GetFhirBundle returned statusCode of " + fmt.Sprint(resp.StatusCode))
 		return nil, err
 	}
 	//tbundle := &fhir.Bundle{}
 	defer resp.Body.Close()
 	byte, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("GetFhirBundle:194  --  Error Decoding bundle: %s", err.Error())
+		return nil, log.Errorf("--  Error Reading resp.Body: " + err.Error())
 	}
+	//log.Debug3("body: " + string(byte))
 	bundle, err := fhir.UnmarshalBundle(byte)
 	if err != nil {
-		fmt.Printf("GetFhirBundle:198  --  Error Decoding bundle: %s\n", err.Error())
-		return nil, err
+		return nil, log.Errorf("--  Error Decoding bundle: " + err.Error())
 	}
 	//fmt.Printf("GetFhirBundle:201  --  Bundle =  %s\n", spew.Sdump(bundle))
 	// err = json.NewDecoder(resp.Body).Decode(&data)
