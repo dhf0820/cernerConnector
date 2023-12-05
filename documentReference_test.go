@@ -25,7 +25,7 @@ import (
 	//"time"
 
 	jw_token "github.com/dhf0820/jwToken"
-	common "github.com/dhf0820/uc_core/common"
+	common "github.com/dhf0820/uc_common"
 
 	//"github.com/dhf0820/uc_core/service"
 

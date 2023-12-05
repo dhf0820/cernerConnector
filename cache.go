@@ -18,7 +18,7 @@ import (
 
 	//"time"
 
-	common "github.com/dhf0820/uc_core/common"
+	common "github.com/dhf0820/uc_common"
 	log "github.com/dhf0820/vslog"
 	//"github.com/sirupsen/logrus"
 	//"github.com/samply/golang-fhir-models/fhir-models/fhir"

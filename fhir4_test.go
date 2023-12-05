@@ -24,7 +24,7 @@ import (
 //const baseurl = "https://open-ic.epic.com/FHIR/api/FHIR/DSTU2/"
 
 // const pid = "63ed93c8bd78ae6b013a502b"
-const baseurl = "http://universalcharts.com:4000/api/rest/v1"
+//const baseurl = "http://universalcharts.com:4000/api/rest/v1"
 
 func TestQuery(t *testing.T) {
 	fmt.Printf("Test run a FHIR query")

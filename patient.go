@@ -16,7 +16,7 @@ import (
 	fhir "github.com/dhf0820/fhir4"
 	//"github.com/dhf0820/uc_core/common"
 	//"github.com/samply/golang-fhir-models/fhir-models/fhir"
-	common "github.com/dhf0820/uc_core/common"
+	common "github.com/dhf0820/uc_common"
 	log "github.com/dhf0820/vslog"
 
 	//"github.com/sirupsen/logrus"
@@ -251,7 +251,7 @@ func GetPatient(patId string) (*fhir.Patient, error) {
 	filter := bson.M{"id": patId}
 	collection, _ := GetCollection("Patients")
 	pat := &fhir.Patient{}
-	fmt.Printf("GetPatient:195  --  Calling FindOne with Filter: " + filter)
+	fmt.Printf("GetPatient:195  --  Calling FindOne with Filter: %v", filter)
 	err := collection.FindOne(context.TODO(), filter).Decode(pat) // See if the user already has a session
 	if err != nil {
 		fmt.Printf("GetPatient:198  -- FindOne error: %s\n", err.Error())
@@ -278,7 +278,7 @@ func GetPatient(patId string) (*fhir.Patient, error) {
 	// return &patient, err
 }
 
-func PatientSearch(cp *common.ConnectorPayload, query, resource, token string) (*fhir.Bundle, error) {
+func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bundle, error) {
 	// fhirID, err := primitive.ObjectIDFromHex(fhirId)
 	// if err != nil {
 	// 	return nil, err

@@ -12,7 +12,7 @@ import (
 	"io"
 	"strings"
 
-	common "github.com/dhf0820/uc_core/common"
+	common "github.com/dhf0820/uc_common"
 	log "github.com/sirupsen/logrus"
 	// "go.mongodb.org/mongo-driver/bson"
 	// "go.mongodb.org/mongo-driver/bson/primitive"

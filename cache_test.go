@@ -2,8 +2,9 @@ package main
 
 import (
 	//"context"
-
+	"encoding/json"
 	fhir "github.com/dhf0820/fhir4"
+	"net/http"
 	//"github.com/samply/golang-fhir-models/fhir-models/fhir"
 	"fmt"
 	//"go.mongodb.org/mongo-driver/bson"
@@ -11,12 +12,14 @@ import (
 	"os"
 	"testing"
 	//"time"
+	"io"
+	"strings"
 
 	"github.com/davecgh/go-spew/spew"
 	//"github.com/dhf0820/token"
 	//"github.com/dhf0820/uc_core/util"
 
-	common "github.com/dhf0820/uc_core/common"
+	common "github.com/dhf0820/uc_common"
 	log "github.com/dhf0820/vslog"
 	. "github.com/smartystreets/goconvey/convey"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -31,18 +34,33 @@ const baseurl = "https://fhir-open.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af
 
 func TestPatientCache(t *testing.T) {
 	fmt.Printf("Test run a FHIR query")
-	c := New(baseurl, "application/json+fhir")
+	//c := New(baseurl, "application/json+fhir")
 	Convey("Run a query", t, func() {
 
-		caFhirId := "62f14531ba5395278cd530c4"
-		patient, err := c.GetPatient("375", caFhirId)
-		//bundle, err := c.PatientSearch(caFhirId, "family=smart")
+		//caFhirId := "62f14531ba5395278cd530c4"
+		//patient, err := c.GetPatient("375", caFhirId)
+		jwt, payload, err := jw_token.CreateTestJWToken("10s")
 		So(err, ShouldBeNil)
-		So(patient, ShouldNotBeNil)
+		So(jwt, ShouldNotBeNil)
+		So(payload, ShouldNotBeNil)
+		jwt = "Bearer " + jwt
+		req, err := http.NewRequest("GET", "system/640ba5e3bd4105586a6dda74/Patient?patient=12724067", nil)
+		So(err, ShouldBeNil)
+		So(req, ShouldNotBeNil)
+		req.Header.Set("Authorization", jwt)
+		cp := CreateCP(false)
+		cpb, err := json.Marshal(cp)
+		So(err, ShouldBeNil)
+		cps := string(cpb)
+		rc := io.NopCloser(strings.NewReader(cps))
+		req.Body = rc
+		bundle, err := PatientSearch(cp, "family=sm", jwt)
+		So(err, ShouldBeNil)
+		So(bundle, ShouldNotBeNil)
 		// data, err := c.Query("Patient/12724066")
 		// So(err, ShouldBeNil)
 		// So(data, ShouldNotBeNil)
-		pat, err := fhir4.UnmarshalPatient(bundle.Entry[0].Resource)
+		pat, err := fhir.UnmarshalPatient(bundle.Entry[0].Resource)
 		So(err, ShouldBeNil)
 		So(pat, ShouldNotBeNil)
 		fmt.Printf("PatientSearch returned: %s\n", spew.Sdump(pat))

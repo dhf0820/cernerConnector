@@ -8,9 +8,10 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	cm "github.com/dhf0820/baseConnector/common"
+
 	fhir "github.com/dhf0820/fhir4"
 	jw_token "github.com/dhf0820/jwToken"
-	common "github.com/dhf0820/uc_core/common"
+	common "github.com/dhf0820/uc_common"
 
 	//"github.com/gorilla/mux"
 
@@ -811,7 +812,7 @@ func findPatient(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Printf("findPatient:814  --  Calling patFilter.Find\n")
 	qry := r.URL.RawQuery
-	bundle, err := PatientSearch(cp, qry, "Patient", JWToken)
+	bundle, err := PatientSearch(cp, qry, JWToken)
 	if err != nil {
 		fmt.Printf("findPatient:818  -- PatientSearch returned err: %s\n", err.Error())
 		status := 400
