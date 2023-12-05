@@ -3,14 +3,13 @@ package main
 import (
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
 
 	//"github.com/davecgh/go-spew/spew"
 	fhir "github.com/dhf0820/fhir4"
 	//log "github.com/sirupsen/logrus"
-	//. "github.com/smartystreets/goconvey/convey"
 	"fmt"
+	. "github.com/smartystreets/goconvey/convey"
 	"os"
 	"strings"
 	"testing"
@@ -18,13 +17,12 @@ import (
 	//"time"
 
 	jw_token "github.com/dhf0820/jwToken"
-	common "github.com/dhf0820/uc_core/common"
+	common "github.com/dhf0820/uc_common"
 
 	"github.com/davecgh/go-spew/spew"
 	//"github.com/dhf0820/uc_core/util"
-
 	//log "github.com/sirupsen/logrus"
-	. "github.com/smartystreets/goconvey/convey"
+	//. "github.com/smartystreets/goconvey/convey"
 	//"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -55,7 +53,7 @@ func TestPostPatient(t *testing.T) {
 		So(payload, ShouldNotBeNil)
 		cp := CreateCP(true)
 		//cp.SavePayload.SrcPatient = SampleFhirPatient()
-		cp.SavePayload.RawResource = SamplePatient()
+		cp.SavePayload.SrcResource = SamplePatient()
 		cpb, err := json.Marshal(cp)
 		So(err, ShouldBeNil)
 		cps := string(cpb)
@@ -151,7 +149,7 @@ func TestPostDuplicatePatient(t *testing.T) {
 		So(payload, ShouldNotBeNil)
 		cp := CreateCP(true)
 		//cp.SavePayload.SrcPatient = SampleFhirPatient()
-		cp.SavePayload.RawResource = SamplePatient()
+		cp.SavePayload.SrcResource = SamplePatient()
 		cpb, err := json.Marshal(cp)
 		So(err, ShouldBeNil)
 		cps := string(cpb)
@@ -167,7 +165,7 @@ func TestPostDuplicatePatient(t *testing.T) {
 		resp := rr.Result()
 		fmt.Printf("TestPostDuplicatePatient:184  --  resp: %s\n", spew.Sdump(rr))
 		defer resp.Body.Close()
-		byte, err := ioutil.ReadAll(resp.Body)
+		byte, err := io.ReadAll(resp.Body)
 		So(err, ShouldBeNil)
 		patient := fhir.Patient{}
 		err = json.Unmarshal(byte, &patient)
