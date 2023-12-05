@@ -1,28 +1,22 @@
 package main
 
 import (
-	"encoding/json"
-	"io"
-	"net/http"
-
-	//"github.com/davecgh/go-spew/spew"
-	fhir "github.com/dhf0820/fhir4"
-	//log "github.com/sirupsen/logrus"
-	//. "github.com/smartystreets/goconvey/convey"
+	//"encoding/json"
+	//"io"
+	//"net/http"
 	"fmt"
-	"os"
-	"strings"
+	fhir "github.com/dhf0820/fhir4"
+	log "github.com/dhf0820/vslog"
+	//"os"
+	//"strings"
 	"testing"
 
-	//"time"
+	"time"
 
 	jw_token "github.com/dhf0820/jwToken"
 	common "github.com/dhf0820/uc_common"
 
 	"github.com/davecgh/go-spew/spew"
-	//"github.com/dhf0820/uc_core/util"
-
-	//log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 	//"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -315,12 +309,13 @@ func TestPatientSearch(t *testing.T) {
 		So(err, ShouldBeNil)
 		So(payload, ShouldNotBeNil)
 		So(jwt, ShouldNotBeNil)
-		cnt, bundle, header, err := FindResource(cp, "Patient", "dharman0127", "family=sm&_count=12", JWToken)
+		bundle, err := PatientSearch(cp, "family=sm&_count=12", jwt)
 		//bundle, err := c.PatientSearch(fhirSystem, "family=smart&_count=12", "patient", newToken)
-		So(header, ShouldNotBeNil)
-		So(cnt, ShouldNotEqual, 0)
+		// So(header, ShouldNotBeNil)
+		// So(cnt, ShouldNotEqual, 0)
 		So(err, ShouldBeNil)
 		So(bundle, ShouldNotBeNil)
+		cnt := len(bundle.Entry)
 		log.Debug3("TestPatientSearch returned " + fmt.Sprint(cnt) + " resources")
 		//fmt.Printf("PatientSearch returned: %s\n", spew.Sdump(bundle))
 		// data, err := c.Query("Patient/12724066")
@@ -330,7 +325,7 @@ func TestPatientSearch(t *testing.T) {
 		So(err, ShouldBeNil)
 		So(pat, ShouldNotBeNil)
 
-		//fmt.Printf("PatientSearch[0] returned: %s\n", spew.Sdump(pat))
+		log.Debug3("PatientSearch[0] returned: %s", spew.Sdump(pat))
 		fmt.Printf("Patient.ID := %s\n", *pat.Id)
 		time.Sleep(15 * time.Second)
 	})
