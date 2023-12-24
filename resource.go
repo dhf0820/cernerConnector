@@ -136,6 +136,7 @@ func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, t
 					return bodyBytes, log.Errorf("Response --  Error Decoding DocumentReference: " + err.Error())
 				}
 				log.Debug5("Response --  DocumentReference: " + spew.Sdump(docRef))
+				log.Debug3("Returning DocumentReference")
 				return bodyBytes, nil
 			case "diagnosticreport":
 				diagRept, err := fhir.UnmarshalDiagnosticReport(bodyBytes)

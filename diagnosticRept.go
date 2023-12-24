@@ -290,7 +290,7 @@ func getDiagnosticRept(w http.ResponseWriter, r *http.Request) {
 			WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityFatal, &errMsg))
 			return
 		}
-		log.Debug3(fmt.Sprintf("Resource %s   contains: %s", resourceType, spew.Sdump(data)))
+		//log.Debug3(fmt.Sprintf("Resource %s   contains: %s", resourceType, spew.Sdump(data)))
 		resp.ResourceType = resourceType
 		//resp.Resource.ResourceType = resourceType
 

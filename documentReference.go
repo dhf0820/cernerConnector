@@ -127,7 +127,8 @@ func findDocumentReference(w http.ResponseWriter, r *http.Request) {
 	resp.Header = header
 	resp.Message = "Ok"
 	logTime := time.Now()
-	log.Debug3(fmt.Sprintf("--  resp without bundle: " + spew.Sdump(resp)))
+	//log.Debug3(fmt.Sprintf("--  resp without bundle: " + spew.Sdump(resp)))
+
 	log.Debug3(fmt.Sprintf("--  Time to log = %s", time.Since(logTime)))
 	resp.Bundle = bundle
 	log.Debug3(fmt.Sprintf("--  Number of entries in bundle: %d", len(bundle.Entry)))
@@ -148,12 +149,15 @@ func getDocumentRef(w http.ResponseWriter, r *http.Request) {
 	resourceType := "DocumentReference"
 	log.Debug3("Starting get" + resourceType)
 	JWToken = r.Header.Get("Authorization")
-	_, status, err := jw_token.ValidToken(JWToken)
+	payload, err := jw_token.VerifyToken(JWToken)
 	if err != nil {
 		errMsg := err.Error()
+		fmt.Printf("getDocumentRef:  --  Error: %s\n", errMsg)
+		status := 401
 		WriteFhirOperationOutcome(w, status, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
+	log.Debug3("payload: " + spew.Sdump(payload))
 	params := mux.Vars(r)
 	// Resource := DetermineGetResource(r.URL.Path, "/")
 	resourceId := params["resourceId"]
@@ -223,7 +227,7 @@ func getDocumentRef(w http.ResponseWriter, r *http.Request) {
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityError, &errMsg))
 		return
 	}
-	log.Debug3("Basic Resource: " + spew.Sdump(basicResource))
+	log.Debug5("Basic Resource: " + spew.Sdump(basicResource))
 	resourceType = basicResource.ResourceType
 	//TODO: unmarshal into a basic fhir resource (id, text)
 	log.Debug3("FillResourceResponse for " + strings.ToLower(resourceType))
@@ -234,7 +238,7 @@ func getDocumentRef(w http.ResponseWriter, r *http.Request) {
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
-	log.Debug3(fmt.Sprintf("Resource %s   contains: %s", resourceType, spew.Sdump(data)))
+	log.Debug5(fmt.Sprintf("Resource %s   contains: %s", resourceType, spew.Sdump(data)))
 	resp.ResourceType = resourceType
 	//resp.Resource.ResourceType = resourceType
 
@@ -341,7 +345,7 @@ func FindDocumentReference(connPayLoad *common.ConnectorPayload, userId, query, 
 	log.Debug3("--  query: " + query)
 	//fullQuery := fmt.Sprintf("/%s?%s", resource, query)
 	//fmt.Printf("FindRecource:84  --  ConectorPayload: %s\n", spew.Sdump(connPayLoad)))
-	log.Debug3("--  UserId: " + userId)
+	//log.Debug3("--  UserId: " + userId)
 	//log.Debug3("--  fullQuery: " + fullQuery)
 	//log.Debug3("-- Page: %d\n", page)
 	//fmt.Printf("FindResource:90  --  ConnectorConfig: %s\n", spew.Sdump(connConfig))
@@ -353,7 +357,7 @@ func FindDocumentReference(connPayLoad *common.ConnectorPayload, userId, query, 
 	// check every 10 seconds.  Should be a FhirSystem variable value to avoid code change
 	c := New(connPayLoad.ConnectorConfig.HostUrl, "application/json")
 	startTime := time.Now()
-	log.Debug3("")
+
 	bundle, err := c.GetFhirBundle(query, JWToken)
 	if err != nil {
 		// msg := log.ErrMsg("GetNextResource error: " + err.Error())
@@ -365,7 +369,10 @@ func FindDocumentReference(connPayLoad *common.ConnectorPayload, userId, query, 
 	// if err != nil {
 	// 	return 0, nil, nil, err
 	// }
-	log.Debug5("bundle: " + spew.Sdump(bundle))
+	enteries := len(bundle.Entry)
+
+	log.Debug3("--  Number of entries in bundle: " + fmt.Sprint(enteries))
+	//log.Debug5("bundle: " + spew.Sdump(bundle))
 	header := &common.CacheHeader{}
 	header.SystemCfg = connPayLoad.System
 	header.ResourceType = resourceType
@@ -373,7 +380,7 @@ func FindDocumentReference(connPayLoad *common.ConnectorPayload, userId, query, 
 	header.PageId = page
 	queryId := primitive.NewObjectID().Hex()
 	header.QueryId = queryId
-	log.Debug3("connConfig: " + spew.Sdump(connConfig))
+	//log.Debug3("connConfig: " + spew.Sdump(connConfig))
 	header.CacheBase = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
 	log.Debug3("Header:" + spew.Sdump(header))
 	//header.ResourceCacheBase = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
@@ -394,7 +401,7 @@ func FindDocumentReference(connPayLoad *common.ConnectorPayload, userId, query, 
 	// if err != nil {
 	// 	return 0, nil, nil, err
 	// }
-	log.Debug5("bundle: " + spew.Sdump(bundle))
+	//log.Debug5("bundle: " + spew.Sdump(bundle))
 	cacheBundle.Bundle = bundle
 	startTime = time.Now()
 	log.Debug3("calling CaacheResourceBundleAndEntries")
@@ -408,6 +415,7 @@ func FindDocumentReference(connPayLoad *common.ConnectorPayload, userId, query, 
 	log.Debug3("--  links: " + spew.Sdump(bundle.Link))
 	//Follow the bundle links to retrieve all bundles(pages) in the query response
 	nextURL := GetNextDocumentReferenceUrl(bundle.Link)
+	log.Debug3("--  nextURL: " + nextURL)
 	total := int64(0)
 	if nextURL == "" {
 		log.Debug3("-- Get" + resourceType + "Url contains no next - One page only")
@@ -418,9 +426,11 @@ func FindDocumentReference(connPayLoad *common.ConnectorPayload, userId, query, 
 		return int64(pg), bundle, cacheBundle.Header, err
 	}
 	page++
-	log.Debug3("Calling c.GetNextDocumentReference")
-	go c.GetNextDocumentReference(header, nextURL, JWToken, page)
-	log.Debug3("--  Page 1 total time: " + fmt.Sprint(time.Since(startTime)))
+	fmt.Printf("\n\n\n\n\n\n\n")
+	log.Debug3("Calling c.GetNextDocumentReference for page " + fmt.Sprint(page))
+	c.GetNextDocumentReference(header, nextURL, JWToken, page)
+	//go c.GetNextDocumentReference(header, nextURL, JWToken, page)
+	log.Debug3("--  Page: " + fmt.Sprint(page) + " total time: " + fmt.Sprint(time.Since(startTime)))
 	// There is one full page and possibley more. Respond with two aso they user will create two page buttons and update every
 	// 10 secnds.
 	//return int64(page), bundle, cacheBundle.Header, err
@@ -482,7 +492,9 @@ func (c *Connection) GetNextDocumentReference(header *common.CacheHeader, url, t
 		//return int64(pg + 1), &bundle, cacheBundle.Header, err
 	}
 
-	log.Debug3("--  GetNextDocumentRefeerenceUrl")
+	log.Debug3("--  GetNextDocumentReferenceUrl")
+	log.Debug3("--  links: " + spew.Sdump(bundle))
+	fmt.Printf("\n\n\n\n\n\n\n")
 	nextURL := GetNextDocumentReferenceUrl(bundle.Link)
 	if nextURL == "" {
 		msg := fmt.Sprintf("GetNextResourceUrl Last page had %d Resources processed ", len(bundle.Entry))
@@ -490,9 +502,10 @@ func (c *Connection) GetNextDocumentReference(header *common.CacheHeader, url, t
 		log.Debug3("--  Should return:  " + msg)
 		return
 	} else {
-		log.Debug3("-- GetNextDocumentReference is being called in the background")
+		log.Debug3("-- go c.GetNextDocumentReference is being called in the background")
 		go c.GetNextDocumentReference(header, nextURL, token, pg+1)
-		log.Debug3("GetNextDocumentReference Returned")
+		//c.GetNextDocumentReference(header, nextURL, token, pg+1)
+		log.Debug3("go c.GetNextDocumentReference Returned")
 	}
 	log.Debug3("GetNextDocumentReference is returning")
 }

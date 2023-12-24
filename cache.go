@@ -46,6 +46,7 @@ type ResourceResponse struct {
 func CacheResourceBundleElements(ctx context.Context, userId,
 	patientId string, sysConfig *common.SystemConfig, bundle *fhir.Bundle,
 	resourceType string) error {
+	log.Debug3("CacheResourceBundleElements: --  Is not implemented")
 	return log.Errorf("CacheResourceBundleElements:  --  Not implemented")
 
 	// var lastError error
@@ -88,7 +89,7 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 	header.PageId = page
 	//header.CacheUrl = fmt.Sprintf("%s/ResourceCache/%s", CacheServer, header.QueryId)
 	//fmt.Printf("CacheResourceBundleAndEntries:89  --  CacheUrl = %s\n", header.CacheUrl)
-	log.Debug3("CacheResourceBundleAndEntries --  Number of Entries: " + fmt.Sprint(len(cbdl.Bundle.Entry)))
+	//log.Debug3("CacheResourceBundleAndEntries --  Number of Entries: " + fmt.Sprint(len(cbdl.Bundle.Entry)))
 	cacheBundle, err := json.Marshal(cbdl)
 	if err != nil {
 		err = log.Errorf("-- Error marshaling CacheBundle into json: " + err.Error())

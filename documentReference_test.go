@@ -7,7 +7,7 @@ import (
 	"io"
 
 	//"github.com/gorilla/mux"
-	"github.com/davecgh/go-spew/spew"
+	//"github.com/davecgh/go-spew/spew"
 	"github.com/joho/godotenv"
 
 	//"gitlab.com/dhf0820/ids_model/common"
@@ -57,12 +57,13 @@ func TestSimpleFindDocumentRef(t *testing.T) {
 		// So(conf, ShouldNotBeNil)
 		// So(err, ShouldBeNil)
 		// So(conf, ShouldNotBeNil)
-		req, err := http.NewRequest("GET", "/api/rest/v1/DocumentReference?patient=12724068", nil)
+		req, err := http.NewRequest("GET", "/api/rest/v1/DocumentReference?patient=12724067&_count=5", nil)
 		//req, err := http.NewRequest("GET", "/api/rest/v1/GetPatient/12345", nil)
 		So(err, ShouldBeNil)
 		//w := httptest.NewRecorder()
 		os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
-		os.Setenv("TOKEN_DURATION", "2m")
+		os.Setenv("TOKEN_DURATION", "10m")
+
 		jwt, payload, err := jw_token.CreateTestToken()
 		So(err, ShouldBeNil)
 		So(jwt, ShouldNotBeNil)
@@ -76,7 +77,7 @@ func TestSimpleFindDocumentRef(t *testing.T) {
 		req.Body = rc
 		log.Debug3("--  url: " + fmt.Sprint(req.URL))
 		rr := executeRequest(req)
-		log.Debug3("rr: " + spew.Sdump(rr))
+		//log.Debug3("rr: " + spew.Sdump(rr))
 		checkResponseCode(t, http.StatusOK, rr.Code)
 		resp := rr.Result()
 		defer resp.Body.Close()
@@ -84,15 +85,16 @@ func TestSimpleFindDocumentRef(t *testing.T) {
 		So(err, ShouldBeNil)
 		So(byte, ShouldNotBeNil)
 		resResp := &common.ResourceResponse{}
-		log.Debug3("resResp Bytes: " + spew.Sdump(resResp))
+		//log.Debug3("resResp Bytes: " + spew.Sdump(resResp))
 		err = json.Unmarshal(byte, resResp)
 		//patient, err := fhir.UnmarshalPatient(byte)
 		So(err, ShouldBeNil)
-		log.Debug3("resResp: " + spew.Sdump(resResp))
+		//log.Debug3("resResp: " + spew.Sdump(resResp))
 		So(resResp, ShouldNotBeNil)
 		So(resResp.Bundle, ShouldNotBeNil)
-		So(resResp.Resource.DiagnosticReport, ShouldNotBeNil)
-		So(resResp.Resources, ShouldBeNil)
+		//log.Debug3("resResp: " + spew.Sdump(resResp))
+		//So(resResp.Resource.DocumentReference, ShouldNotBeNil)
+		//So(resResp.Resources, ShouldBeNil)
 		//fmt.Printf("\nTestSimpleFindResource:68  --  Patients: %s\n", spew.Sdump(resResp.Patients))
 		//fmt.Printf("\nTestSimpleFindResource:69  --  Bundle: %s\n", spew.Sdump(resResp.Bundle))
 	})

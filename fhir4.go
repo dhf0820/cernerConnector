@@ -210,12 +210,18 @@ func (c *Connection) GetFhirReq(req *http.Request) (*http.Response, error) {
 }
 
 func (c *Connection) GetFhirBundle(url string, token string) (*fhir.Bundle, error) {
-	log.Debug3(fmt.Sprintf("--  BaseUrl: %s  add url: %s\n", c.BaseURL, url))
+	fullUrl := ""
+	if strings.Contains(url, "https") {
+		fullUrl = url
+	} else {
+		fullUrl = c.BaseURL + "/" + url
+	}
+
 	//besure first character of partial url is /
 	// if url[0:1] != "/" {
 	// 	url = "/" + url
 	// }
-	fullUrl := c.BaseURL + "/" + url
+
 	log.Info("GetFhirBundle FullURL Requested: " + fullUrl)
 	req, err := http.NewRequest("GET", fullUrl, nil)
 	if err != nil {
@@ -287,7 +293,7 @@ func (c *Connection) GetFhirBundle(url string, token string) (*fhir.Bundle, erro
 //	}
 //
 // Query sends a query to the base url
-func (c *Connection) QueryBundle(q string, token string) (*fhir.Bundle, error) {
+func (c *Connection) QueryBundle(q, token string) (*fhir.Bundle, error) {
 	fmt.Printf("\n\n\n\nQueryBundle:233  --  BaseUrl: %s  -  Query param: %s\n\n\n\n", c.BaseURL, q)
 	if q == "" {
 		return nil, fmt.Errorf("c.QueryBundle:231  --  query parameter missing")
