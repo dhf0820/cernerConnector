@@ -2,34 +2,33 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+
+	fhir "github.com/dhf0820/fhir4"
+	jw_token "github.com/dhf0820/golangJWT"
+
+	//jw_token "github.com/dhf0820/jwToken"
 	"io"
 	"net/http"
-
-	//"github.com/davecgh/go-spew/spew"
-	fhir "github.com/dhf0820/fhir4"
-	//log "github.com/sirupsen/logrus"
-	"fmt"
-	. "github.com/smartystreets/goconvey/convey"
 	"os"
 	"strings"
 	"testing"
 
-	//"time"
-
-	jw_token "github.com/dhf0820/jwToken"
 	common "github.com/dhf0820/uc_common"
+	log "github.com/dhf0820/vslog"
+
+	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	//"github.com/dhf0820/uc_core/util"
-	//log "github.com/sirupsen/logrus"
-	//. "github.com/smartystreets/goconvey/convey"
+	"github.com/joho/godotenv"
+	. "github.com/smartystreets/goconvey/convey"
 	//"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestPostPatient(t *testing.T) {
 	fmt.Printf("Test Add a new patient to Server")
 	//c := New(baseurl)
-
+	log.SetDebuglevel("DEBUG3")
 	Convey("PostNewPatient", t, func() {
 		fmt.Printf("\n\n\nPostNewPatient:  --  Start\n")
 
@@ -42,12 +41,13 @@ func TestPostPatient(t *testing.T) {
 		// So(mongodb, ShouldNotBeNil)
 		//conf, err := Initialize()
 		So(err, ShouldBeNil)
+
 		//caFhirId := "62d0ad3c9d0119afff9978b3"
 		//cerFhirId := "62f1c5dab3070d0b40e7aac1"
 		err = os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
 		So(err, ShouldBeNil)
-
-		newToken, payload, err := jw_token.CreateTestJWToken("10s")
+		os.Setenv("TOKEN_DURATION", "10s")
+		newToken, payload, err := jw_token.CreateTestToken()
 		So(err, ShouldBeNil)
 		So(newToken, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
@@ -67,7 +67,7 @@ func TestPostPatient(t *testing.T) {
 		rr := executeRequest(req)
 		checkResponseCode(t, http.StatusCreated, rr.Code)
 		resp := rr.Result()
-		fmt.Printf("TestPostNewPatient:80  --  resp: %s\n", spew.Sdump(resp))
+		//fmt.Printf("TestPostNewPatient:80  --  resp: %s\n", spew.Sdump(resp))
 		So(resp, ShouldNotBeNil)
 		So(resp.StatusCode, ShouldEqual, http.StatusCreated)
 
@@ -94,7 +94,7 @@ func TestPostPatient(t *testing.T) {
 		saveResp := common.SaveResponse{}
 
 		err = json.NewDecoder(resp.Body).Decode(&saveResp)
-		fmt.Printf("TestPostNewPatient:107  --  patient: %s\n", spew.Sdump(saveResp))
+		log.Debug3("--  patient: " + spew.Sdump(saveResp))
 		So(err, ShouldBeNil)
 		// err = json.Unmarshal(byte, &patient)
 		// if err != nil {
@@ -122,13 +122,36 @@ func TestPostPatient(t *testing.T) {
 		// fmt.Printf("\nTestPostNewPatient:107  --  Patient: %s\n", spew.Sdump(patient))
 		// location := baseUrl + "/system/640ba66cbd4105586a6dda75/Patient/" // + *patient.Id
 		// fmt.Printf("TestPostNewPatient:109  --  location: %s\n", location)
+		// =======
+		// 		So(payload, ShouldNotBeNil)
+		// 		So(jwt, ShouldNotBeNil)
+		// 		bundle, err := PatientSearch(cp, "family=sm&_count=12", jwt)
+		// 		//bundle, err := c.PatientSearch(fhirSystem, "family=smart&_count=12", "patient", newToken)
+		// 		// So(header, ShouldNotBeNil)
+		// 		// So(cnt, ShouldNotEqual, 0)
+		// 		So(err, ShouldBeNil)
+		// 		So(bundle, ShouldNotBeNil)
+		// 		cnt := len(bundle.Entry)
+		// 		log.Debug3("TestPatientSearch returned " + fmt.Sprint(cnt) + " resources")
+		// 		//fmt.Printf("PatientSearch returned: %s\n", spew.Sdump(bundle))
+		// 		// data, err := c.Query("Patient/12724066")
+		// 		// So(err, ShouldBeNil)
+		// 		// So(data, ShouldNotBeNil)
+		// 		pat, err := fhir.UnmarshalPatient(bundle.Entry[0].Resource)
+		// 		So(err, ShouldBeNil)
+		// 		So(pat, ShouldNotBeNil)
+
+		// 		log.Debug3("PatientSearch[0] returned: %s", spew.Sdump(pat))
+		// 		fmt.Printf("Patient.ID := %s\n", *pat.Id)
+		// 		time.Sleep(15 * time.Second)
+		// >>>>>>> 61de559706406293047124fa154836d840a322d6
 	})
 }
 
 func TestPostDuplicatePatient(t *testing.T) {
 	fmt.Printf("Test Add a duplicate patient to Server")
 	//c := New(baseurl)
-
+	log.SetDebuglevel("DEBUG3")
 	Convey("PostDuplicatePatient", t, func() {
 		fmt.Printf("\n\n\nTestPostDuplicatePatient:127  --  Start\n")
 		os.Setenv("CONFIG_ADDRESS", "http://192.168.1.148:30100/api/rest/v1")
@@ -142,8 +165,8 @@ func TestPostDuplicatePatient(t *testing.T) {
 		So(err, ShouldBeNil)
 		//caFhirId := "62d0ad3c9d0119afff9978b3"
 		//cerFhirId := "62f1c5dab3070d0b40e7aac1"
-
-		newToken, payload, err := jw_token.CreateTestJWToken("10s")
+		os.Setenv("TOKEN_DURATION", "10s")
+		newToken, payload, err := jw_token.CreateTestToken()
 		So(err, ShouldBeNil)
 		So(newToken, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
@@ -256,82 +279,105 @@ func TestPostDuplicatePatient(t *testing.T) {
 	// })
 }
 
-// func TestPatientSearch(t *testing.T) {
-// 	fmt.Printf("Test run a FHIR query")
-// 	//c := New(baseurl)
-// 	Convey("RunPatientQuery", t, func() {
-// 		// os.Setenv("CONFIG_ADDRESS", "http://universalcharts.com:20100/api/rest/v1")
-// 		// _, err := GetServiceConfig("uc_ca3", "local_test", "test") //GetConfig("delivery", "test")
-// 		// So(err, ShouldBeNil)
-// 		// mongodb, err := OpenMongoDB()
-// 		// So(err, ShouldBeNil)
-// 		// So(mongodb, ShouldNotBeNil)
-// 		// //conf, err := Initialize()
-// 		// So(err, ShouldBeNil)
-// 		// //caFhirId := "62d0ad3c9d0119afff9978b3"
-// 		// cerFhirId := "62f1c5dab3070d0b40e7aac1"
-// 		// fhirSystem, err := GetFhirSystem(cerFhirId)
-// 		// So(err, ShouldBeNil)
-// 		// cc := common.ConnectorConfig{}
-// 		// cp := common.ConnectorPayload{}
-// 		// cc.ID, _ = primitive.ObjectIDFromHex("62f1c5dab3070d0b40e7aac1")
-// 		// cc.Name = "uc_ca3"
-// 		// cc.Version = "local_test"
-// 		// cc.CacheUrl = "http://uc_cache:9200"
-// 		// // "cacheurl" : "http://uc_cache:9200",
-// 		// // "cache_url" : "http://uc_cache:9200"
-// 		// data := []*common.KVData{}
-// 		// cacheServer := common.KVData{}
-// 		// cacheServer.Name = "cacheServer"
-// 		// cacheServer.Value = "http://192.168.1.152:30201"
-// 		// data = append(data, &cacheServer)
-// 		// hostServer := common.KVData{}
-// 		// hostServer.Name = "cacheHost"
-// 		// hostServer.Value = "http://ucCache:9200"
-// 		// data = append(data, &hostServer)
-// 		// cc.Data = data
-// 		// cp.FhirSystem = fhirSystem
-// 		// cp.ConnectorConfig = &cc
-// 		// //err = os.Setenv("ACCESS_SECRET", util.RandomString(32))
-// 		// err = os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
-// 		// So(err, ShouldBeNil)
-// 		// maker, err := token.NewJWTMaker(os.Getenv("ACCESS_SECRET"))
-// 		// So(err, ShouldBeNil)
-// 		// So(maker, ShouldNotBeNil)
-// 		// username := util.RandomOwner()
-// 		// duration := 10 * time.Minute
-// 		// //userId := "user123456"
-// 		// userId := "62d0af5dec383ade03a96b7e"
-// 		// role := "Provider"
-// 		// ip := "192.168.1.1.99"
-// 		// fullName := "Debbie Harman MD"
-// 		// newToken, payload, err := maker.CreateToken(ip, username, duration, userId, fullName, role)
-// 		// So(err, ShouldBeNil)
-// 		// So(newToken, ShouldNotBeNil)
-// 		// So(payload, ShouldNotBeNil)
-// 		cp := CreateCP()
-// 		JWToken, err := CreateJWToken()
-// 		So(err, ShouldBeNil)
-// 		cnt, bundle, header, err := FindResource(cp, "Patient", "dharman0127", "family=smart&_count=12", JWToken)
-// 		//bundle, err := c.PatientSearch(fhirSystem, "family=smart&_count=12", "patient", newToken)
-// 		So(header, ShouldNotBeNil)
-// 		So(cnt, ShouldNotEqual, 0)
-// 		So(err, ShouldBeNil)
-// 		So(bundle, ShouldNotBeNil)
-// 		fmt.Printf("TestPatientSearch:177 returned %d resources\n", cnt)
-// 		//fmt.Printf("PatientSearch returned: %s\n", spew.Sdump(bundle))
-// 		// data, err := c.Query("Patient/12724066")
-// 		// So(err, ShouldBeNil)
-// 		// So(data, ShouldNotBeNil)
-// 		pat, err := fhir4.UnmarshalPatient(bundle.Entry[0].Resource)
-// 		So(err, ShouldBeNil)
-// 		So(pat, ShouldNotBeNil)
+func TestPatientSearch(t *testing.T) {
+	log.SetDebuglevel("DEBUG3")
+	log.Debug3("TestPatientSearch")
+	godotenv.Load("./.env.cerner_conn_go_test")
+	conf, err := GetServiceConfig("uc_cerner", "go_test", "test")
+	if err != nil {
+		log.Error("Error getting service config: " + err.Error())
+		t.FailNow()
+	}
+	if conf == nil {
+		log.Error("Error getting service config: " + err.Error())
+		t.FailNow()
+	}
+	//c := New(baseurl)
+	Convey("RunPatientQuery", t, func() {
+		// os.Setenv("CONFIG_ADDRESS", "http://universalcharts.com:20100/api/rest/v1")
+		// _, err := GetServiceConfig("uc_ca3", "local_test", "test") //GetConfig("delivery", "test")
+		// So(err, ShouldBeNil)
+		// mongodb, err := OpenMongoDB()
+		// So(err, ShouldBeNil)
+		// So(mongodb, ShouldNotBeNil)
+		// //conf, err := Initialize()
+		// So(err, ShouldBeNil)
+		// //caFhirId := "62d0ad3c9d0119afff9978b3"
+		// cerFhirId := "62f1c5dab3070d0b40e7aac1"
+		// fhirSystem, err := GetFhirSystem(cerFhirId)
+		// So(err, ShouldBeNil)
+		// cc := common.ConnectorConfig{}
+		// cp := common.ConnectorPayload{}
+		// cc.ID, _ = primitive.ObjectIDFromHex("62f1c5dab3070d0b40e7aac1")
+		// cc.Name = "uc_ca3"
+		// cc.Version = "local_test"
+		// cc.CacheUrl = "http://uc_cache:9200"
+		// // "cacheurl" : "http://uc_cache:9200",
+		// // "cache_url" : "http://uc_cache:9200"
+		// data := []*common.KVData{}
+		// cacheServer := common.KVData{}
+		// cacheServer.Name = "cacheServer"
+		// cacheServer.Value = "http://192.168.1.152:30201"
+		// data = append(data, &cacheServer)
+		// hostServer := common.KVData{}
+		// hostServer.Name = "cacheHost"
+		// hostServer.Value = "http://ucCache:9200"
+		// data = append(data, &hostServer)
+		// cc.Data = data
+		// cp.FhirSystem = fhirSystem
+		// cp.ConnectorConfig = &cc
+		// //err = os.Setenv("ACCESS_SECRET", util.RandomString(32))
+		// err = os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
+		// So(err, ShouldBeNil)
+		// maker, err := token.NewJWTMaker(os.Getenv("ACCESS_SECRET"))
+		// So(err, ShouldBeNil)
+		// So(maker, ShouldNotBeNil)
+		// username := util.RandomOwner()
+		// duration := 10 * time.Minute
+		// //userId := "user123456"
+		// userId := "62d0af5dec383ade03a96b7e"
+		// role := "Provider"
+		// ip := "192.168.1.1.99"
+		// fullName := "Debbie Harman MD"
+		// newToken, payload, err := maker.CreateToken(ip, username, duration, userId, fullName, role)
+		// So(err, ShouldBeNil)
+		// So(newToken, ShouldNotBeNil)
+		// So(payload, ShouldNotBeNil)
+		cp := CreateCP(false)
 
-// 		//fmt.Printf("PatientSearch[0] returned: %s\n", spew.Sdump(pat))
-// 		fmt.Printf("Patient.ID := %s\n", *pat.Id)
-// 		time.Sleep(15 * time.Second)
-// 	})
-// }
+		err = os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
+		So(err, ShouldBeNil)
+		log.Debug3("Create new token: ")
+		os.Setenv("TOKEN_DURATION", "10s")
+		jwt, payload, err := jw_token.CreateTestToken()
+		So(err, ShouldBeNil)
+		So(payload, ShouldNotBeNil)
+		So(jwt, ShouldNotBeNil)
+		log.Debug3("Validate new token: ")
+		payload, err = jw_token.VerifyToken(jwt)
+		So(err, ShouldBeNil)
+		So(payload, ShouldNotBeNil)
+		log.Debug3("TestPatientSearch  --  payload: " + spew.Sdump(payload))
+		cnt, bundle, header, err := FindResource(cp, "Patient", "dharman0127", "family=smart&_count=2", jwt)
+		//bundle, err := c.PatientSearch(fhirSystem, "family=smart&_count=12", "patient", newToken)
+		So(header, ShouldNotBeNil)
+		So(cnt, ShouldNotEqual, 0)
+		So(err, ShouldBeNil)
+		So(bundle, ShouldNotBeNil)
+		fmt.Printf("TestPatientSearch:177 returned %d resources\n", cnt)
+		//fmt.Printf("PatientSearch returned: %s\n", spew.Sdump(bundle))
+		// data, err := c.Query("Patient/12724066")
+		// So(err, ShouldBeNil)
+		// So(data, ShouldNotBeNil)
+		pat, err := fhir.UnmarshalPatient(bundle.Entry[0].Resource)
+		So(err, ShouldBeNil)
+		So(pat, ShouldNotBeNil)
+
+		//fmt.Printf("PatientSearch[0] returned: %s\n", spew.Sdump(pat))
+		log.Debug3("Patient.ID = " + *pat.Id)
+		time.Sleep(15 * time.Second)
+	})
+}
 
 // // func TestCaPatientSearch(t *testing.T) {
 // // 	fmt.Printf("Test query through to CA for patient")

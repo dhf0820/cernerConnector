@@ -244,16 +244,17 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	header.PageId = page
 	queryId := primitive.NewObjectID().Hex()
 	header.QueryId = queryId
-	log.Debug5("connConfig: " + spew.Sdump(connConfig))
-	//header.CacheBase = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
+	log.Debug3("connConfig: " + spew.Sdump(connConfig))
+	header.CacheBase = fmt.Sprintf("%s/system/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
 	//header.ResourceCacheBase = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
-	//header.GetBundleCacheBase = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheBase, header.SystemCfg.ID.Hex())
-	//header.GetResourceCacheBase = fmt.Sprintf("%s/%s/CachePage", header.CacheBase, header.SystemCfg.ID.Hex())
+	header.GetBundleCacheBase = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheBase, header.SystemCfg.ID.Hex())
+	header.GetResourceCacheBase = fmt.Sprintf("%s/%s/CachePage", header.CacheBase, header.SystemCfg.ID.Hex())
 
 	cacheBundle := common.CacheBundle{}
 	cacheBundle.PageId = header.PageId
 	cacheBundle.Header = header
 	cacheBundle.ID = primitive.NewObjectID()
+	log.Debug3("--  cacheBundle: " + spew.Sdump(cacheBundle))
 	//fmt.Printf("\n\n\n\n$$$ FindResource:110 calling CacheResourceBundleAndEntries (without bundle) - %s \n", spew.Sdump(cacheBundle))
 	//fmt.Printf("FindResource:126  --  bundle = %s\n", spew.Sdump(bundle))
 	//Cache the first bundle(page)
@@ -266,6 +267,7 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	// }
 	cacheBundle.Bundle = bundle
 	startTime = time.Now()
+	log.Debug3("Calling CacheResourceBundleAndEntries with token: " + JWToken)
 	pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
 	log.Debug3(fmt.Sprintf("CacheResource returned %d %ss in page: %d for %s  took %s\n", len(cacheBundle.Bundle.Entry), resource, page, systemCfg.DisplayName, time.Since(startTime)))
 	if err != nil {

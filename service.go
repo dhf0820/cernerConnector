@@ -13,7 +13,8 @@ import (
 	"strings"
 
 	common "github.com/dhf0820/uc_common"
-	log "github.com/sirupsen/logrus"
+	log "github.com/dhf0820/vslog"
+	//"github.com/sirupsen/logrus"
 	// "go.mongodb.org/mongo-driver/bson"
 	// "go.mongodb.org/mongo-driver/bson/primitive"
 
@@ -21,7 +22,7 @@ import (
 	//"net"
 	"net/http"
 	"os"
-	"time"
+	//"time"
 	//"github.com/sirupsen/logrus"
 )
 
@@ -59,23 +60,23 @@ func Start(serviceName, codeVersion string) {
 	}
 	listenPort := os.Getenv("LISTEN_PORT")
 	if listenPort == "" {
-		log.Warnf("Start:61  --  LISTEN_PORT not set in environment. Meaning  running standalone.  Using default port 40103")
+		log.Warn("--  LISTEN_PORT not set in environment. Meaning  running standalone.  Using default port 40103")
 		listenPort = "40103" // Default for Ca3Connector local host standalone
 	}
 	restAddress := fmt.Sprintf("%s:%s", "0.0.0.0", listenPort)
-	log.Printf("Start:64  --  restAddress: %s  -  port: %s", restAddress, listenPort)
+	log.Debug3(fmt.Sprintf("--  restAddress: %s  -  port: %s", restAddress, listenPort))
 	router := NewRouter()
 	configVersion := os.Getenv("CONFIG_VERSION")
 
-	log.Printf("Start:68  --  %s CodeVersion: [%s]  ConfigVersion: [%s]  is listening for restful requests at %s", serviceName, codeVersion, configVersion, restAddress)
+	log.Debug3(fmt.Sprintf("--  %s CodeVersion: [%s]  ConfigVersion: [%s]  is listening for restful requests at %s", serviceName, codeVersion, configVersion, restAddress))
 	err := http.ListenAndServe(restAddress, router)
-	log.Printf("Start:70  --  This should not happen err = %s", err.Error())
+	log.Debug3("--  This should not happen err = " + err.Error())
 
 }
 
 func Initialize(serviceName, version string) (*common.ServiceConfig, error) {
 	var err error
-	log.Printf("Initiallizing %s version %s\n", serviceName, version)
+	log.Debug3(fmt.Sprintf("Initiallizing %s version %s\n", serviceName, version))
 	if serviceName == "" {
 		if os.Getenv("SERVICE_NAME") == "" {
 			serviceName = "cerner_conn"
@@ -90,7 +91,7 @@ func Initialize(serviceName, version string) (*common.ServiceConfig, error) {
 		os.Setenv("SERVICE_COMPANY", "test")
 	}
 
-	fmt.Printf("Initialize:91  --  Service: %s  SERVICE_VERSION: %s  SERVICE_COMPANY = [%s]\n\n", serviceName, os.Getenv("SERVICE_VERSION"), os.Getenv("SERVICE_COMPANY"))
+	log.Debug3(fmt.Sprintf("--  Service: %s  SERVICE_VERSION: %s  SERVICE_COMPANY = [%s]"+serviceName, os.Getenv("SERVICE_VERSION"), os.Getenv("SERVICE_COMPANY")))
 	// PatientData := strings.ToLower(os.Getenv("PATIENT_DATA"))
 	// if strings.Trim(PatientData, " ") == "" {
 	// 	PatientData = "postgres"
@@ -98,7 +99,7 @@ func Initialize(serviceName, version string) (*common.ServiceConfig, error) {
 	Conf, err = GetServiceConfig(strings.ToLower(serviceName), strings.ToLower(os.Getenv("SERVICE_VERSION")),
 		strings.ToLower(os.Getenv("SERVICE_COMPANY")))
 	if err != nil {
-		return nil, fmt.Errorf("could not retieve Configuration : %s", err.Error())
+		return nil, log.Errorf("could not retieve Configuration : " + err.Error())
 	}
 	//DbConnector, err = common.GetDatabaseByName(Conf.DataConnectors, "mongo")
 	//fmt.Printf("\n----config: %s]\n", spew.Sdump(Conf))
@@ -111,30 +112,30 @@ func Initialize(serviceName, version string) (*common.ServiceConfig, error) {
 }
 
 func GetServiceConfig(name, version, company string) (*common.ServiceConfig, error) {
-	log.Printf("GetServiceConfig:111   Starting\n")
+	log.Debug3("GetServiceConfig Starting")
 	//_, _ = GetCollection("sys_config")
 	var cfg ConfigResp
 	var err error
 	//var unmarshalErr *json.UnmarshalTypeError
 	var bdy []byte
 	cfg = ConfigResp{}
-	log.Printf("GetServiceConfig:118  --  name: %s, version: %s, company: %s", name, version, company)
+	log.Debug3(fmt.Sprintf("GetServiceConfig --  name: %s, version: %s, company: %s", name, version, company))
 	//coreName := strings.ReplaceAll(os.Getenv("CORE_NAME_PORT"), " ","")
 	//api := os.Getenv("API")
 	//Log.Infof("API: [%s]\n", api)
 	configAddr := os.Getenv("CONFIG_ADDRESS")
 	// configAddr = "http://docker1.ihids.com:19101/api/rest/v1"
-	log.Printf("GetServiceConfig:124  --  ConfigAddress: %s", configAddr)
+	log.Debug3("--  ConfigAddress: " + configAddr)
 	url := fmt.Sprintf("%s/config?name=%s&version=%s&company=%s", configAddr, name, version, company)
-	fmt.Printf("GetServiceConfig:126  --  core url: %s\n", url)
-	startTime := time.Now()
+	log.Debug3("--  core url: " + url)
+	//startTime := time.Now()
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Errorf("GetServiceConfig:130  --  http.Get(%s)  returned error: %s", url, err.Error())
+		log.Errorf(fmt.Sprintf("--  http.Get(%s)  returned error: %s", url, err.Error()))
 		return nil, err
 	}
-	fmt.Printf("GetServiceConfig:133  --  Elapsed Time: %s\n", time.Since(startTime))
-	fmt.Printf("GetServiceConfig:134  --  status : %d\n", resp.StatusCode)
+	//fmt.Printf("GetServiceConfig:133  --  Elapsed Time: %s\n", time.Since(startTime))
+	log.Debug3("GetServiceConfig status: " + resp.Status)
 	defer resp.Body.Close()
 	//cfg = mod.ServiceConfig{}
 	bdy, err = io.ReadAll(resp.Body)
@@ -146,7 +147,8 @@ func GetServiceConfig(name, version, company string) (*common.ServiceConfig, err
 	if err != nil {
 		return nil, err
 	}
-	//fmt.Printf("GetServiceConfig:224  --  Config = %s\n", spew.Sdump(cfg))
+	Conf = &cfg.Config
+	//fmt.Printf("--  Config = " + spew.Sdump(Conf))
 	//fmt.Printf("GetServiceConfig:225  --  Elapsed Time: %s\n", time.Since(startTime))
 	//fmt.Printf("GetServiceConfig:226 - status : %d\n", resp.StatusCode)
 	//_, err = GetCollection("sys_config")

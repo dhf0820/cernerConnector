@@ -9,6 +9,7 @@ import (
 	//"github.com/gorilla/mux"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/joho/godotenv"
+
 	//"gitlab.com/dhf0820/ids_model/common"
 
 	log "github.com/dhf0820/vslog"
@@ -24,7 +25,8 @@ import (
 
 	//"time"
 
-	jw_token "github.com/dhf0820/jwToken"
+	//jw_token "github.com/dhf0820/jwToken"
+	jw_token "github.com/dhf0820/golangJWT"
 	common "github.com/dhf0820/uc_common"
 
 	//"github.com/dhf0820/uc_core/service"
@@ -40,10 +42,11 @@ import (
 
 func TestSimpleFindDocumentRef(t *testing.T) {
 	Convey("TestSimpleFindDocumentRef", t, func() {
+		log.SetDebuglevel("DEBUG3")
 		os.Setenv("CONFIG_ADDRESS", "http://universalcharts.com:30300/api/rest/v1")
-
+		os.Setenv("TOKEN_DURATION", "30s")
 		os.Setenv("COMPANY", "demo")
-		godotenv.Load("./.env.uc_ca3_test")
+		godotenv.Load("./.env.cerner_conn_test")
 		os.Setenv("COMPANY", "test")
 		mongo := OpenDBUrl("mongodb+srv://dhfadmin:Sacj0nhati@cluster1.24b12.mongodb.net/test?retryWrites=true&w=majority")
 		So(mongo, ShouldNotBeNil)
@@ -54,12 +57,13 @@ func TestSimpleFindDocumentRef(t *testing.T) {
 		// So(conf, ShouldNotBeNil)
 		// So(err, ShouldBeNil)
 		// So(conf, ShouldNotBeNil)
-		req, err := http.NewRequest("GET", "system/640ba5e3bd4105586a6dda74/DocumentReference?patient=12724068", nil)
+		req, err := http.NewRequest("GET", "/api/rest/v1/DocumentReference?patient=12724068", nil)
 		//req, err := http.NewRequest("GET", "/api/rest/v1/GetPatient/12345", nil)
 		So(err, ShouldBeNil)
 		//w := httptest.NewRecorder()
 		os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
-		jwt, payload, err := jw_token.CreateTestJWToken("10s")
+		os.Setenv("TOKEN_DURATION", "2m")
+		jwt, payload, err := jw_token.CreateTestToken()
 		So(err, ShouldBeNil)
 		So(jwt, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)

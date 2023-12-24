@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
+	//"github.com/davecgh/go-spew/spew"
 	common "github.com/dhf0820/uc_common"
 	log "github.com/dhf0820/vslog"
 
@@ -40,9 +40,9 @@ func OpenDBUrl(dbURL string) *MongoDB {
 	//if svcConfig == nil {
 	//	fmt.Printf("\n---$$$Config is not initialized\n\n")
 	//}
-	startTime := time.Now()
+	//startTime := time.Now()
 	uri := dbURL
-	fmt.Printf("vsMongo:40  --Opening database:39  %s\n", uri)
+	log.Debug3("Opening database uri: " + uri)
 	//uri := dbURL + databaseName
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 
@@ -58,9 +58,9 @@ func OpenDBUrl(dbURL string) *MongoDB {
 	opts := options.Client()
 	opts.ApplyURI(uri)
 	opts.SetMaxPoolSize(5)
-	fmt.Printf("vsmongo:56  -- Connecting to mongo\n")
+	log.Debug3("-- Connecting to mongo")
 	if mongoClient, err = mongo.Connect(ctx, opts); err != nil {
-		msg := fmt.Sprintf("vsmmongo:58  mongo.Connect error: %s\n", err.Error())
+		msg := log.ErrMsg("mongo.Connect error: " + err.Error())
 		log.Error(msg)
 		return nil
 	}
@@ -71,18 +71,18 @@ func OpenDBUrl(dbURL string) *MongoDB {
 		return nil
 	}
 	Company := os.Getenv("COMPANY")
-	fmt.Printf("vsMongo:68  --  Company(DatabaseName: %s\n", Company)
+	log.Info("Company(DatabaseName: " + Company)
 
 	DB.Client = mongoClient
 	DB.DatabaseName = Company //.Getenv("COMPANY") //DbConnector.Database  //databaseName
 	DB.Database = mongoClient.Database(DB.DatabaseName)
 	DB.URL = dbURL
-	fmt.Printf("vsMongo:74  --Database: %s\n", DB.DatabaseName)
-	fmt.Println("Database connected")
+	log.Info("Database: " + DB.DatabaseName + " Connected")
+
 	//fmt.Printf("Client: %s\n", spew.Sdump(client))
 
 	DB.Collection = DB.Client.Database(DB.DatabaseName).Collection(GetDbField("collection"))
-	fmt.Printf("DBOpen-77 took %d ms\n", time.Since(startTime).Milliseconds())
+	//fmt.Printf("DBOpen-77 took %d ms\n", time.Since(startTime).Milliseconds())
 	return &DB
 }
 
@@ -92,7 +92,7 @@ func OpenMongoDB() (*MongoDB, error) {
 	//if svcConfig == nil {
 	//	fmt.Printf("\n---$$$Config is not initialized\n\n")
 	//}
-	startTime := time.Now()
+	//startTime := time.Now()
 	//DbConnector = svcConfig.DataConnector
 	//dbURL := DbConnector.Server
 	// DbConnector, err := common.GetDatabaseByName(Conf.DataConnectors, "mongo")
@@ -102,7 +102,7 @@ func OpenMongoDB() (*MongoDB, error) {
 	dbURL := DbConnector.Server
 	//dbURL := DBUrl() //os.Getenv("CORE_DB")
 	uri := dbURL
-	fmt.Printf("Opening database:97 uri:[%s]\n", uri)
+	log.Debug3("Opening Mongo URI: " + uri)
 	//uri := dbURL + databaseName
 	//ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 
@@ -121,10 +121,10 @@ func OpenMongoDB() (*MongoDB, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	fmt.Printf("vsmongo:114 -- Using new connect routine from atlas\n")
+	log.Info("Using new connect routine from atlas")
 	mongoClient, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		msg := fmt.Sprintf("vsMongo:121 Mongo.Connect error: %s\n", err.Error())
+		msg := log.ErrMsg(" Mongo.Connect error: " + err.Error())
 		log.Fatal(msg)
 	}
 
@@ -136,7 +136,7 @@ func OpenMongoDB() (*MongoDB, error) {
 	err = mongoClient.Ping(context.TODO(), nil)
 	if err != nil {
 		//fmt.Printf("Database did not connect: %v\n", err)
-		log.Errorf("did not connect by ping: " + err.Error())
+		err = log.Errorf("did not connect by ping: " + err.Error())
 		return nil, err
 	}
 
@@ -144,15 +144,12 @@ func OpenMongoDB() (*MongoDB, error) {
 	DB.DatabaseName = DbConnector.Database
 	//DB.DatabaseName = os.Getenv("COMPANY") //DbConnector.Database  //databaseName
 	//DB.DatabaseName = "test"
-	fmt.Printf("DatabaseName:140 -  %s\n", DB.DatabaseName)
+	//fmt.Printf("DatabaseName:140 -  %s\n", DB.DatabaseName)
 	DB.Database = mongoClient.Database(DB.DatabaseName)
 	DB.URL = dbURL
-	fmt.Printf("vsmongo:142 -- Database: %s\n", DB.DatabaseName)
-	fmt.Println("Database connected")
-	//fmt.Printf("Client: %s\n", spew.Sdump(client))
-
+	log.Info("Database: " + DB.DatabaseName + " connected")
 	DB.Collection = DB.Client.Database(DB.DatabaseName).Collection(GetDbField("collection"))
-	fmt.Printf("vsmongo:153 - DBOpen -- took %d ms\n", time.Since(startTime).Milliseconds())
+	//fmt.Printf("vsmongo:153 - DBOpen -- took %d ms\n", time.Since(startTime).Milliseconds())
 	return &DB, err
 }
 
@@ -160,10 +157,10 @@ func DBUrl() string {
 
 	//cacheDB := os.Getenv("CACHE_DB")
 	var err error
-	log.Info(" GetDatabaseByName Conf: " + spew.Sdump(Conf))
+	//log.Debug3(" GetDatabaseByName Conf: " + spew.Sdump(Conf))
 	dbConnector, err = common.GetDatabaseByName(Conf.DataConnectors, "mongo")
 	if err != nil {
-		log.Info("GetDatabaseByName error: " + err.Error())
+		log.Error("GetDatabaseByName error: " + err.Error())
 		return ""
 	}
 	//fmt.Printf("vsmongo.DBUrl:162 - GotDataConnector: %s\n", spew.Sdump(dbConnector))
@@ -190,7 +187,7 @@ func ConnectToMongoDB() (*MongoDB, error) {
 	//databaseName := os.Getenv("COMPANY")
 	//databaseName := Company
 	databaseName := dbConnector.Database
-	fmt.Printf("Using DB: [%s]\n", databaseName)
+	log.Info("Using DB: " + databaseName)
 	//if url == "" {
 	//	url = settings.DbURL()
 	//}
@@ -242,17 +239,17 @@ func (db *MongoDB) Close() error {
 func GetCollection(collection string) (*mongo.Collection, error) {
 	if collection == "" {
 		collection = CollectionName()
-		fmt.Printf("Using default Collection: %s\n", collection)
+		log.Info("Using default Collection: " + collection)
 	}
 	db, err := Current() //"mongodb://admin:Sacj0nhat1@cat.vertisoft.com:27017")
 	if err != nil {
-		fmt.Printf("Current DB returned error: %s\n", err)
+
 		log.Fatal(err.Error())
 		//return nil, err
 	}
 	client := db.Client
 	coll := client.Database(DB.DatabaseName).Collection(collection)
-	fmt.Printf("Changed to Collection: %s\n", collection)
+	log.Info("Changed to Collection: " + collection)
 	return coll, nil
 }
 

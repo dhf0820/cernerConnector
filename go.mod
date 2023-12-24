@@ -8,11 +8,12 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dhf0820/baseConnector v0.0.0-20230612022521-666c749210ae
 	github.com/dhf0820/fhir4 v0.0.0-20231012185545-c350b9504fb4
-	github.com/dhf0820/jwToken v0.0.0-20231004025559-35bfe987e1dd
-	github.com/dhf0820/uc_common v0.0.0-20231203014753-d8bbc8ec8111
-	github.com/dhf0820/uc_core v0.0.0-20231126043334-0a8efd3c0962
+	github.com/dhf0820/golangJWT v0.0.0-20231224002043-3e6c92e230be
+	github.com/dhf0820/jwToken v0.0.0-20230702231745-103565cb4c1d
+	github.com/dhf0820/uc_common v0.0.0-20231224005049-ffc6b90e1ed2
+	github.com/dhf0820/uc_core v0.0.0-20230822025212-bfd9037a37b3
 	github.com/dhf0820/vslog v0.0.0-20231007220019-758899f13b4a
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.4.0
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/schema v1.2.0
 	github.com/joho/godotenv v1.5.1

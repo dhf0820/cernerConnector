@@ -33,7 +33,7 @@ import (
 const baseurl = "https://fhir-open.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d/"
 
 func TestPatientCache(t *testing.T) {
-	fmt.Printf("Test run a FHIR query")
+	log.Debug3("Test run a FHIR query")
 	//c := New(baseurl, "application/json+fhir")
 	Convey("Run a query", t, func() {
 

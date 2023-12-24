@@ -19,17 +19,18 @@ import (
 	"strings"
 	"time"
 
-	jw_token "github.com/dhf0820/jwToken"
+	jw_token "github.com/dhf0820/golangJWT"
+	//jw_token "github.com/dhf0820/jwToken"
 )
 
 func findDocumentReference(w http.ResponseWriter, r *http.Request) {
 	resourceType := "DocumentReference"
 	log.Debug1(" --  Resource = " + resourceType)
 	JWToken = r.Header.Get("Authorization")
-	Payload, status, err := jw_token.ValidateToken(JWToken, "")
+	Payload, err := jw_token.VerifyToken(JWToken)
 	if err != nil {
 		errMsg := err.Error()
-		WriteFhirOperationOutcome(w, status, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
+		WriteFhirOperationOutcome(w, 401, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
 	userId := Payload.UserId
@@ -80,7 +81,7 @@ func findDocumentReference(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 	totalPages, bundle, header, err = FindDocumentReference(&connectorPayload, userId, queryStr, JWToken)
 	log.Debug3(" - FindDocumentReference returned")
-	finalStatus := status
+	finalStatus := 500
 	if err != nil {
 		errMsg := log.ErrMsg(fmt.Sprintf("error:  %s", err.Error()))
 		fmt.Println(errMsg)
@@ -147,7 +148,7 @@ func getDocumentRef(w http.ResponseWriter, r *http.Request) {
 	resourceType := "DocumentReference"
 	log.Debug3("Starting get" + resourceType)
 	JWToken = r.Header.Get("Authorization")
-	_, status, err := jw_token.ValidateToken(JWToken, "")
+	_, status, err := jw_token.ValidToken(JWToken)
 	if err != nil {
 		errMsg := err.Error()
 		WriteFhirOperationOutcome(w, status, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))

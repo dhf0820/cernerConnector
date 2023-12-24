@@ -455,7 +455,7 @@ func searchPatient(w http.ResponseWriter, r *http.Request) {
 	//connConfig := connectorPayload.ConnectorConfig
 	//buildFieldsByTagMap("schema", *psp)
 	JWToken = r.Header.Get("Authorization")
-	//fmt.Printf("searchPatient:219 - JWToken: %s\n", JWToken)
+	log.Debug3("searchPatient - JWToken: " + JWToken)
 	Payload, status, err := jw_token.ValidateToken(r.Header.Get("Authorization"), "")
 	if err != nil {
 		errMsg := err.Error()

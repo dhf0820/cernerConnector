@@ -210,7 +210,7 @@ func (c *Connection) GetFhirReq(req *http.Request) (*http.Response, error) {
 }
 
 func (c *Connection) GetFhirBundle(url string, token string) (*fhir.Bundle, error) {
-	log.Debug3(fmt.Sprintf("--  BaseUrl - %s  add url: %s\n", c.BaseURL, url))
+	log.Debug3(fmt.Sprintf("--  BaseUrl: %s  add url: %s\n", c.BaseURL, url))
 	//besure first character of partial url is /
 	// if url[0:1] != "/" {
 	// 	url = "/" + url

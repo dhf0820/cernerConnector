@@ -251,11 +251,11 @@ func GetPatient(patId string) (*fhir.Patient, error) {
 	filter := bson.M{"id": patId}
 	collection, _ := GetCollection("Patients")
 	pat := &fhir.Patient{}
-	fmt.Printf("GetPatient:195  --  Calling FindOne with Filter: %v", filter)
+
+	log.Debug3("--Calling FindOne with Filter: " + spew.Sdump(filter))
 	err := collection.FindOne(context.TODO(), filter).Decode(pat) // See if the user already has a session
 	if err != nil {
-		fmt.Printf("GetPatient:198  -- FindOne error: %s\n", err.Error())
-		return nil, err
+		return nil, log.Errorf("-- FindOne error: " + err.Error())
 	}
 	//fmt.Printf("GetPatient:201  -- FindOne Patient: %s\n", spew.Sdump(pat))
 	return pat, err
@@ -283,9 +283,9 @@ func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bund
 	// if err != nil {
 	// 	return nil, err
 	// }
-	fmt.Printf("PatientSearch:227  --  queryString: %s\n", query)
+	log.Debug3("--  queryString: %s" + query)
 	qry := fmt.Sprintf("Patient?%s", query)
-	fmt.Printf("PatientSearch:229  --  Final url to query: %s\n", qry)
+	log.Debug3("--  Final url to query: " + qry)
 
 	log.Debug3("cp.ConnectorConfig = " + spew.Sdump(cp.ConnectorConfig))
 	log.Debug3("URL = " + cp.ConnectorConfig.HostUrl)
@@ -296,6 +296,7 @@ func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bund
 	if err != nil {
 		log.Error("getFhirBundle error: " + err.Error())
 	}
+	log.Debug3("--  Bundle= " + spew.Sdump(bundle))
 	bundle.ResourceType = StrPtr("Bundle")
 	// cb := uc_core/common.CacheBundle{}
 	// cb.

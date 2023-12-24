@@ -14,6 +14,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	log "github.com/dhf0820/vslog"
+
 	//"github.com/sirupsen/logrus"
 	//. "github.com/smartystreets/goconvey/convey"
 	"fmt"
@@ -49,7 +50,7 @@ func GetSystemConfigById(id primitive.ObjectID) (*common.SystemConfig, error) {
 	}
 	filter := bson.M{"_id": id}
 	sysConfig := &common.SystemConfig{}
-	fmt.Printf("GetSystemConfig:24  --  Calling FindOne SystemConfig: %v\n", filter)
+	log.Debug3("--  Calling FindOne SystemConfig: " + fmt.Sprint(filter))
 	err = collection.FindOne(context.Background(), filter).Decode(&sysConfig)
 	return sysConfig, err
 }
@@ -57,7 +58,7 @@ func GetSystemConfigById(id primitive.ObjectID) (*common.SystemConfig, error) {
 func CreateCP(includeSave bool) *common.ConnectorPayload {
 	log.Debug3("Entering CreateCP")
 	id, _ := primitive.ObjectIDFromHex("640ba5e3bd4105586a6dda74")
-	sc, err := GetSystemConfigById(id)
+	sysCfg, err := GetSystemConfigById(id)
 	if err != nil {
 		log.Error("--  GetSystemConfigById error: " + err.Error())
 		return nil
@@ -82,28 +83,28 @@ func CreateCP(includeSave bool) *common.ConnectorPayload {
 
 	cp := common.ConnectorPayload{}
 	cc := common.ConnectorConfig{}
-	cc.ID, _ = primitive.ObjectIDFromHex("62f1c5dab3070d0b40e7aac1")
-	cc.Name = "uc_ca3"
-	cc.Version = "local"
-	cc.Label = "CA3FhirConnector"
+	cc.ID, _ = primitive.ObjectIDFromHex("6500c89134a3835f7e47f832")
+	cc.Name = "cerner"
+	cc.Version = "go_test"
+	cc.Label = "OpenCernerConnector"
 	cc.Credentials = ""
-	cc.HostUrl = "http://ca_3backend:4000/api/rest/v1/"
-	cc.URL = "http://uc_cernerConnector:20103"
+	cc.HostUrl = "https://fhir-open.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d"
+	cc.URL = "http://yawl:50103"
 	data := []*common.KVData{}
 	cacheServer := common.KVData{}
 	cacheServer.Name = "cacheServer"
-	cacheServer.Value = "http://universalcharts.com:30201"
+	cacheServer.Value = "http://yawl:50201"
 	data = append(data, &cacheServer)
 	hostServer := common.KVData{}
 	hostServer.Name = "cacheHost"
 	hostServer.Value = "http://ucCache:9200"
 	data = append(data, &hostServer)
 	cc.Data = data
-	cc.CacheUrl = "http://universalcharts.com:30201"
+	cc.CacheUrl = "http://yawl:50201/system"
 
 	//TODO: AddFhirAuthToken
 	cp.ConnectorConfig = &cc
-	cp.System = sc
+	cp.System = sysCfg
 	// if includeSave {
 	// 	cp.SavePayload = &common.SavePayload{}
 	// 	cp.SavePayload.SrcResource = SamplePatient()

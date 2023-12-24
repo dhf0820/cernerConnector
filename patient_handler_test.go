@@ -40,6 +40,7 @@ import (
 )
 
 func TestSearchPatient(t *testing.T) {
+	log.SetDebuglevel("DEBUG3")
 	Convey("TestSearchPatient", t, func() {
 		req, err := http.NewRequest("GET", "/api/rest/v1/Patient?family=harman", nil)
 		So(err, ShouldBeNil)
@@ -147,6 +148,7 @@ func TestSearchPatient(t *testing.T) {
 // }
 
 func TestPatientGet(t *testing.T) {
+	log.SetDebuglevel("DEBUG3")
 	Convey("Subject: GetPatient", t, func() {
 		godotenv.Load("./.env.uc_ca3_conn_test")
 		// os.Setenv("CONFIG_ADDRESS", "http://192.168.1.117:30300/api/rest/v1")
@@ -293,6 +295,7 @@ func TestPatientGet(t *testing.T) {
 }
 
 func TestCernerSearchPatient(t *testing.T) {
+	log.SetDebuglevel("DEBUG3")
 	Convey("TestCernerSearchPatient", t, func() {
 		os.Setenv("COMPANY", "test")
 		mongo := OpenDBUrl("mongodb+srv://dhfadmin:Sacj0nhati@cluster1.24b12.mongodb.net/test?retryWrites=true&w=majority")

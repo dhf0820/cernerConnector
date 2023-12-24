@@ -74,9 +74,9 @@ func CacheResourceBundleElements(ctx context.Context, userId,
 // // sends bundle to cache which caches the Bundle  in BundleCache, then caches each entry in ResourceCacheCaches both the bundle and the individual entries cached in
 func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page int) (int, error) {
 	header := *cbdl.Header
-	fmt.Printf("CacheResourceBundleAndEntries:76  --  Starting for ResourceType: %s  Page: %d\n", header.ResourceType, page)
+	log.Debug3(fmt.Sprintf("--  Starting for ResourceType: %s  Page: %d\n", header.ResourceType, page))
 	//fmt.Printf("CacheResourceBundleAndEntries:77  -- Header = %s\n", spew.Sdump(header))
-	fmt.Printf("CacheResourceBundleAndEntries:78  == CashBase: %s\n", header.CacheBase)
+	log.Debug3(fmt.Sprintf("-- CashBase: %s\n", header.CacheBase))
 	//fhirSystem := header.FhirSystem
 	// fhirSystem, err := GetFhirSystem(header.FhirSystem.Hex())
 	// if err != nil {
@@ -88,51 +88,54 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 	header.PageId = page
 	//header.CacheUrl = fmt.Sprintf("%s/ResourceCache/%s", CacheServer, header.QueryId)
 	//fmt.Printf("CacheResourceBundleAndEntries:89  --  CacheUrl = %s\n", header.CacheUrl)
-	fmt.Printf("CacheResourceBundleAndEntries:90  --  Number of Entries = %d\n", len(cbdl.Bundle.Entry))
+	log.Debug3("CacheResourceBundleAndEntries --  Number of Entries: " + fmt.Sprint(len(cbdl.Bundle.Entry)))
 	cacheBundle, err := json.Marshal(cbdl)
 	if err != nil {
-		err = fmt.Errorf("CacheResourceBundleAndEntries:93  -- Error marshaling CacheBundle into json: %s", err.Error())
+		err = log.Errorf("-- Error marshaling CacheBundle into json: " + err.Error())
 		fmt.Printf("%s\n", err.Error())
 		return 0, err
 	}
+	//log.Debug3("CacheResourceBundleAndEntries  --  CacheBundle: " + string(cacheBundle))
 	//fmt.Printf("Send Status to: [%s]\n", statusURL)
 	//fmt.Printf("CacheResourceBundleAndEntries:99  --  Using CoreUrl: %s\n", coreURL)
 	//coreURL := cbdl.Header.FhirSystem.UcUrl + "/BundleTransaction"
 	time.Sleep(3 * time.Second)
 	cacheURL := cbdl.Header.CacheBase + "/BundleTransaction"
+	log.Debug3("CacheResourceBundleAndEntries  --  cacheURL: " + cacheURL)
 	req, _ := http.NewRequest("POST", cacheURL, bytes.NewBuffer(cacheBundle))
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", token)
 	req.Header.Set("Resource", cbdl.Header.ResourceType)
-	fmt.Printf("CacheResourceBundleAndEntries:107  --  Token: %s\n", token)
+	token = "Bearer " + token
+	log.Debug3("CacheResourceBundleAndEntries  --  Token: " + token)
 	client := &http.Client{}
-	fmt.Printf("\nCacheResourceBundleAndEntries:109  --  Using %s  Calling uc_cache: %s\n\n\n", req.Method, cacheURL)
+	log.Debug3(fmt.Sprintf("CacheResourceBundleAndEntries  --  Method: %s  URL: %s", req.Method, cacheURL))
 	resp, err := client.Do(req)
-	//fmt.Printf("CacheResourceBundleAndEntries:109   --  resp: %s\n", spew.Sdump(resp))
+	//log.Debug3("CacheResourceBundleAndEntries  --  resp: " + spew.Sdump(resp))
 	//defer resp.Body.Close()
 	if err != nil {
-		err = fmt.Errorf("CacheResourceBundleAndEntries:110  -- Error uc_cache Request: %s", err.Error())
-		fmt.Printf("%s\n", err.Error())
+		err = log.Errorf("CacheResourceBundleAndEntries  -- Error uc_cache Request: " + err.Error())
+		fmt.Println(err.Error())
 		return 0, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		err = fmt.Errorf("CacheResourceBundleAndEntries:109  -- Invalid uc_ache Status: %d  --  %s", resp.StatusCode, resp.Status)
-		fmt.Printf("\n%s\n\n\n", err.Error())
+		err = log.Errorf(fmt.Sprintf("CacheResourceBundleAndEntries -- Invalid uc_cache Status: " + fmt.Sprint(resp.StatusCode) + " -- " + resp.Status))
+		fmt.Println(err.Error())
 		return 0, err
 	}
 	log.Debug3("Bundle Sent to uc_cache Successful")
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		err = fmt.Errorf("CacheResourceBundleAndEntries:124  --  ReadAllBody : error: %s\n", err.Error())
-		fmt.Printf("%s\n", err.Error())
+		err = fmt.Errorf("CacheResourceBundleAndEntries: ReadAllBody : error: " + err.Error())
+		fmt.Println(err.Error())
 		return 0, err
 	}
 	bundleResp := common.BundleCacheResponse{}
 	err = json.Unmarshal(body, &bundleResp)
 	if err != nil {
-		err = fmt.Errorf("CacheResourceBundleAndEntries:131 -- Unmarshal BundleResponse failed: %s", err.Error())
-		fmt.Printf("%s\n", err.Error())
+		err = log.Errorf("CacheResourceBundleAndEntries: Unmarshal BundleResponse failed: " + err.Error())
+		fmt.Println(err.Error())
 		return 0, err
 	}
 	//page = page + 1
@@ -643,7 +646,8 @@ func TotalCacheForQuery(queryId string) (int64, error) {
 // 	}
 // }
 
-// func CacheResource(fhirSystem *common.FhirSystem, resourceCache *common.ResourceCache, token string) (string, error) {
+// TODO: Call Cache Service to cache a single Resource
+// func CacheResource(sysCfg *common.SystemConfig, resourceCache *common.ResourceCache, token string) (string, error) {
 // 	coreURL := fhirSystem.UcUrl + "/Cache"
 // 	byte, err := json.Marshal(resourceCache)
 // 	if err != nil {
