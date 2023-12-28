@@ -25,7 +25,7 @@ import (
 
 	//"time"
 
-	//jw_token "github.com/dhf0820/jwToken"
+	//jw_token "github.com/dhf0820/golangJWT"
 	jw_token "github.com/dhf0820/golangJWT"
 	common "github.com/dhf0820/uc_common"
 
@@ -64,7 +64,7 @@ func TestSimpleFindDocumentRef(t *testing.T) {
 		os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
 		os.Setenv("TOKEN_DURATION", "10m")
 
-		jwt, payload, err := jw_token.CreateTestToken()
+		jwt, payload, err := jw_token.CreateTestToken("")
 		So(err, ShouldBeNil)
 		So(jwt, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)

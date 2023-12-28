@@ -3,14 +3,18 @@ package main
 import (
 	//"context"
 	"encoding/json"
-	fhir "github.com/dhf0820/fhir4"
 	"net/http"
+
+	fhir "github.com/dhf0820/fhir4"
+
 	//"github.com/samply/golang-fhir-models/fhir-models/fhir"
 	"fmt"
 	//"go.mongodb.org/mongo-driver/bson"
-	jw_token "github.com/dhf0820/jwToken"
 	"os"
 	"testing"
+
+	jw_token "github.com/dhf0820/golangJWT"
+
 	//"time"
 	"io"
 	"strings"
@@ -39,7 +43,7 @@ func TestPatientCache(t *testing.T) {
 
 		//caFhirId := "62f14531ba5395278cd530c4"
 		//patient, err := c.GetPatient("375", caFhirId)
-		jwt, payload, err := jw_token.CreateTestJWToken("10s")
+		jwt, payload, err := jw_token.CreateTestToken("10s")
 		So(err, ShouldBeNil)
 		So(jwt, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
@@ -102,11 +106,8 @@ func TestDocumentReferenceCache(t *testing.T) {
 		//c := New(baseurl)
 		err = os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!") //util.RandomString(32))
 		So(err, ShouldBeNil)
-		maker, err := jw_token.NewJWTMaker(os.Getenv("ACCESS_SECRET"))
-		So(err, ShouldBeNil)
-		So(maker, ShouldNotBeNil)
 		os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
-		jwt, payload, err := jw_token.CreateTestJWToken("10s")
+		jwt, payload, err := jw_token.CreateTestToken("10s")
 		So(err, ShouldBeNil)
 		So(jwt, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
@@ -176,7 +177,7 @@ func TestDocumentReferenceBundleCache(t *testing.T) {
 	fmt.Printf("\n\n\n\ncacheTest:68  --  Test FHIR ading DocumentReference to query\n")
 	//c := New(baseurl)
 	Convey("Run a query", t, func() {
-		jwt, payload, err := jw_token.CreateTestJWToken("10s")
+		jwt, payload, err := jw_token.CreateTestToken("10s")
 		So(err, ShouldBeNil)
 		So(jwt, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)

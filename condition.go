@@ -19,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	jw_token "github.com/dhf0820/jwToken"
+	jw_token "github.com/dhf0820/golangJWT"
 )
 
 func findCondition(w http.ResponseWriter, r *http.Request) {

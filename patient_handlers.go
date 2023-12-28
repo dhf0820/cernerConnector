@@ -10,7 +10,7 @@ import (
 	cm "github.com/dhf0820/baseConnector/common"
 
 	fhir "github.com/dhf0820/fhir4"
-	jw_token "github.com/dhf0820/jwToken"
+	jw_token "github.com/dhf0820/golangJWT"
 	common "github.com/dhf0820/uc_common"
 
 	//"github.com/gorilla/mux"
