@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   cernerConnector:
-    image: dhf0820/cerner_connector:231227.0   #dhf0820/cerner_connector:231224.0 dhf0820/uc_ca3_arm64:220925.0
+    image: dhf0820/cerner_connector:231224.1   #dhf0820/uc_ca3_arm64:220925.0
     ports:
       - "0.0.0.0:20103:9200"
     environment:

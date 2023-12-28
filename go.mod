@@ -8,7 +8,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dhf0820/baseConnector v0.0.0-20230612022521-666c749210ae
 	github.com/dhf0820/fhir4 v0.0.0-20231012185545-c350b9504fb4
-	github.com/dhf0820/golangJWT v0.0.0-20231225044831-b15311f0b194
+	github.com/dhf0820/golangJWT v0.0.0-20231227062716-846921ca6c1d
 	github.com/dhf0820/uc_common v0.0.0-20231224005049-ffc6b90e1ed2
 	github.com/dhf0820/uc_core v0.0.0-20230822025212-bfd9037a37b3
 	github.com/dhf0820/vslog v0.0.0-20231007220019-758899f13b4a

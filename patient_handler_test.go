@@ -47,7 +47,7 @@ func TestSearchPatient(t *testing.T) {
 
 		os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
 
-		jwt, payload, err := jw_token.CreateTestJWToken("10s")
+		jwt, payload, err := jw_token.CreateTestToken("10s")
 		So(err, ShouldBeNil)
 		So(jwt, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
@@ -184,7 +184,7 @@ func TestPatientGet(t *testing.T) {
 			//req := httptest.NewRequest("GET", "/62f14531ba5395278cd530c4/Patient/12724066", nil)
 			//req, _ := http.NewRequest("GET", "/api/rest/v1/Patient?family=smart&given=fred&_count=2", nil)
 			godotenv.Load("./.env_uc_ca3_conn_test")
-			jwt, payload, err := jw_token.CreateTestJWToken("10s")
+			jwt, payload, err := jw_token.CreateTestToken("10s")
 			So(err, ShouldBeNil)
 			So(jwt, ShouldNotBeNil)
 			So(payload, ShouldNotBeNil)
@@ -307,7 +307,7 @@ func TestCernerSearchPatient(t *testing.T) {
 		So(err, ShouldBeNil)
 
 		os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
-		jwt, payload, err := jw_token.CreateTestJWToken("10s")
+		jwt, payload, err := jw_token.CreateTestToken("10s")
 		So(err, ShouldBeNil)
 		So(jwt, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)

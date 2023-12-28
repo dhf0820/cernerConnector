@@ -47,7 +47,7 @@ func TestPostPatient(t *testing.T) {
 		err = os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
 		So(err, ShouldBeNil)
 		os.Setenv("TOKEN_DURATION", "10s")
-		newToken, payload, err := jw_token.CreateTestToken()
+		newToken, payload, err := jw_token.CreateTestToken("")
 		So(err, ShouldBeNil)
 		So(newToken, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
@@ -166,7 +166,7 @@ func TestPostDuplicatePatient(t *testing.T) {
 		//caFhirId := "62d0ad3c9d0119afff9978b3"
 		//cerFhirId := "62f1c5dab3070d0b40e7aac1"
 		os.Setenv("TOKEN_DURATION", "10s")
-		newToken, payload, err := jw_token.CreateTestToken()
+		newToken, payload, err := jw_token.CreateTestToken("")
 		So(err, ShouldBeNil)
 		So(newToken, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
@@ -349,7 +349,7 @@ func TestPatientSearch(t *testing.T) {
 		So(err, ShouldBeNil)
 		log.Debug3("Create new token: ")
 		os.Setenv("TOKEN_DURATION", "10s")
-		jwt, payload, err := jw_token.CreateTestToken()
+		jwt, payload, err := jw_token.CreateTestToken("")
 		So(err, ShouldBeNil)
 		So(payload, ShouldNotBeNil)
 		So(jwt, ShouldNotBeNil)

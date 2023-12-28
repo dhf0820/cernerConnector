@@ -31,7 +31,7 @@ func TestQuery(t *testing.T) {
 	fmt.Printf("Test run a FHIR query")
 	c := New(baseurl, "application/json+fhir")
 	Convey("Run a query", t, func() {
-		newToken, payload, err := jw_token.CreateTestJWToken("10s")
+		newToken, payload, err := jw_token.CreateTestToken("10s")
 		So(err, ShouldBeNil)
 		So(newToken, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
@@ -50,7 +50,7 @@ func TestDocumentReferenceQuery(t *testing.T) {
 	fmt.Printf("\n\n\n\nFhir4Test:38  --  Test run a FHIR query")
 	c := New(baseurl, "application/json+fhir")
 	Convey("Run a query", t, func() {
-		newToken, payload, err := jw_token.CreateTestJWToken("10s")
+		newToken, payload, err := jw_token.CreateTestToken("10s")
 		So(err, ShouldBeNil)
 		So(newToken, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
@@ -82,7 +82,7 @@ func TestDocumentReferenceQuery(t *testing.T) {
 func TestGetFHIR(t *testing.T) {
 	Convey("Subject: GetFHIR", t, func() {
 		fmt.Printf("TestGetFHIR\n")
-		newToken, payload, err := jw_token.CreateTestJWToken("10s")
+		newToken, payload, err := jw_token.CreateTestToken("10s")
 		So(err, ShouldBeNil)
 		So(newToken, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
@@ -118,7 +118,7 @@ func TestGetSrcFHIRBundle(t *testing.T) {
 	Convey("Subject: GetSrcFHIRBundle", t, func() {
 		srcBaseUrl := "http://192.168.1.152:4000/api/rest/v1"
 		fmt.Printf("TestGetSrcFHIR:116\n")
-		newToken, payload, err := jw_token.CreateTestJWToken("10s")
+		newToken, payload, err := jw_token.CreateTestToken("10s")
 		So(err, ShouldBeNil)
 		So(newToken, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
@@ -323,7 +323,7 @@ func TestGetSrcFHIRBundle(t *testing.T) {
 func TestGetRemoteFhirPatient(t *testing.T) {
 	Convey("Subject: GetRemoteFhirPatient", t, func() {
 		fmt.Printf("TestGetRemoteFhirPatient:321\n")
-		newToken, payload, err := jw_token.CreateTestJWToken("10s")
+		newToken, payload, err := jw_token.CreateTestToken("10s")
 		So(err, ShouldBeNil)
 		So(newToken, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)

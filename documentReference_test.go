@@ -64,7 +64,7 @@ func TestSimpleFindDocumentRef(t *testing.T) {
 		os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
 		os.Setenv("TOKEN_DURATION", "10m")
 
-		jwt, payload, err := jw_token.CreateTestToken()
+		jwt, payload, err := jw_token.CreateTestToken("")
 		So(err, ShouldBeNil)
 		So(jwt, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
