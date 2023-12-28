@@ -26,7 +26,7 @@ import (
 	//"github.com/dhf0820/token"
 	common "github.com/dhf0820/uc_common"
 	//"github.com/dhf0820/uc_core/service"
-	jw_token "github.com/dhf0820/jwToken"
+	jw_token "github.com/dhf0820/golangJWT"
 	//"github.com/davecgh/go-spew/spew"
 	//fhir "github.com/dhf0820/fhir4"
 

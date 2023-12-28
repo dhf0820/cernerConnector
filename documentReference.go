@@ -20,7 +20,7 @@ import (
 	"time"
 
 	jw_token "github.com/dhf0820/golangJWT"
-	//jw_token "github.com/dhf0820/jwToken"
+	//jw_token "github.com/dhf0820/golangJWT"
 )
 
 func findDocumentReference(w http.ResponseWriter, r *http.Request) {

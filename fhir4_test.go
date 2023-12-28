@@ -11,8 +11,9 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	fhir "github.com/dhf0820/fhir4"
+
 	//"github.com/dhf0820/token"
-	jw_token "github.com/dhf0820/jwToken"
+	jw_token "github.com/dhf0820/golangJWT"
 	//github.com/davecgh/go-spew/spew"
 	//log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
