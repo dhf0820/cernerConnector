@@ -24,7 +24,8 @@ import (
 
 	//"time"
 
-	jw_token "github.com/dhf0820/jwToken"
+	//jw_token "github.com/dhf0820/jwToken"
+	jw_token "github.com/dhf0820/golangJWT"
 	common "github.com/dhf0820/uc_common"
 
 	//"github.com/dhf0820/uc_core/service"
@@ -60,7 +61,7 @@ func TestSimpleFindDiagnosticRepts(t *testing.T) {
 		So(err, ShouldBeNil)
 		//w := httptest.NewRecorder()
 		os.Setenv("ACCESS_SECRET", "I am so blessed Debbie loves me!")
-		jwt, payload, err := jw_token.CreateTestJWToken("10s")
+		jwt, payload, err := jw_token.CreateTestToken("10s")
 		So(err, ShouldBeNil)
 		So(jwt, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)

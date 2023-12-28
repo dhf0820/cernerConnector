@@ -1,6 +1,8 @@
 module github.com/dhf0820/cernerConnector
 
-go 1.21
+go 1.21.1
+
+toolchain go1.21.5
 
 replace gitlab.com/dhf0820/cernerConnector => ../cernerConnector
 
