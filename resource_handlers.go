@@ -1118,6 +1118,7 @@ func FillResourceResponse(resp *common.ResourceResponse, resourceType string) er
 		//resData := common.ResourceData{}
 		for _, item := range resp.Bundle.Entry {
 			resData := common.ResourceData{}
+
 			pat, err := fhir.UnmarshalPatient(item.Resource)
 			if err != nil {
 				return log.Errorf("UnMarshal(Patient) error = " + err.Error())

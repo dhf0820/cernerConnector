@@ -69,9 +69,10 @@ func TestPatientCache(t *testing.T) {
 		// rc := io.NopCloser(strings.NewReader(cps))
 		// req.Body = rc
 		os.Setenv("USE_CACHE", "true")
-		bundle, err := PatientSearch(cp, "family=jo&_count=3", jwt)
+		bundle, cacheHeader, err := PatientSearch(cp, "family=jo&_count=3", jwt)
 		So(err, ShouldBeNil)
 		So(bundle, ShouldNotBeNil)
+		So(cacheHeader, ShouldNotBeNil)
 		log.Debug3("Link: " + spew.Sdump(bundle.Link))
 		// data, err := c.Query("Patient/12724066")
 		// So(err, ShouldBeNil)
