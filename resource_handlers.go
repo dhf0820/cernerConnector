@@ -476,7 +476,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	}
 
 	connectorConfig := connectorPayload.ConnectorConfig
-	log.Debug5("-- ConnectorPayload = " + spew.Sdump(connectorPayload))
+	log.Debug3("-- ConnectorPayload = " + spew.Sdump(connectorPayload))
 	uri := r.URL.RequestURI()
 	fmt.Printf("findResource:475  --  uri: %s\n", uri)
 	fmt.Printf("findResource:476  --  URL.Path() = %s\n", r.URL.Path)
@@ -666,7 +666,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	var bundle *fhir.Bundle
 	var header *common.CacheHeader
 	//resourceId := r.Header.Get("Fhir-System")
-	log.Debug5(" - connectorPayload = " + spew.Sdump(connectorPayload))
+	log.Debug3(" - connectorPayload = " + spew.Sdump(connectorPayload))
 	qryStr := r.URL.RawQuery
 
 	log.Debug3(fmt.Sprintf(" - resource = %s  uri = %s", resourceType, qryStr))

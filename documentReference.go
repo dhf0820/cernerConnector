@@ -14,7 +14,7 @@ import (
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	// //"os"
+	//"os"
 	//"strconv"
 	"strings"
 	"time"
@@ -82,27 +82,35 @@ func findDocumentReference(w http.ResponseWriter, r *http.Request) {
 	totalPages, bundle, header, err = FindDocumentReference(&connectorPayload, userId, queryStr, JWToken)
 	log.Debug3(" - FindDocumentReference returned")
 	finalStatus := 500
+	noCache := false
 	if err != nil {
-		errMsg := log.ErrMsg(fmt.Sprintf("error:  %s", err.Error()))
-		fmt.Println(errMsg)
-		// errParts := strings.Split(err.Error(), "|")
-		// log.Debug3(" - errParts = " + spew.Sdump(errParts))
-		// if len(errParts) > 1 { //Not a valid error message
-		// 	errMsg = errParts[1]
-		// 	finalStatus, err = strconv.Atoi(errParts[0])
-		// 	if err != nil {
-		// 		finalStatus = 413
-		// 	}
-		// 	log.Debug3("finalStatus: " + fmt.Sprint(finalStatus))
-		// }
-		oo := CreateOperationOutcome(fhir.IssueTypeNotFound, fhir.IssueSeverityInformation, &errMsg)
+		if err.Error() != "CacheNotAvailable" {
+			errMsg := log.ErrMsg(fmt.Sprintf("error:  %s", err.Error()))
+			fmt.Println(errMsg)
+			// errParts := strings.Split(err.Error(), "|")
+			// log.Debug3(" - errParts = " + spew.Sdump(errParts))
+			// if len(errParts) > 1 { //Not a valid error message
+			// 	errMsg = errParts[1]
+			// 	finalStatus, err = strconv.Atoi(errParts[0])
+			// 	if err != nil {
+			// 		finalStatus = 413
+			// 	}
+			// 	log.Debug3("finalStatus: " + fmt.Sprint(finalStatus))
+			// }
+			oo := CreateOperationOutcome(fhir.IssueTypeNotFound, fhir.IssueSeverityInformation, &errMsg)
 
-		log.Debug3("OpOutcome: " + spew.Sdump(oo))
-		WriteFhirOperationOutcome(w, finalStatus, oo)
-		//CreateOperationOutcome(fhir.IssueTypeNotFound, fhir.IssueSeverityInformation, &errMsg))
-		return
+			log.Debug3("OpOutcome: " + spew.Sdump(oo))
+			WriteFhirOperationOutcome(w, finalStatus, oo)
+			//CreateOperationOutcome(fhir.IssueTypeNotFound, fhir.IssueSeverityInformation, &errMsg))
+			return
+		} else {
+			noCache = true
+		}
 	}
 	//}
+	if noCache {
+		totalPages = 1
+	}
 	log.Debug3(fmt.Sprintf(" - Get %s bundle successful in %s", resourceType, time.Since(startTime)))
 	log.Debug3(fmt.Sprintf(" - Total Pages: %d", totalPages))
 	log.Debug3(fmt.Sprintf(" - Number in page: %d", len(bundle.Entry)))
@@ -404,38 +412,44 @@ func FindDocumentReference(connPayLoad *common.ConnectorPayload, userId, query, 
 	//log.Debug5("bundle: " + spew.Sdump(bundle))
 	cacheBundle.Bundle = bundle
 	startTime = time.Now()
-	log.Debug3("calling CaacheResourceBundleAndEntries")
-	pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
 
-	log.Debug3(fmt.Sprintf("CacheResource returned %d %ss in page: %d for %s  took %s\n", len(cacheBundle.Bundle.Entry), resourceType, page, header.SystemCfg.DisplayName, time.Since(startTime)))
-	if err != nil {
-		//return err and done
-		return int64(pg + 1), bundle, cacheBundle.Header, err
-	}
-	log.Debug3("--  links: " + spew.Sdump(bundle.Link))
-	//Follow the bundle links to retrieve all bundles(pages) in the query response
-	nextURL := GetNextDocumentReferenceUrl(bundle.Link)
-	log.Debug3("--  nextURL: " + nextURL)
-	total := int64(0)
-	if nextURL == "" {
-		log.Debug3("-- Get" + resourceType + "Url contains no next - One page only")
-		total, err = TotalCacheForQuery(cacheBundle.QueryId)
-		log.Debug3("total: " + fmt.Sprint(total))
-		cacheBundle.Header.PageId = pg
-		//page++
-		return int64(pg), bundle, cacheBundle.Header, err
-	}
-	page++
-	fmt.Printf("\n\n\n\n\n\n\n")
-	log.Debug3("Calling c.GetNextDocumentReference for page " + fmt.Sprint(page))
-	c.GetNextDocumentReference(header, nextURL, JWToken, page)
-	//go c.GetNextDocumentReference(header, nextURL, JWToken, page)
-	log.Debug3("--  Page: " + fmt.Sprint(page) + " total time: " + fmt.Sprint(time.Since(startTime)))
-	// There is one full page and possibley more. Respond with two aso they user will create two page buttons and update every
-	// 10 secnds.
-	//return int64(page), bundle, cacheBundle.Header, err
-	if len(bundle.Entry) == 0 {
-		return 0, bundle, cacheBundle.Header, log.Errorf("No resources found")
+	if UseCache() {
+		log.Debug3("calling CacheResourceBundleAndEntries")
+		pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
+
+		if pg == -1 {
+			log.Error("Cache not responding")
+			return 0, nil, nil, nil
+		}
+		log.Debug3(fmt.Sprintf("CacheResource returned %d %ss in page: %d for %s  took %s\n", len(cacheBundle.Bundle.Entry), resourceType, page, header.SystemCfg.DisplayName, time.Since(startTime)))
+		if err != nil {
+			//return err and done
+			return int64(pg + 1), bundle, cacheBundle.Header, err
+		}
+		log.Debug3("--  links: " + spew.Sdump(bundle.Link))
+		//Follow the bundle links to retrieve all bundles(pages) in the query response
+		nextURL := GetNextDocumentReferenceUrl(bundle.Link)
+		log.Debug3("--  nextURL: " + nextURL)
+		total := int64(0)
+		if nextURL == "" {
+			log.Debug3("-- Get" + resourceType + "Url contains no next - One page only")
+			total, err = TotalCacheForQuery(cacheBundle.QueryId)
+			log.Debug3("total: " + fmt.Sprint(total))
+			cacheBundle.Header.PageId = pg
+			//page++
+			return int64(pg), bundle, cacheBundle.Header, err
+		}
+		page++
+		log.Debug3("Calling c.GetNextDocumentReference for page " + fmt.Sprint(page))
+		c.GetNextDocumentReference(header, nextURL, JWToken, page)
+		//go c.GetNextDocumentReference(header, nextURL, JWToken, page)
+		log.Debug3("--  Page: " + fmt.Sprint(page) + " total time: " + fmt.Sprint(time.Since(startTime)))
+		// There is one full page and possibley more. Respond with two aso they user will create two page buttons and update every
+		// 10 secnds.
+		//return int64(page), bundle, cacheBundle.Header, err
+		if len(bundle.Entry) == 0 {
+			return 0, bundle, cacheBundle.Header, log.Errorf("No resources found")
+		}
 	}
 	log.Debug3("FindDocumentReference returning")
 	return int64(len(bundle.Entry)), bundle, cacheBundle.Header, err

@@ -2,8 +2,8 @@ package main
 
 import (
 	//"context"
-	"encoding/json"
-	"net/http"
+	//"encoding/json"
+	//"net/http"
 
 	fhir "github.com/dhf0820/fhir4"
 
@@ -16,15 +16,15 @@ import (
 	jw_token "github.com/dhf0820/golangJWT"
 
 	//"time"
-	"io"
-	"strings"
+	//"io"
+	//"strings"
 
 	"github.com/davecgh/go-spew/spew"
 	//"github.com/dhf0820/token"
 	//"github.com/dhf0820/uc_core/util"
-
 	common "github.com/dhf0820/uc_common"
 	log "github.com/dhf0820/vslog"
+	"github.com/joho/godotenv"
 	. "github.com/smartystreets/goconvey/convey"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -37,7 +37,17 @@ import (
 const baseurl = "https://fhir-open.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d/"
 
 func TestPatientCache(t *testing.T) {
+	log.SetDebuglevel("DEBUG3")
 	log.Debug3("Test run a FHIR query")
+	err := godotenv.Load("./.env.cerner_conn_test")
+	if err != nil {
+		t.Errorf("./.env.cerner_conn_test not found")
+	}
+	Conf, err = GetServiceConfig("cerner_conn", "ssd", "test")
+	if err != nil {
+		log.Error("GetServiceConfig failed: " + err.Error())
+		t.FailNow()
+	}
 	//c := New(baseurl, "application/json+fhir")
 	Convey("Run a query", t, func() {
 
@@ -47,27 +57,29 @@ func TestPatientCache(t *testing.T) {
 		So(err, ShouldBeNil)
 		So(jwt, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
-		jwt = "Bearer " + jwt
-		req, err := http.NewRequest("GET", "system/640ba5e3bd4105586a6dda74/Patient?patient=12724067", nil)
-		So(err, ShouldBeNil)
-		So(req, ShouldNotBeNil)
-		req.Header.Set("Authorization", jwt)
+		// jwt = "Bearer " + jwt
+		// req, err := http.NewRequest("GET", "system/640ba5e3bd4105586a6dda74/Patient?family=jo&_count=3", nil)
+		// So(err, ShouldBeNil)
+		// So(req, ShouldNotBeNil)
+		// req.Header.Set("Authorization", jwt)
 		cp := CreateCP(false)
-		cpb, err := json.Marshal(cp)
-		So(err, ShouldBeNil)
-		cps := string(cpb)
-		rc := io.NopCloser(strings.NewReader(cps))
-		req.Body = rc
-		bundle, err := PatientSearch(cp, "family=sm", jwt)
+		// cpb, err := json.Marshal(cp)
+		// So(err, ShouldBeNil)
+		// cps := string(cpb)
+		// rc := io.NopCloser(strings.NewReader(cps))
+		// req.Body = rc
+		os.Setenv("USE_CACHE", "true")
+		bundle, err := PatientSearch(cp, "family=jo&_count=3", jwt)
 		So(err, ShouldBeNil)
 		So(bundle, ShouldNotBeNil)
+		log.Debug3("Link: " + spew.Sdump(bundle.Link))
 		// data, err := c.Query("Patient/12724066")
 		// So(err, ShouldBeNil)
 		// So(data, ShouldNotBeNil)
 		pat, err := fhir.UnmarshalPatient(bundle.Entry[0].Resource)
 		So(err, ShouldBeNil)
 		So(pat, ShouldNotBeNil)
-		fmt.Printf("PatientSearch returned: %s\n", spew.Sdump(pat))
+		//log.Debug3("PatientSearch returned Entry[0]: " + spew.Sdump(pat))
 	})
 }
 

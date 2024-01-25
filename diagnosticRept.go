@@ -505,31 +505,33 @@ func FindDiagnosticRept(connPayLoad *common.ConnectorPayload, userId, query, JWT
 	// }
 	log.Debug5("bundle: " + spew.Sdump(bundle))
 	cacheBundle.Bundle = bundle
-	startTime = time.Now()
-	// pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
-	// fmt.Printf("FindResource:131 CacheResource returned %d %ss in page: %d for %s  took %s\n", len(cacheBundle.Bundle.Entry), resource, page, systemCfg.DisplayName, time.Since(startTime))
-	// if err != nil {
-	// 	//return err and done
-	// 	return int64(pg + 1), bundle, cacheBundle.Header, err
-	// }
-	// fmt.Printf("FindResource:143  --  links: %s\n", spew.Sdump(bundle.Link))
-	// //Follow the bundle links to retrieve all bundles(pages) in the query response
-	// nextURL := GetNextResourceUrl(bundle.Link)
-	// total := int64(0)
-	// if nextURL == "" {
-	// 	msg := fmt.Sprintf("FindResource:147 -- GetNext%sUrl initialy No Next - One page only ", resource)
-	// 	fmt.Println(msg)
-	// 	total, err = TotalCacheForQuery(cacheBundle.QueryId)
-	// 	cacheBundle.Header.PageId = pg
-	// 	//page++
-	// 	return int64(pg), bundle, cacheBundle.Header, err
-	// }
-	// page++
-	// go c.GetNextResource(header, nextURL, resource, JWToken, page)
-	log.Debug3("--  Page 1 total time: " + fmt.Sprint(time.Since(startTime)))
-	// There is one full page and possibley more. Respond with two aso they user will create two page buttons and update every
-	// 10 secnds.
-	//return int64(page), bundle, cacheBundle.Header, err
+	if UseCache() {
+		startTime = time.Now()
+		// pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
+		// fmt.Printf("FindResource:131 CacheResource returned %d %ss in page: %d for %s  took %s\n", len(cacheBundle.Bundle.Entry), resource, page, systemCfg.DisplayName, time.Since(startTime))
+		// if err != nil {
+		// 	//return err and done
+		// 	return int64(pg + 1), bundle, cacheBundle.Header, err
+		// }
+		// fmt.Printf("FindResource:143  --  links: %s\n", spew.Sdump(bundle.Link))
+		// //Follow the bundle links to retrieve all bundles(pages) in the query response
+		// nextURL := GetNextResourceUrl(bundle.Link)
+		// total := int64(0)
+		// if nextURL == "" {
+		// 	msg := fmt.Sprintf("FindResource:147 -- GetNext%sUrl initialy No Next - One page only ", resource)
+		// 	fmt.Println(msg)
+		// 	total, err = TotalCacheForQuery(cacheBundle.QueryId)
+		// 	cacheBundle.Header.PageId = pg
+		// 	//page++
+		// 	return int64(pg), bundle, cacheBundle.Header, err
+		// }
+		// page++
+		// go c.GetNextResource(header, nextURL, resource, JWToken, page)
+		log.Debug3("--  Page 1 total time: " + fmt.Sprint(time.Since(startTime)))
+		// There is one full page and possibley more. Respond with two aso they user will create two page buttons and update every
+		// 10 secnds.
+		//return int64(page), bundle, cacheBundle.Header, err
+	}
 	if len(bundle.Entry) == 0 {
 		return 0, bundle, cacheBundle.Header, log.Errorf("No resources found")
 	} else {
@@ -555,10 +557,9 @@ func (c *Connection) GetNextDiagnosticRept(header *common.CacheHeader, url, reso
 	//fmt.Printf("GetNextResource:155  --  resource: %s\n", resource) //spew.Sdump(header))
 	//Call Remote FHIR server for the resource bundle
 	startTime := time.Now()
-	bundle, err := c.GetFhirBundle(url, JWToken)
+	bundle, err := c.GetFhirBundle(url, token)
 	if err != nil {
-		msg := fmt.Sprintf("--  error: " + err.Error())
-		fmt.Println(msg)
+		log.Error("c.GetFhirBundle error: " + err.Error())
 		return
 	}
 	log.Debug3(fmt.Sprintf("--  Query Next Set from %s of %s time: %s\n", header.SystemCfg.DisplayName, header.ResourceType, time.Since(startTime)))
@@ -579,27 +580,33 @@ func (c *Connection) GetNextDiagnosticRept(header *common.CacheHeader, url, reso
 	cacheBundle.ID = primitive.NewObjectID()
 	cacheBundle.Header = header
 	cacheBundle.Bundle = bundle
-	log.Debug3("-- Calling CacheResourceBundleAndEntries")
-	pg, err := CacheResourceBundleAndEntries(&cacheBundle, token, page)
-	if err != nil {
-		log.Error("GetNextResource: returned err: " + err.Error())
-		return
-		//return int64(pg + 1), &bundle, cacheBundle.Header, err
+	if UseCache() {
+		log.Debug3("-- Calling CacheResourceBundleAndEntries")
+		pg, err := CacheResourceBundleAndEntries(&cacheBundle, token, page)
+		if err != nil {
+			log.Error("GetNextResource: returned err: " + err.Error())
+			return
+			//return int64(pg + 1), &bundle, cacheBundle.Header, err
+		}
+		if pg == -1 {
+			log.Error("Cache not responding")
+			return
+		}
+		log.Debug3("--  GetNextDocumentReptUrl")
+		nextURL := GetNextDiagnosticReptUrl(bundle.Link)
+		if nextURL == "" {
+			msg := fmt.Sprintf("GetNextDiagnosticReptUrl Last page had %d DiagnosticRepts processed ", len(bundle.Entry))
+			// fmt.Println(msg)
+			log.Debug3("--  Should return:  " + msg)
+			return
+		} else {
+			log.Debug3("-- GetNextDiagnosticRept is being called in the background")
+			go c.GetNextResource(header, nextURL, resource, token, pg+1)
+			log.Debug3("GetNextDiagnosticRept Returned")
+		}
+		log.Debug3("GetNextDiagnosticRept is returning")
 	}
-
-	log.Debug3("--  GetNextDocumentReptUrl")
-	nextURL := GetNextDiagnosticReptUrl(bundle.Link)
-	if nextURL == "" {
-		msg := fmt.Sprintf("GetNextDiagnosticReptUrl Last page had %d DiagnosticRepts processed ", len(bundle.Entry))
-		// fmt.Println(msg)
-		log.Debug3("--  Should return:  " + msg)
-		return
-	} else {
-		log.Debug3("-- GetNextDiagnosticRept is being called in the background")
-		go c.GetNextResource(header, nextURL, resource, token, pg+1)
-		log.Debug3("GetNextDiagnosticRept Returned")
-	}
-	//log.Debug3("GetNextResource is returning")
+	log.Info("No Caching being used")
 }
 
 // func GetHeaderInfoFromBundle(resource string, hdr *common.CacheHeader, bundle *fhir4.Bundle) (string, string, error) {

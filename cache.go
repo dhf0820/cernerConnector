@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io"
-
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 
 	//"strconv"
 	//"github.com/davecgh/go-spew/spew"
@@ -74,6 +74,11 @@ func CacheResourceBundleElements(ctx context.Context, userId,
 // // CacheResourceBundleAndEntries: accepts a cacheBundle and JWToken, submiting it to the caching system returning the QueryId and err
 // // sends bundle to cache which caches the Bundle  in BundleCache, then caches each entry in ResourceCacheCaches both the bundle and the individual entries cached in
 func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page int) (int, error) {
+	if os.Getenv("USE_CACHE") == "false" {
+		return -1, errors.New("NO CACHE")
+	}
+	log.Info("Starting CacheResourceBundleAndEnteries")
+	fmt.Println()
 	header := *cbdl.Header
 	log.Debug3(fmt.Sprintf("--  Starting for ResourceType: %s  Page: %d\n", header.ResourceType, page))
 	//fmt.Printf("CacheResourceBundleAndEntries:77  -- Header = %s\n", spew.Sdump(header))
@@ -118,26 +123,26 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 	if err != nil {
 		err = log.Errorf("CacheResourceBundleAndEntries  -- Error uc_cache Request: " + err.Error())
 		fmt.Println(err.Error())
-		return 0, err
+		return 0, nil
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		err = log.Errorf(fmt.Sprintf("CacheResourceBundleAndEntries -- Invalid uc_cache Status: " + fmt.Sprint(resp.StatusCode) + " -- " + resp.Status))
 		fmt.Println(err.Error())
-		return 0, err
+		return 0, nil
 	}
 	log.Debug3("Bundle Sent to uc_cache Successful")
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		err = fmt.Errorf("CacheResourceBundleAndEntries: ReadAllBody : error: " + err.Error())
 		fmt.Println(err.Error())
-		return 0, err
+		return 0, nil
 	}
 	bundleResp := common.BundleCacheResponse{}
 	err = json.Unmarshal(body, &bundleResp)
 	if err != nil {
 		err = log.Errorf("CacheResourceBundleAndEntries: Unmarshal BundleResponse failed: " + err.Error())
 		fmt.Println(err.Error())
-		return 0, err
+		return 0, nil
 	}
 	//page = page + 1
 	return page, nil

@@ -4,12 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	//"github.com/davecgh/go-spew/spew"
 	"os"
 	"strconv"
 	"time"
 
-	//"github.com/davecgh/go-spew/spew"
+	"github.com/davecgh/go-spew/spew"
 	common "github.com/dhf0820/uc_common"
 	log "github.com/dhf0820/vslog"
 
@@ -157,7 +156,7 @@ func DBUrl() string {
 
 	//cacheDB := os.Getenv("CACHE_DB")
 	var err error
-	//log.Debug3(" GetDatabaseByName Conf: " + spew.Sdump(Conf))
+	log.Info(" GetDatabaseByName Conf: " + spew.Sdump(Conf))
 	dbConnector, err = common.GetDatabaseByName(Conf.DataConnectors, "mongo")
 	if err != nil {
 		log.Error("GetDatabaseByName error: " + err.Error())
