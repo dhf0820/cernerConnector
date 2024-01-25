@@ -449,12 +449,14 @@ func GetObservation(cp *common.ConnectorPayload, resourceName, resourceId string
 func FindObservation(connPayLoad *common.ConnectorPayload, userId, query, JWToken string) (int64, *fhir.Bundle, *common.CacheHeader, error) {
 	resource := "Observation"
 	page := 1
+
+	sysCfg := connPayLoad.System
 	connConfig := connPayLoad.ConnectorConfig
 	log.Debug3("--  query: " + query)
-	//fullQuery := fmt.Sprintf("/%s?%s", resource, query)
+	fullQuery := fmt.Sprintf("%s?%s", resource, query)
 	//fmt.Printf("FindRecource:84  --  ConectorPayload: %s\n", spew.Sdump(connPayLoad)))
 	log.Debug3("--  UserId: " + userId)
-	//log.Debug3("--  fullQuery: " + fullQuery)
+	log.Debug3("--  fullQuery: " + fullQuery)
 	//log.Debug3("-- Page: %d\n", page)
 	//fmt.Printf("FindResource:90  --  ConnectorConfig: %s\n", spew.Sdump(connConfig))
 	//fmt.Printf("FindResource:91  --  query: %s\n", query)
@@ -465,8 +467,8 @@ func FindObservation(connPayLoad *common.ConnectorPayload, userId, query, JWToke
 	// check every 10 seconds.  Should be a FhirSystem variable value to avoid code change
 	c := New(connPayLoad.ConnectorConfig.HostUrl, "application/json")
 	startTime := time.Now()
-	log.Debug3("query: " + query)
-	bundle, err := c.GetFhirBundle(query, JWToken)
+	log.Debug3("query: " + fullQuery)
+	bundle, err := c.GetFhirBundle(fullQuery, JWToken)
 	if err != nil {
 		// msg := log.ErrMsg("GetNextResource error: " + err.Error())
 		// fmt.Println(msg)
@@ -508,26 +510,32 @@ func FindObservation(connPayLoad *common.ConnectorPayload, userId, query, JWToke
 	log.Debug3("bundle: " + spew.Sdump(bundle))
 	cacheBundle.Bundle = bundle
 	startTime = time.Now()
-	// pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
-	// fmt.Printf("FindResource:131 CacheResource returned %d %ss in page: %d for %s  took %s\n", len(cacheBundle.Bundle.Entry), resource, page, systemCfg.DisplayName, time.Since(startTime))
-	// if err != nil {
-	// 	//return err and done
-	// 	return int64(pg + 1), bundle, cacheBundle.Header, err
-	// }
-	// fmt.Printf("FindResource:143  --  links: %s\n", spew.Sdump(bundle.Link))
-	// //Follow the bundle links to retrieve all bundles(pages) in the query response
-	// nextURL := GetNextResourceUrl(bundle.Link)
-	// total := int64(0)
-	// if nextURL == "" {
-	// 	msg := fmt.Sprintf("FindResource:147 -- GetNext%sUrl initialy No Next - One page only ", resource)
-	// 	fmt.Println(msg)
-	// 	total, err = TotalCacheForQuery(cacheBundle.QueryId)
-	// 	cacheBundle.Header.PageId = pg
-	// 	//page++
-	// 	return int64(pg), bundle, cacheBundle.Header, err
-	// }
-	// page++
-	// go c.GetNextResource(header, nextURL, resource, JWToken, page)
+	if !UseCache() {
+		log.Info("Using Caching")
+		pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
+		log.Debug3(fmt.Sprintf("CacheResourceBundleAndEntries returned %d %ss in page: %d for %s  took %s", len(cacheBundle.Bundle.Entry), resource, page, sysCfg.DisplayName, time.Since(startTime)))
+		if err != nil {
+			//return err and done
+			return int64(pg + 1), bundle, cacheBundle.Header, err
+		}
+		log.Debug3("links: " + spew.Sdump(bundle.Link))
+		//Follow the bundle links to retrieve all bundles(pages) in the query response
+		nextURL := GetNextObservationUrl(bundle.Link)
+		total := int64(0)
+		if nextURL == "" {
+			log.Debug3(fmt.Sprintf("GetNext%sUrl initialy No Next - One page only ", resource))
+			total, err = TotalCacheForQuery(cacheBundle.QueryId)
+			cacheBundle.Header.PageId = pg
+			log.Debug3("total: " + fmt.Sprint(total))
+			//page++
+			return int64(pg), bundle, cacheBundle.Header, err
+		}
+		page++
+		go c.GetNextObservation(header, nextURL, resource, JWToken, page)
+	} else {
+		log.Info("Not Using Caching")
+	}
+	log.Info("Used queery: " + fullQuery)
 	log.Debug3("--  Page 1 total time: " + fmt.Sprint(time.Since(startTime)))
 	// There is one full page and possibley more. Respond with two aso they user will create two page buttons and update every
 	// 10 secnds.

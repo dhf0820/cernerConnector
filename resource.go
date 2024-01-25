@@ -6,18 +6,23 @@ import (
 	//"bytes"
 	"encoding/json"
 	"net/http"
+
 	// 	//"errors"
 	"fmt"
+	"os"
+
 	"github.com/davecgh/go-spew/spew"
 	fhir "github.com/dhf0820/fhir4"
 	common "github.com/dhf0820/uc_common"
+
 	//common "github.com/dhf0820/uc_core/common"
-	log "github.com/dhf0820/vslog"
-	"github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"io"
 	"strings"
 	"time"
+
+	log "github.com/dhf0820/vslog"
+	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func GetResourceBytes(cp *common.ConnectorPayload, resourceName, resourceId string, token string) ([]byte, int, error) {
@@ -207,6 +212,7 @@ func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, t
 func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query, JWToken string) (int64, *fhir.Bundle, *common.CacheHeader, error) {
 	page := 1
 	connConfig := connPayLoad.ConnectorConfig
+	log.Debug3("connPayload: " + spew.Sdump(connPayLoad))
 	systemCfg := connPayLoad.System
 	log.Debug3("resource: " + resource)
 	log.Debug3("query: " + query)
@@ -268,41 +274,44 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	// }
 	cacheBundle.Bundle = bundle
 	startTime = time.Now()
-	log.Debug3("Calling CacheResourceBundleAndEntries with token: " + JWToken)
-	pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
-	log.Debug3(fmt.Sprintf("CacheResource returned %d %ss in page: %d for %s  took %s\n", len(cacheBundle.Bundle.Entry), resource, page, systemCfg.DisplayName, time.Since(startTime)))
-	if err != nil {
-		//return err and done
-		return int64(pg + 1), bundle, cacheBundle.Header, err
-	}
-	fmt.Printf("FindResource:143  --  links: %s\n", spew.Sdump(bundle.Link))
-	//Follow the bundle links to retrieve all bundles(pages) in the query response
-	nextURL := GetNextResourceUrl(bundle.Link)
-	total := int64(0)
-	if nextURL == "" {
-		log.Debug3("-- GetNext" + resource + " initialy No Next - One page only ")
+	if UseCache() {
+		log.Debug3("Calling CacheResourceBundleAndEntries with token: " + JWToken)
+		pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
+		log.Debug3(fmt.Sprintf("CacheResource returned %d %ss in page: %d for %s  took %s\n", len(cacheBundle.Bundle.Entry), resource, page, systemCfg.DisplayName, time.Since(startTime)))
+		if err != nil {
+			//return err and done
+			return int64(pg + 1), bundle, cacheBundle.Header, err
+		}
+		fmt.Printf("FindResource:143  --  links: %s\n", spew.Sdump(bundle.Link))
+		//Follow the bundle links to retrieve all bundles(pages) in the query response
+		nextURL := GetNextResourceUrl(bundle.Link)
+		total := int64(0)
+		if nextURL == "" {
+			log.Debug3("-- GetNext" + resource + " initialy No Next - One page only ")
 
-		total, err = TotalCacheForQuery(cacheBundle.QueryId)
-		cacheBundle.Header.PageId = pg
-		//page++
-		log.Debug3("total: " + fmt.Sprint(total))
-		return int64(pg), bundle, cacheBundle.Header, err
+			total, err = TotalCacheForQuery(cacheBundle.QueryId)
+			cacheBundle.Header.PageId = pg
+			//page++
+			log.Debug3("total: " + fmt.Sprint(total))
+			return int64(pg), bundle, cacheBundle.Header, err
+		}
+		page++
+		go c.GetNextResource(header, nextURL, resource, JWToken, page)
+		log.Debug3(fmt.Sprintf("Page 1 total time: %s", time.Since(startTime)))
+		// There is one full page and possibley more. Respond with two aso they user will create two page buttons and update every
+		// 10 secnds.
+		//return int64(page), bundle, cacheBundle.Header, err
+		if bundle == nil {
+			return 0, nil, nil, log.Errorf("Bundle is nil")
+		}
+		if len(bundle.Entry) == 0 {
+			return 0, bundle, cacheBundle.Header, log.Errorf("No resources found")
+		} else {
+			return int64(len(bundle.Entry)), bundle, cacheBundle.Header, err
+		}
 	}
-	page++
-	go c.GetNextResource(header, nextURL, resource, JWToken, page)
-	log.Debug3(fmt.Sprintf("Page 1 total time: %s", time.Since(startTime)))
-	// There is one full page and possibley more. Respond with two aso they user will create two page buttons and update every
-	// 10 secnds.
-	//return int64(page), bundle, cacheBundle.Header, err
-	if bundle == nil {
-		return 0, nil, nil, log.Errorf("Bundle is nil")
-	}
-	if len(bundle.Entry) == 0 {
-		return 0, bundle, cacheBundle.Header, log.Errorf("No resources found")
-	} else {
-		return int64(len(bundle.Entry)), bundle, cacheBundle.Header, err
-	}
-	return 0, bundle, cacheBundle.Header, err
+	return int64(len(bundle.Entry)), bundle, cacheBundle.Header, err
+	//return 0, bundle, cacheBundle.Header, err
 }
 
 func GetNextResourceUrl(link []fhir.BundleLink) string {
@@ -498,4 +507,11 @@ func CreateFhirQuery(r *http.Request) (string, error) {
 		log.Info("CreateFhirQuery = " + query)
 	}
 	return query, nil
+}
+
+func UseCache() bool {
+	if os.Getenv("USE_CACHE") == "TRUE" {
+		return true
+	}
+	return false
 }

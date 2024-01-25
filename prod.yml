@@ -2,19 +2,21 @@ version: "3.7"
 
 services:
   cernerConnector:
-    image: dhf0820/cerner_connector:231225.0   #dhf0820/uc_ca3_arm64:220925.0
+    image: dhf0820/cerner_connector:240101.1    #231228.1   #dhf0820/cerner_connector:231224.1 dhf0820/uc_ca3_arm64:220925.0
     ports:
       - "0.0.0.0:20103:9200"
     environment:
       LISTEN_PORT: 9200
-      CONFIG_ADDRESS: "http://dev.vertisoft.com:30300/api/rest/v1"
+      CONFIG_ADDRESS: "http://uc_core:9200/api/rest/v1" #"http://dev.vertisoft.com:30300/api/rest/v1"
       SERVICE_NAME: "cerner_conn"
       SERVICE_VERSION: "docker_test"
       COMPANY: "test"
       REFRESH_SECRET: "Debbie loves me more"
       ACCESS_SECRET: "I am so blessed Debbie loves me!"
+      USE_CACHE: "false"
       API: "RESTFUL"
       DBNAME: "test"
+      PAGE_SIZE: "24"
     networks:
       - vs_web
       - uc_attachable

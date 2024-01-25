@@ -14,8 +14,8 @@ import (
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	// //"os"
-	//"strconv"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -52,7 +52,7 @@ func findCondition(w http.ResponseWriter, r *http.Request) {
 	}
 
 	connectorConfig := connectorPayload.ConnectorConfig
-	log.Debug5("-- ConnectorPayload = " + spew.Sdump(connectorPayload))
+	//log.Debug5("-- ConnectorPayload = " + spew.Sdump(connectorPayload))
 	uri := r.URL.RequestURI()
 	log.Debug3("--  uri: " + uri)
 	log.Debug3("--  URL.Path() = " + r.URL.Path)
@@ -62,7 +62,8 @@ func findCondition(w http.ResponseWriter, r *http.Request) {
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
-
+	qryParams := strings.Split(r.URL.RawQuery, "&")
+	log.Debug3("qryParams: " + spew.Sdump(qryParams))
 	queryStr := ""
 	log.Debug3("-- Resource: " + resourceType)
 	queryStr = fmt.Sprintf("%s?%s", resourceType, r.URL.RawQuery) //BuildDiagnosticQuery(r)
@@ -79,8 +80,8 @@ func findCondition(w http.ResponseWriter, r *http.Request) {
 	log.Debug3(" - calling " + queryStr)
 	var totalPages int64
 	startTime := time.Now()
-	totalPages, bundle, header, err = FindObservation(&connectorPayload, userId, queryStr, JWToken)
-	log.Debug3(" - FindObservation returned")
+	totalPages, bundle, header, err = FindCondition(&connectorPayload, userId, queryStr, JWToken)
+	log.Debug3(" - FindCondition returned")
 	finalStatus := status
 	if err != nil {
 		errMsg := log.ErrMsg(fmt.Sprintf("error:  %s", err.Error()))
@@ -97,7 +98,7 @@ func findCondition(w http.ResponseWriter, r *http.Request) {
 		// }
 		oo := CreateOperationOutcome(fhir.IssueTypeNotFound, fhir.IssueSeverityInformation, &errMsg)
 
-		log.Debug3("OpOutcome: " + spew.Sdump(oo))
+		//log.Debug3("OpOutcome: " + spew.Sdump(oo))
 		WriteFhirOperationOutcome(w, finalStatus, oo)
 		//CreateOperationOutcome(fhir.IssueTypeNotFound, fhir.IssueSeverityInformation, &errMsg))
 		return
@@ -127,7 +128,7 @@ func findCondition(w http.ResponseWriter, r *http.Request) {
 	resp.Header = header
 	resp.Message = "Ok"
 	logTime := time.Now()
-	log.Debug3(fmt.Sprintf("--  resp without bundle: " + spew.Sdump(resp)))
+	//log.Debug3(fmt.Sprintf("--  resp without bundle: " + spew.Sdump(resp)))
 	log.Debug3(fmt.Sprintf("--  Time to log = %s", time.Since(logTime)))
 	resp.Bundle = bundle
 	log.Debug3(fmt.Sprintf("--  Number of entries in bundle: %d", len(bundle.Entry)))
@@ -222,7 +223,7 @@ func getCondition(w http.ResponseWriter, r *http.Request) {
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityError, &errMsg))
 		return
 	}
-	log.Debug3("Basic Resource: " + spew.Sdump(basicResource))
+	//log.Debug3("Basic Resource: " + spew.Sdump(basicResource))
 	resourceType = basicResource.ResourceType
 	//TODO: unmarshal into a basic fhir resource (id, text)
 	log.Debug3("FillResourceResponse for " + strings.ToLower(resourceType))
@@ -261,7 +262,7 @@ func getCondition(w http.ResponseWriter, r *http.Request) {
 		resp.CountInPage = 1
 		resp.QueryId = primitive.NewObjectID().Hex()
 		resp.Status = 200
-		log.Debug5("Patient case final " + spew.Sdump(resp))
+		//log.Debug5("Patient case final " + spew.Sdump(resp))
 	case "binary":
 		log.Debug3("Processing Binary")
 		//fmt.Printf("GetResource:831  --  patient raw = %v\n", results)
@@ -284,14 +285,14 @@ func getCondition(w http.ResponseWriter, r *http.Request) {
 		resp.QueryId = primitive.NewObjectID().Hex()
 		resp.Status = 200
 	case "documentreference":
-		log.Debug5("Processing DocumentReference results: " + spew.Sdump(results))
+		//log.Debug5("Processing DocumentReference results: " + spew.Sdump(results))
 		data, err := fhir.UnmarshalDocumentReference(results)
 		if err != nil {
 			errMsg := log.ErrMsg(fmt.Sprintf("Unmarshal %s error: %s", resourceType, err.Error()))
 			WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityFatal, &errMsg))
 			return
 		}
-		log.Debug3(fmt.Sprintf("Resource %s   contains: %s", resourceType, spew.Sdump(data)))
+		//log.Debug3(fmt.Sprintf("Resource %s   contains: %s", resourceType, spew.Sdump(data)))
 		resp.ResourceType = resourceType
 		//resp.Resource.ResourceType = resourceType
 
@@ -314,7 +315,7 @@ func getCondition(w http.ResponseWriter, r *http.Request) {
 			WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityError, &errMsg))
 			return
 		}
-		log.Debug3("Basic Resource: " + spew.Sdump(basicResource))
+		//log.Debug3("Basic Resource: " + spew.Sdump(basicResource))
 		resp.ResourceType = resourceType
 		//resp.Resource.ResourceType = resourceType
 
@@ -331,7 +332,7 @@ func getCondition(w http.ResponseWriter, r *http.Request) {
 	}
 	// resp.ResourceType = Resource
 	// resp.Resource.Resource = results
-	log.Debug5("returning resource: " + spew.Sdump(resp))
+	//log.Debug5("returning resource: " + spew.Sdump(resp))
 	WriteFhirResponse(w, resp.Status, &resp)
 }
 
@@ -383,12 +384,12 @@ func GetCondition(cp *common.ConnectorPayload, resourceName, resourceId string, 
 				log.Debug5("Response --  DocumentReference: " + spew.Sdump(docRef))
 				return bodyBytes, nil
 			case "diagnosticreport":
-				diagRept, err := fhir.UnmarshalDiagnosticReport(bodyBytes)
-				if err != nil {
-					log.Debug3("Response --  Error Decoding DiagnosticReport: " + err.Error())
-					return bodyBytes, log.Errorf("Response --  Error Decoding DiagnosticReport: " + err.Error())
-				}
-				log.Debug5("Response --  DiagnosticReport: " + spew.Sdump(diagRept))
+				// diagRept, err := fhir.UnmarshalDiagnosticReport(bodyBytes)
+				// if err != nil {
+				// 	log.Debug3("Response --  Error Decoding DiagnosticReport: " + err.Error())
+				// 	return bodyBytes, log.Errorf("Response --  Error Decoding DiagnosticReport: " + err.Error())
+				// }
+				//log.Debug5("Response --  DiagnosticReport: " + spew.Sdump(diagRept))
 				return bodyBytes, nil
 
 			default:
@@ -450,8 +451,8 @@ func GetCondition(cp *common.ConnectorPayload, resourceName, resourceId string, 
 func FindCondition(connPayLoad *common.ConnectorPayload, userId, query, JWToken string) (int64, *fhir.Bundle, *common.CacheHeader, error) {
 	resource := "Observation"
 	page := 1
-	connConfig := connPayLoad.ConnectorConfig
-	log.Debug3("--  query: " + query)
+	//connConfig := connPayLoad.ConnectorConfig
+	//log.Debug3("--  query: " + query)
 	//fullQuery := fmt.Sprintf("/%s?%s", resource, query)
 	//fmt.Printf("FindRecource:84  --  ConectorPayload: %s\n", spew.Sdump(connPayLoad)))
 	log.Debug3("--  UserId: " + userId)
@@ -459,6 +460,9 @@ func FindCondition(connPayLoad *common.ConnectorPayload, userId, query, JWToken 
 	//log.Debug3("-- Page: %d\n", page)
 	//fmt.Printf("FindResource:90  --  ConnectorConfig: %s\n", spew.Sdump(connConfig))
 	//fmt.Printf("FindResource:91  --  query: %s\n", query)
+
+	//TODO: Create a page bundle pageSize entries long from the larger bundle received from Remote if Remote does not support _count
+	// Return the first page with the cache header. fill the rest of the pages in background.
 
 	//TODO: Process the query in the background filling the resourceCache and BundleCache. Assign a cacheId on the call
 	//Once background is started wait in a loop checking the ResourceCache Status using the assigned cacheId until either
@@ -474,11 +478,33 @@ func FindCondition(connPayLoad *common.ConnectorPayload, userId, query, JWToken 
 		fmt.Println(err.Error())
 		return 0, nil, nil, err
 	}
+	if bundle == nil {
+		return 0, bundle, nil, log.Errorf("No resources found")
+	}
+	if len(bundle.Link) > 1 {
+		//There are more pages. Handle them in the background
+	}
+	pageSize := 20
+	pageSizeStr, valid := os.LookupEnv("PAGE_SIZE")
+	if valid == true {
+		pageSize, err = strconv.Atoi(pageSizeStr)
+		if err != nil {
+			pageSize = 10
+		}
+	} else {
+		pageSize = 10
+	}
+
+	enteries := len(bundle.Entry)
+	log.Debug3("Number of enteries in Bundle: " + fmt.Sprint(enteries))
+	if enteries > pageSize {
+		log.Debug3("TODO: return the first " + fmt.Sprint(pageSize) + " Conditions and cache the rest in page size of " + fmt.Sprint(pageSize))
+	}
 	// bundle, err := c.Query(query, JWToken) // Perform the actul query of the fhir server
 	// if err != nil {
 	// 	return 0, nil, nil, err
 	// }
-	log.Debug5("bundle: " + spew.Sdump(bundle))
+	//log.Debug5("bundle: " + spew.Sdump(bundle))
 	header := &common.CacheHeader{}
 	header.SystemCfg = connPayLoad.System
 	header.ResourceType = resource
@@ -486,7 +512,7 @@ func FindCondition(connPayLoad *common.ConnectorPayload, userId, query, JWToken 
 	header.PageId = page
 	queryId := primitive.NewObjectID().Hex()
 	header.QueryId = queryId
-	log.Debug5("connConfig: " + spew.Sdump(connConfig))
+	//log.Debug5("connConfig: " + spew.Sdump(connConfig))
 	//header.CacheBase = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
 	//header.ResourceCacheBase = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
 	//header.GetBundleCacheBase = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheBase, header.SystemCfg.ID.Hex())
@@ -501,14 +527,18 @@ func FindCondition(connPayLoad *common.ConnectorPayload, userId, query, JWToken 
 	//Cache the first bundle(page)
 	log.Debug3(fmt.Sprintf("--  Query %s for %ss took %s\n\n\n", connPayLoad.ConnectorConfig.Label, resource, time.Since(startTime)))
 	log.Debug3("--  UnmarshalBundle")
+
+	if len(bundle.Link) > 1 {
+		//There are more pages. Handle them in the background
+	}
 	// bundle := fhir4.Bundle{}
 	// bundle, err = fhir4.UnmarshalBundle(byte)
 	// if err != nil {
 	// 	return 0, nil, nil, err
 	// }
-	log.Debug3("bundle: " + spew.Sdump(bundle))
+	//log.Debug3("bundle: " + spew.Sdump(bundle))
 	cacheBundle.Bundle = bundle
-	startTime = time.Now()
+
 	// pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
 	// fmt.Printf("FindResource:131 CacheResource returned %d %ss in page: %d for %s  took %s\n", len(cacheBundle.Bundle.Entry), resource, page, systemCfg.DisplayName, time.Since(startTime))
 	// if err != nil {
@@ -542,10 +572,11 @@ func FindCondition(connPayLoad *common.ConnectorPayload, userId, query, JWToken 
 		return int64(len(bundle.Entry)), bundle, cacheBundle.Header, err
 
 	}
-	return 0, bundle, cacheBundle.Header, err
+	//return 0, bundle, cacheBundle.Header, err
 }
 
 func GetNextConditionUrl(link []fhir.BundleLink) string {
+	log.Debug3("GEtNextConditionUrl")
 	for _, lnk := range link {
 		if lnk.Relation == "next" {
 			log.Info("--  There is  next page to get")
@@ -557,7 +588,7 @@ func GetNextConditionUrl(link []fhir.BundleLink) string {
 
 // //GetNextResource: fetches the resource at provided url, processes it and checks if more to call.
 func (c *Connection) GetNextCondition(header *common.CacheHeader, url, resource, token string, page int) {
-	log.Debug3("-- page:  " + fmt.Sprint(page))
+	log.Debug3("GetNextCondition -- page:  " + fmt.Sprint(page))
 	//fmt.Printf("GetNextResource:155  --  resource: %s\n", resource) //spew.Sdump(header))
 	//Call Remote FHIR server for the resource bundle
 	startTime := time.Now()
@@ -577,25 +608,27 @@ func (c *Connection) GetNextCondition(header *common.CacheHeader, url, resource,
 	cacheBundle.ID = primitive.NewObjectID()
 	cacheBundle.Header = header
 	cacheBundle.Bundle = bundle
-	log.Debug3("-- Calling CacheResourceBundleAndEntries")
-	pg, err := CacheResourceBundleAndEntries(&cacheBundle, token, page)
-	if err != nil {
-		log.Error("GetNextResource: returned err: " + err.Error())
-		return
-		//return int64(pg + 1), &bundle, cacheBundle.Header, err
-	}
+	if UseCache() {
+		log.Debug3("-- Calling CacheResourceBundleAndEntries")
+		pg, err := CacheResourceBundleAndEntries(&cacheBundle, token, page)
+		if err != nil {
+			log.Error("GetNextResource: returned err: " + err.Error())
+			return
+			//return int64(pg + 1), &bundle, cacheBundle.Header, err
+		}
 
-	log.Debug3("--  GetNextResourceUrl")
-	nextURL := GetNextConditionUrl(bundle.Link)
-	if nextURL == "" {
-		msg := fmt.Sprintf("GetNextConditionUrl Last page had %d Resources processed ", len(bundle.Entry))
-		// fmt.Println(msg)
-		log.Debug3("--  Should return:  " + msg)
-		return
-	} else {
-		log.Debug3("-- GetNextDiagnosticRept is being called in the background")
-		go c.GetNextCondition(header, nextURL, resource, token, pg+1)
-		log.Debug3("GetNextCondition Returned")
+		log.Debug3("--  GetNextResourceUrl")
+		nextURL := GetNextConditionUrl(bundle.Link)
+		if nextURL == "" {
+			msg := fmt.Sprintf("GetNextConditionUrl Last page had %d Resources processed ", len(bundle.Entry))
+			// fmt.Println(msg)
+			log.Debug3("--  Should return:  " + msg)
+			return
+		} else {
+			log.Debug3("-- GetNextDiagnosticRept is being called in the background")
+			go c.GetNextCondition(header, nextURL, resource, token, pg+1)
+			log.Debug3("GetNextCondition Returned")
+		}
+		log.Debug3("GetNextCondition is returning")
 	}
-	log.Debug3("GetNextCondition is returning")
 }

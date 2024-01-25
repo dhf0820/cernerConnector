@@ -22,7 +22,7 @@ import (
 	//"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-
+	jw_token "github.com/dhf0820/golangJWT"
 	//"io/ioutil"
 	"net/http"
 	//"os"
@@ -278,7 +278,12 @@ func GetPatient(patId string) (*fhir.Patient, error) {
 	// return &patient, err
 }
 
-func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bundle, error) {
+func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bundle, *common.CacheHeader, error) {
+	payload, _, err := jw_token.ValidateToken(JWToken, "")
+	if err != nil {
+		return nil,nil,  err
+	}
+	userId := payload.UserId
 	// fhirID, err := primitive.ObjectIDFromHex(fhirId)
 	// if err != nil {
 	// 	return nil, err
@@ -292,12 +297,76 @@ func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bund
 	baseUrl := cp.ConnectorConfig.HostUrl
 	c := New(baseUrl, "application/json+fhir")
 	log.Debug3(fmt.Sprintf("CallGetFhirBundle at %s  with %s", c.BaseURL, qry))
+	startTime := time.Now()
 	bundle, err := c.GetFhirBundle(qry, token)
 	if err != nil {
 		log.Error("getFhirBundle error: " + err.Error())
 	}
 	log.Debug3("--  Bundle= " + spew.Sdump(bundle))
+
+	enteries := len(bundle.Entry)
+
+	log.Debug3("--  Number of entries in bundle: " + fmt.Sprint(enteries))
+	//log.Debug5("bundle: " + spew.Sdump(bundle))
+	header := &common.CacheHeader{}
+	header.SystemCfg = cp.System
+	connConfig := cp.ConnectorConfig
+	header.ResourceType = "Patient"
+	header.UserId = userId
+	header.PageId = 1
+	queryId := primitive.NewObjectID().Hex()
+	header.QueryId = queryId
+	//log.Debug3("connConfig: " + spew.Sdump(connConfig))
+	header.CacheBase = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
+	log.Debug3("Header:" + spew.Sdump(header))
+	//header.ResourceCacheBase = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
+	header.GetBundleCacheBase = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheBase, header.SystemCfg.ID.Hex())
+	header.GetResourceCacheBase = fmt.Sprintf("%s/%s/CachePage", header.CacheBase, header.SystemCfg.ID.Hex())
+
+	cacheBundle := common.CacheBundle{}
+	cacheBundle.PageId = header.PageId
+	cacheBundle.Header = header
+	cacheBundle.ID = primitive.NewObjectID()
+	//fmt.Printf("\n\n\n\n$$$ FindResource:110 calling CacheResourceBundleAndEntries (without bundle) - %s \n", spew.Sdump(cacheBundle))
+	//fmt.Printf("FindResource:126  --  bundle = %s\n", spew.Sdump(bundle))
+	//Cache the first bundle(page)
+	log.Debug3(fmt.Sprintf("--  Query %s for %ss took %s\n\n\n", cp.ConnectorConfig.Label, "Patient", time.Since(startTime)))
+	log.Debug3("--  UnmarshalBundle")
+	// bundle := fhir4.Bundle{}
+	// bundle, err = fhir4.UnmarshalBundle(byte)
+	// if err != nil {
+	// 	return 0, nil, nil, err
+	// }
+	//log.Debug5("bundle: " + spew.Sdump(bundle))
+	cacheBundle.Bundle = bundle
+	//startTime = time.Now()
 	bundle.ResourceType = StrPtr("Bundle")
+	if UseCache() {
+		log.Debug3("calling CacheResourceBundleAndEntries")
+		pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, 0)
+		log.Debug3(fmt.Sprintf("CacheResourceBundleAndEntries returned %d %ss in page: %d for %s  took %s", len(cacheBundle.Bundle.Entry), resource, page, sysCfg.DisplayName, time.Since(startTime)))
+		if err != nil {
+			//return err and done
+			return int64(bundle, cacheBundle.Header, err // cacheBundle.Header, err
+		}
+		log.Debug3("links: " + spew.Sdump(bundle.Link))
+		//Follow the bundle links to retrieve all bundles(pages) in the query response
+		nextURL := GetNextObservationUrl(bundle.Link)
+		total := int64(0)
+		if nextURL == "" {
+			log.Debug3(fmt.Sprintf("GetNext%sUrl initialy No Next - One page only ", "Patient"))
+			total, err = TotalCacheForQuery(cacheBundle.QueryId)
+			cacheBundle.Header.PageId = pg
+			log.Debug3("total: " + fmt.Sprint(total))
+			//page++
+			return  bundle, cacheBundle.Header, err
+		}
+		page++
+		go c.GetNextObservation(header, nextURL, resource, JWToken, page)
+	} else {
+		log.Info("Not Using Caching")
+	}
+
 	// cb := uc_core/common.CacheBundle{}
 	// cb.
 	// 	CacheResourceBundleAndEntries(bundle, JWToken, 1)

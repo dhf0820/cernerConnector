@@ -177,7 +177,7 @@ var routes = Routes{
 		"FindObservations",
 		"GET",
 		"/api/rest/v1/Observation",
-		findResource,
+		findObservation,
 	},
 	Route{
 		"GetObservation",

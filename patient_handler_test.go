@@ -40,7 +40,19 @@ import (
 )
 
 func TestSearchPatient(t *testing.T) {
+
 	log.SetDebuglevel("DEBUG3")
+	err := godotenv.Load("./.env.cerner_conn_test")
+	if err != nil {
+		log.Error("./.env.cerner_conn_test was not found")
+		t.FailNow()
+	}
+	Conf, err = GetServiceConfig("cerner_conn", "ssd", "test")
+	if err != nil {
+		log.Error("GetServiceConfig failed: " + err.Error())
+		t.FailNow()
+	}
+	log.Debug3("TestSearchPatient Conf: " + spew.Sdump(Conf))
 	Convey("TestSearchPatient", t, func() {
 		req, err := http.NewRequest("GET", "/api/rest/v1/Patient?family=harman", nil)
 		So(err, ShouldBeNil)
