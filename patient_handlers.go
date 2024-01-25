@@ -812,7 +812,7 @@ func findPatient(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Printf("findPatient:814  --  Calling patFilter.Find\n")
 	qry := r.URL.RawQuery
-	bundle, err := PatientSearch(cp, qry, JWToken)
+	bundle, cacheHeader, err := PatientSearch(cp, qry, JWToken)
 	if err != nil {
 		fmt.Printf("findPatient:818  -- PatientSearch returned err: %s\n", err.Error())
 		status := 400
@@ -820,6 +820,7 @@ func findPatient(w http.ResponseWriter, r *http.Request) {
 		WriteFhirOperationOutcome(w, status, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
+	log.Debug3("Cacheheader: " + spew.Sdump(cacheHeader))
 	resp := common.ResourceResponse{}
 	resp.Bundle = bundle
 	FillResourceResponse(&resp, "patient") // Fills the response resource fields

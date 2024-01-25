@@ -20,9 +20,9 @@ import (
 	log "github.com/dhf0820/vslog"
 
 	//"github.com/sirupsen/logrus"
+	jw_token "github.com/dhf0820/golangJWT"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	jw_token "github.com/dhf0820/golangJWT"
 	//"io/ioutil"
 	"net/http"
 	//"os"
@@ -281,13 +281,15 @@ func GetPatient(patId string) (*fhir.Patient, error) {
 func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bundle, *common.CacheHeader, error) {
 	payload, _, err := jw_token.ValidateToken(JWToken, "")
 	if err != nil {
-		return nil,nil,  err
+		return nil, nil, err
 	}
+
 	userId := payload.UserId
 	// fhirID, err := primitive.ObjectIDFromHex(fhirId)
 	// if err != nil {
 	// 	return nil, err
 	// }
+	var page = int64(1)
 	log.Debug3("--  queryString: %s" + query)
 	qry := fmt.Sprintf("Patient?%s", query)
 	log.Debug3("--  Final url to query: " + qry)
@@ -314,6 +316,8 @@ func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bund
 	header.ResourceType = "Patient"
 	header.UserId = userId
 	header.PageId = 1
+	page = 1
+
 	queryId := primitive.NewObjectID().Hex()
 	header.QueryId = queryId
 	//log.Debug3("connConfig: " + spew.Sdump(connConfig))
@@ -344,10 +348,10 @@ func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bund
 	if UseCache() {
 		log.Debug3("calling CacheResourceBundleAndEntries")
 		pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, 0)
-		log.Debug3(fmt.Sprintf("CacheResourceBundleAndEntries returned %d %ss in page: %d for %s  took %s", len(cacheBundle.Bundle.Entry), resource, page, sysCfg.DisplayName, time.Since(startTime)))
+		//log.Debug3(fmt.Sprintf("CacheResourceBundleAndEntries returned %d %ss in page: %d for %s  took %s", len(cacheBundle.Bundle.Entry), resource, page, sysCfg.DisplayName, time.Since(startTime)))
 		if err != nil {
 			//return err and done
-			return int64(bundle, cacheBundle.Header, err // cacheBundle.Header, err
+			return bundle, cacheBundle.Header, err // cacheBundle.Header, err
 		}
 		log.Debug3("links: " + spew.Sdump(bundle.Link))
 		//Follow the bundle links to retrieve all bundles(pages) in the query response
@@ -359,10 +363,10 @@ func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bund
 			cacheBundle.Header.PageId = pg
 			log.Debug3("total: " + fmt.Sprint(total))
 			//page++
-			return  bundle, cacheBundle.Header, err
+			return bundle, cacheBundle.Header, err
 		}
 		page++
-		go c.GetNextObservation(header, nextURL, resource, JWToken, page)
+		//go c.GetNextPatient(header, nextURL, resource, JWToken, int(page))
 	} else {
 		log.Info("Not Using Caching")
 	}
@@ -371,7 +375,7 @@ func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bund
 	// cb.
 	// 	CacheResourceBundleAndEntries(bundle, JWToken, 1)
 	//fmt.Printf("PatientSearch:237  --  Bundle= %s\n\n\n", spew.Sdump(bundle))
-	return bundle, err
+	return bundle, cacheBundle.Header, err
 	/*
 		if err != nil {
 
@@ -441,7 +445,7 @@ func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bund
 		}
 		go c.GetNextResource(header, nextURL, resource, token)
 	*/
-	return bundle, nil
+	return bundle, cacheBundle.Header, nil
 
 }
 
