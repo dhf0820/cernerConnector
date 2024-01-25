@@ -9,7 +9,7 @@ require (
 	github.com/dhf0820/baseConnector v0.0.0-20230612022521-666c749210ae
 	github.com/dhf0820/fhir4 v0.0.0-20231012185545-c350b9504fb4
 	github.com/dhf0820/golangJWT v0.0.0-20231227062716-846921ca6c1d
-	github.com/dhf0820/uc_common v0.0.0-20231224005049-ffc6b90e1ed2
+	github.com/dhf0820/uc_common v0.0.0-20240125042905-83ac9ddd274b
 	github.com/dhf0820/uc_core v0.0.0-20230822025212-bfd9037a37b3
 	github.com/dhf0820/vslog v0.0.0-20231007220019-758899f13b4a
 	github.com/google/uuid v1.4.0
@@ -19,7 +19,7 @@ require (
 	github.com/oleiade/reflections v1.0.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/smartystreets/goconvey v1.8.1
-	go.mongodb.org/mongo-driver v1.13.0
+	go.mongodb.org/mongo-driver v1.13.1
 )
 
 require github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect

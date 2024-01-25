@@ -109,7 +109,6 @@ func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, t
 		log.Error(errMsg)
 		return nil, log.Errorf(errMsg)
 	}
-
 	if bodyBytes != nil {
 		log.Debug3("bodyBytes: " + string(bodyBytes))
 		log.Debug3("resourceType: " + resourceType)
