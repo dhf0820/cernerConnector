@@ -7,9 +7,16 @@ replace gitlab.com/dhf0820/cernerConnector => ../cernerConnector
 require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dhf0820/baseConnector v0.0.0-20230612022521-666c749210ae
+<<<<<<< HEAD
+	github.com/dhf0820/fhir4 v0.0.0-20231012185545-c350b9504fb4
+	github.com/dhf0820/golangJWT v0.0.0-20231227062716-846921ca6c1d
+	github.com/dhf0820/uc_core/common v0.0.0-20240125042905-83ac9ddd274b
+	github.com/dhf0820/uc_core v0.0.0-20230822025212-bfd9037a37b3
+=======
 	github.com/dhf0820/fhir4 v0.0.0-20240211050500-ec607c1fa068
 	github.com/dhf0820/golangJWT v0.0.0-20240106221550-bcd2cee381af
 	github.com/dhf0820/uc_core v0.0.0-20240303001136-4772b4db8b13
+>>>>>>> 50aa60e7b6b2bc789ca9b99adcbc65627998307f
 	github.com/dhf0820/vslog v0.0.0-20231007220019-758899f13b4a
 	github.com/google/uuid v1.4.0
 	github.com/gorilla/mux v1.8.1
