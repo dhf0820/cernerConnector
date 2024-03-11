@@ -110,11 +110,12 @@ func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, t
 		return nil, log.Errorf(errMsg)
 	}
 	if bodyBytes != nil {
-		log.Debug3("bodyBytes: " + string(bodyBytes))
+		//log.Debug3("bodyBytes: " + string(bodyBytes))
 		log.Debug3("resourceType: " + resourceType)
 		log.Debug3("status: " + fmt.Sprint(status))
 		if bodyBytes != nil {
-			log.Debug3("bodyBytes: " + string(bodyBytes))
+
+			//log.Debug3("bodyBytes: " + string(bodyBytes))
 			switch strings.ToLower(resourceName) {
 			case "OperationOutcome":
 				opOut, err := fhir.UnmarshalOperationOutcome(bodyBytes)
@@ -242,7 +243,7 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	// if err != nil {
 	// 	return 0, nil, nil, err
 	// }
-	log.Debug5("bundle: " + spew.Sdump(bundle))
+	log.Debug3("bundle: " + spew.Sdump(bundle))
 	header := &common.CacheHeader{}
 	header.SystemCfg = connPayLoad.System
 	header.ResourceType = resource
@@ -260,6 +261,7 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	cacheBundle.PageId = header.PageId
 	cacheBundle.Header = header
 	cacheBundle.ID = primitive.NewObjectID()
+	cacheBundle.Bundle = bundle
 	log.Debug3("--  cacheBundle: " + spew.Sdump(cacheBundle))
 	//fmt.Printf("\n\n\n\n$$$ FindResource:110 calling CacheResourceBundleAndEntries (without bundle) - %s \n", spew.Sdump(cacheBundle))
 	//fmt.Printf("FindResource:126  --  bundle = %s\n", spew.Sdump(bundle))
@@ -274,7 +276,7 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	cacheBundle.Bundle = bundle
 	startTime = time.Now()
 	if UseCache() {
-		log.Debug3("Calling CacheResourceBundleAndEntries with token: " + JWToken)
+		log.Debug3("Calling CacheResourceBundleAndEntries with token: ") // + JWToken)
 		pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
 		log.Debug3(fmt.Sprintf("CacheResource returned %d %ss in page: %d for %s  took %s\n", len(cacheBundle.Bundle.Entry), resource, page, systemCfg.DisplayName, time.Since(startTime)))
 		if err != nil {
@@ -309,6 +311,14 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 			return int64(len(bundle.Entry)), bundle, cacheBundle.Header, err
 		}
 	}
+	if bundle == nil {
+		log.Debug3("bundle is nil")
+	}
+	if cacheBundle.Header == nil {
+		log.Debug3("cacheBundle.Header is nil")
+	}
+	numEnteries := len(bundle.Entry)
+	log.Debug3("Number of entries:  " + fmt.Sprint(numEnteries))
 	return int64(len(bundle.Entry)), bundle, cacheBundle.Header, err
 	//return 0, bundle, cacheBundle.Header, err
 }

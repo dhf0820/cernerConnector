@@ -129,7 +129,7 @@ func findObservation(w http.ResponseWriter, r *http.Request) {
 	log.Debug3(fmt.Sprintf("--  resp without bundle: " + spew.Sdump(resp)))
 	log.Debug3(fmt.Sprintf("--  Time to log = %s", time.Since(logTime)))
 	resp.Bundle = bundle
-	log.Debug3(fmt.Sprintf("--  Number of entries in bundle: %d", len(bundle.Entry)))
+	log.Debug3(fmt.Sprintf("--  Number of entries in bundle: %d", len(resp.Bundle.Entry)))
 	log.Debug3(fmt.Sprintf("--  QueryId: " + header.QueryId))
 	FillResourceResponse(&resp, resourceType)
 	//fmt.Printf("findResource:614  --  Returning Bundle: %s\n", spew.Sdump(bundle))
@@ -450,10 +450,10 @@ func FindObservation(connPayLoad *common.ConnectorPayload, userId, query, JWToke
 	resource := "Observation"
 	page := 1
 
-	sysCfg := connPayLoad.System
+	//sysCfg := connPayLoad.System
 	connConfig := connPayLoad.ConnectorConfig
 	log.Debug3("--  query: " + query)
-	fullQuery := fmt.Sprintf("%s?%s", resource, query)
+	fullQuery := fmt.Sprintf("%s", query)
 	//fmt.Printf("FindRecource:84  --  ConectorPayload: %s\n", spew.Sdump(connPayLoad)))
 	log.Debug3("--  UserId: " + userId)
 	log.Debug3("--  fullQuery: " + fullQuery)
@@ -513,7 +513,7 @@ func FindObservation(connPayLoad *common.ConnectorPayload, userId, query, JWToke
 	if !UseCache() {
 		log.Info("Using Caching")
 		pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
-		log.Debug3(fmt.Sprintf("CacheResourceBundleAndEntries returned %d %ss in page: %d for %s  took %s", len(cacheBundle.Bundle.Entry), resource, page, sysCfg.DisplayName, time.Since(startTime)))
+		//log.Debug3(fmt.Sprintf("CacheResourceBundleAndEntries returned %d %ss in page: %d for %s  took %s", len(cacheBundle.Bundle.Entry), resource, page, sysCfg.DisplayName, time.Since(startTime)))
 		if err != nil {
 			//return err and done
 			return int64(pg + 1), bundle, cacheBundle.Header, err

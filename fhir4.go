@@ -288,6 +288,85 @@ func (c *Connection) GetFhirBundle(url string, token string) (*fhir.Bundle, erro
 	// return body, nil
 }
 
+func (c *Connection) GetFhirResults(url string, token string) (*fhir.Bundle, error) {
+	fullUrl := ""
+	if strings.Contains(url, "https") {
+		fullUrl = url
+	} else {
+		fullUrl = c.BaseURL + "/" + url
+	}
+
+	//besure first character of partial url is /
+	// if url[0:1] != "/" {
+	// 	url = "/" + url
+	// }
+
+	log.Info("GetFhirBundle FullURL Requested: " + fullUrl)
+	req, err := http.NewRequest("GET", fullUrl, nil)
+	if err != nil {
+		log.Error("--  !!!NewRequest failed: " + err.Error())
+		return nil, err
+	}
+	log.Info("Calling c.GetFhirReq")
+	resp, err := c.GetFhirReq(req)
+	// req.Header.Set("Accept", "application/json+fhir")
+	// resp, err := c.client.Do(req)
+	if err != nil {
+		log.Error("--  !!!fhir query returned err: " + err.Error())
+		return nil, err
+	}
+	log.Debug3("resp.StatusCode: " + fmt.Sprint(resp.StatusCode))
+	if resp.StatusCode == 401 {
+		defer resp.Body.Close()
+		byte, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, log.Errorf("--  Error Reading resp.Body: " + err.Error())
+		}
+		log.Debug3("body: " + string(byte))
+		return nil, log.Errorf("--401 unauthorized")
+	}
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		log.Error("GetFhirBundle returned statusCode of " + fmt.Sprint(resp.StatusCode))
+		return nil, err
+	}
+	//tbundle := &fhir.Bundle{}
+	defer resp.Body.Close()
+	byte, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, log.Errorf("--  Error Reading resp.Body: " + err.Error())
+	}
+	//log.Debug3("body: " + string(byte))
+	bundle, err := fhir.UnmarshalBundle(byte)
+	if err != nil {
+		return nil, log.Errorf("--  Error Decoding bundle: " + err.Error())
+	}
+	//fmt.Printf("GetFhirBundle:201  --  Bundle =  %s\n", spew.Sdump(bundle))
+	// err = json.NewDecoder(resp.Body).Decode(&data)
+	// if err != nil {
+	// 	fmt.Printf("NewDecoder error: %s\n", err.Error())
+	// }
+	// fmt.Printf("NewDecoder: %s\n\n", spew.Sdump(data))
+	// bundle := &fhir.Bundle{}
+	// err = json.NewDecoder(resp.Body).Decode(bundle)
+	// if err != nil {
+	// 	fmt.Printf("GetFhir:131  --  Error Decoding bundle: %s\n", err.Error())
+	// 	return nil, err
+	// }
+
+	// fmt.Printf("GetFhirBundle:209  --  Bundle: %s\n", spew.Sdump(bundle))
+	// patient, err := fhir.UnmarshalPatient(bundle.Entry[0].Resource)
+	// fmt.Printf("GetFhirBundle:211  --  patient:  %s\n", spew.Sdump(patient))
+	return &bundle, nil
+	// body, err := ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	fmt.Printf("ReadBody Error:215 %s\n", err.Error())
+	// 	return nil, err
+	// }
+	// fmt.Printf("\nGetFhir:218  -- %s\n", string(body))
+	// fmt.Printf("GetFhir:219 returning no error and length of data: %d\n", len(body))
+	// return body, nil
+}
+
 //	func (c *Connection)PatientNextPage(url string) {
 //		bytes, err := c.GetFhir(url)
 //	}

@@ -11,8 +11,8 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	fhir "github.com/dhf0820/fhir4"
 
-	common "github.com/dhf0820/uc_common"
-	//common "github.com/dhf0820/uc_core/common"
+	//common "github.com/dhf0820/uc_common"
+	common "github.com/dhf0820/uc_core/common"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
@@ -1154,6 +1154,19 @@ func FillResourceResponse(resp *common.ResourceResponse, resourceType string) er
 			resp.Resources = append(resp.Resources, resData)
 		}
 		log.Debug3(fmt.Sprintf("-- Set %d DiagnosticReport  Bundle had %d entries\n", len(resp.Resources), len(resp.Bundle.Entry)))
+	case "observation":
+		for _, item := range resp.Bundle.Entry {
+			resData := common.ResourceData{}
+			data, err := fhir.UnmarshalObservation(item.Resource)
+			if err != nil {
+				return log.Errorf(" -- error = " + err.Error())
+			}
+			resData.Observation = &data
+			log.Debug3(fmt.Sprintf(" --  Added DiagnosticReporteId: %s\n", *data.Id))
+			resp.Resources = append(resp.Resources, resData)
+		}
+		log.Debug3(fmt.Sprintf("-- Set %d Observation  Bundle had %d entries\n", len(resp.Resources), len(resp.Bundle.Entry)))
+
 	}
 	//TODO: Make Switch smarter.
 	return nil

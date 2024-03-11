@@ -62,8 +62,9 @@ func findDiagnosticRept(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//resourceType = strings.ToLower(resourceType)
 	queryStr := ""
-	log.Debug3("-- Resource: " + resourceType)
+	log.Debug3("-- Resource: " + strings.ToLower(resourceType))
 	queryStr = fmt.Sprintf("%s?%s", resourceType, r.URL.RawQuery) //BuildDiagnosticQuery(r)
 	QueryString = queryStr
 	log.Debug3("--   QueryString = " + QueryString)
