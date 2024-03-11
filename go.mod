@@ -7,10 +7,10 @@ replace gitlab.com/dhf0820/cernerConnector => ../cernerConnector
 require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dhf0820/baseConnector v0.0.0-20230612022521-666c749210ae
-	github.com/dhf0820/fhir4 v0.0.0-20231012185545-c350b9504fb4
-	github.com/dhf0820/golangJWT v0.0.0-20231227062716-846921ca6c1d
-	github.com/dhf0820/uc_common v0.0.0-20240125042905-83ac9ddd274b
-	github.com/dhf0820/uc_core v0.0.0-20230822025212-bfd9037a37b3
+	github.com/dhf0820/fhir4 v0.0.0-20240211050500-ec607c1fa068
+	github.com/dhf0820/golangJWT v0.0.0-20240106221550-bcd2cee381af
+	github.com/dhf0820/uc_common v0.0.0-20240211030525-44558b0e8b0e
+	github.com/dhf0820/uc_core v0.0.0-20240303001136-4772b4db8b13
 	github.com/dhf0820/vslog v0.0.0-20231007220019-758899f13b4a
 	github.com/google/uuid v1.4.0
 	github.com/gorilla/mux v1.8.1
@@ -19,10 +19,8 @@ require (
 	github.com/oleiade/reflections v1.0.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/smartystreets/goconvey v1.8.1
-	go.mongodb.org/mongo-driver v1.13.1
+	go.mongodb.org/mongo-driver v1.14.0
 )
-
-require github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 
 require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
@@ -37,8 +35,8 @@ require (
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
-	golang.org/x/crypto v0.9.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/sync v0.2.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 )
