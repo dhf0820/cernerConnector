@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	common "github.com/dhf0820/uc_common"
+	common "github.com/dhf0820/uc_core/common"
 
-	//logging "github.com/dhf0820/uc_common/logging"
+	//logging "github.com/dhf0820/uc_core/common/logging"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	//m "github.com/dhf0820/ROIPrint/pkg/model"

@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	common "github.com/dhf0820/uc_common"
+	common "github.com/dhf0820/uc_core/common"
 	log "github.com/dhf0820/vslog"
 
 	//"github.com/sirupsen/logrus"

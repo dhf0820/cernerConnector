@@ -27,7 +27,7 @@ import (
 
 	//jw_token "github.com/dhf0820/golangJWT"
 	jw_token "github.com/dhf0820/golangJWT"
-	common "github.com/dhf0820/uc_common"
+	common "github.com/dhf0820/uc_core/common"
 
 	//"github.com/dhf0820/uc_core/service"
 

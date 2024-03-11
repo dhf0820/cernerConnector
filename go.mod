@@ -9,7 +9,6 @@ require (
 	github.com/dhf0820/baseConnector v0.0.0-20230612022521-666c749210ae
 	github.com/dhf0820/fhir4 v0.0.0-20240211050500-ec607c1fa068
 	github.com/dhf0820/golangJWT v0.0.0-20240106221550-bcd2cee381af
-	github.com/dhf0820/uc_common v0.0.0-20240211030525-44558b0e8b0e
 	github.com/dhf0820/uc_core v0.0.0-20240303001136-4772b4db8b13
 	github.com/dhf0820/vslog v0.0.0-20231007220019-758899f13b4a
 	github.com/google/uuid v1.4.0
@@ -23,7 +22,6 @@ require (
 )
 
 require (
-	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
