@@ -9,8 +9,8 @@ github.com/dhf0820/fhir4 v0.0.0-20231012185545-c350b9504fb4 h1:pOoX/RQwgpEK2yeY0
 github.com/dhf0820/fhir4 v0.0.0-20231012185545-c350b9504fb4/go.mod h1:y2bBeVF83vN9rSQauxpZ7NWYlwtrJ7+A+q3OVnSp07k=
 github.com/dhf0820/golangJWT v0.0.0-20231227062716-846921ca6c1d h1:TdLfhs7fsuhJbuIAKgIJpULLcQEHC96CtzyJDfny6/c=
 github.com/dhf0820/golangJWT v0.0.0-20231227062716-846921ca6c1d/go.mod h1:g9ygZMBvUJcFWz6sFRHICH5ZybsdYFcfChBEv0eHZsw=
-github.com/dhf0820/uc_common v0.0.0-20240125042905-83ac9ddd274b h1:rZU6DTY0iVARBvFxTo2YS5t2o6FxJgYK+mkTs76Ap/o=
-github.com/dhf0820/uc_common v0.0.0-20240125042905-83ac9ddd274b/go.mod h1:8EG9cmJ4Zgdqjop05NYXfaYDRZLvZlGObltD13PMggo=
+github.com/dhf0820/uc_core/common v0.0.0-20240125042905-83ac9ddd274b h1:rZU6DTY0iVARBvFxTo2YS5t2o6FxJgYK+mkTs76Ap/o=
+github.com/dhf0820/uc_core/common v0.0.0-20240125042905-83ac9ddd274b/go.mod h1:8EG9cmJ4Zgdqjop05NYXfaYDRZLvZlGObltD13PMggo=
 github.com/dhf0820/uc_core v0.0.0-20230822025212-bfd9037a37b3 h1:DxX+4AFHlf6BFA/xuDUIO7ZRfMcoT/RP/Z2mAbyyS3o=
 github.com/dhf0820/uc_core v0.0.0-20230822025212-bfd9037a37b3/go.mod h1:9q6GiOtzu4rJJlCy4QRD9qthzVHdygVXbCpoaR3qSrQ=
 github.com/dhf0820/vslog v0.0.0-20231007220019-758899f13b4a h1:Ml0irRYHKpTll4BRWdRVuiQ1WtXzx77K3IUJNtux7Lw=

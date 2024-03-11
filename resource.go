@@ -13,7 +13,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	fhir "github.com/dhf0820/fhir4"
-	common "github.com/dhf0820/uc_common"
+	common "github.com/dhf0820/uc_core/common"
 
 	//common "github.com/dhf0820/uc_core/common"
 	"io"

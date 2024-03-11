@@ -22,7 +22,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	//"github.com/dhf0820/token"
 	//"github.com/dhf0820/uc_core/util"
-	common "github.com/dhf0820/uc_common"
+	common "github.com/dhf0820/uc_core/common"
 	log "github.com/dhf0820/vslog"
 	"github.com/joho/godotenv"
 	. "github.com/smartystreets/goconvey/convey"
