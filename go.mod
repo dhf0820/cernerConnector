@@ -9,7 +9,7 @@ require (
 	github.com/dhf0820/baseConnector v0.0.0-20230612022521-666c749210ae
 	github.com/dhf0820/fhir4 v0.0.0-20240211050500-ec607c1fa068
 	github.com/dhf0820/golangJWT v0.0.0-20240106221550-bcd2cee381af
-	github.com/dhf0820/uc_core v0.0.0-20240303001136-4772b4db8b13
+	github.com/dhf0820/uc_core v0.0.0-20240312203441-e97c190867c9
 	github.com/dhf0820/vslog v0.0.0-20231007220019-758899f13b4a
 	github.com/google/uuid v1.4.0
 	github.com/gorilla/mux v1.8.1
