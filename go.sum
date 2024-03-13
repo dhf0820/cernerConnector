@@ -5,8 +5,8 @@ github.com/dhf0820/baseConnector v0.0.0-20230612022521-666c749210ae h1:XM7l8keLF
 github.com/dhf0820/baseConnector v0.0.0-20230612022521-666c749210ae/go.mod h1:xAedUuPDk2h18Kh/LQTkaEdUYwygpayURdUXQ0pav3c=
 github.com/dhf0820/fhir4 v0.0.0-20240211050500-ec607c1fa068 h1:Xs3nXN+VfT/s1bzm3d380cAlqkp9VZzMEhoUm7qZJE8=
 github.com/dhf0820/fhir4 v0.0.0-20240211050500-ec607c1fa068/go.mod h1:sSGz9Tm0LWe8jO/UTZaIhyJDynWHGFthxJY7zbRQgqM=
-github.com/dhf0820/golangJWT v0.0.0-20240313010656-26b32bca91bc h1:oC7bUic/2u0ZJPVksflHiBf0PJNPkyynzMPlf6rPRgo=
-github.com/dhf0820/golangJWT v0.0.0-20240313010656-26b32bca91bc/go.mod h1:g9ygZMBvUJcFWz6sFRHICH5ZybsdYFcfChBEv0eHZsw=
+github.com/dhf0820/golangJWT v0.0.0-20240313012835-3bad75b17988 h1:lviuwE6DMr/Df+ArLD43Q31ZL2l9nGHY7LiO8YxZkFI=
+github.com/dhf0820/golangJWT v0.0.0-20240313012835-3bad75b17988/go.mod h1:g9ygZMBvUJcFWz6sFRHICH5ZybsdYFcfChBEv0eHZsw=
 github.com/dhf0820/uc_core v0.0.0-20240312203441-e97c190867c9 h1:SM6HLqYuTaP3rZHRcd2B3sn2cD7UIhmmfsoZx/ZvA/w=
 github.com/dhf0820/uc_core v0.0.0-20240312203441-e97c190867c9/go.mod h1:3mqIisXjacFb4PTkuJSi87YMar8vLW/JmdsMvGtMw7g=
 github.com/dhf0820/vslog v0.0.0-20231007220019-758899f13b4a h1:Ml0irRYHKpTll4BRWdRVuiQ1WtXzx77K3IUJNtux7Lw=
