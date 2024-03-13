@@ -43,8 +43,8 @@ import (
 
 func GetSystemConfigById(id primitive.ObjectID) (*common.SystemConfig, error) {
 	strId := id.Hex()
-	log.Debug3("--   Id: " + strId)
-	collection, err := GetCollection("systemConfig")
+	log.Debug3("-   Id: " + strId)
+	collection, err := GetCollection("SystemConfig")
 	if err != nil {
 		return nil, err
 	}
@@ -126,11 +126,11 @@ func CreateCP(includeSave bool) *common.ConnectorPayload {
 }
 
 func CreateCernerCP(includeSave bool) *common.ConnectorPayload {
-	fmt.Printf("CreateCernerCP:744  --  includeSave: %v\n", includeSave)
+	log.Debug3("--  includeSave: " + fmt.Sprint(includeSave))
 	id, _ := primitive.ObjectIDFromHex("640ba5e3bd4105586a6dda74")
 	sc, err := GetSystemConfigById(id)
 	if err != nil {
-		fmt.Printf("CreateCernerCP:729  --  GetSystemConfigById error: %s\n", err.Error())
+		log.Debug3("GetSystemConfigById error: " + err.Error())
 		return nil
 	}
 	//ids := []*uc_core/common.KVData{}

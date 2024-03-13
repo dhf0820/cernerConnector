@@ -26,7 +26,7 @@ var ResponseType string
 var QueryString string
 
 func main() {
-	version = "240311.2"
+	version = "240312.0"
 	log.SetDebuglevel("DEBUG3")
 	log.Info("run mode: " + os.Getenv("MODE"))
 	switch os.Getenv("MODE") {

@@ -69,3 +69,30 @@ func TestConnectToMongoDB(t *testing.T) {
 		// So(c, ShouldNotBeNil)
 	})
 }
+
+func TestGetSystemConfig(t *testing.T) {
+	//t.Parallel()
+	//InitTest()
+
+	fmt.Printf("\n\nTestOpenDB\n")
+	Convey("Subject: Open the mongo DB", t, func() {
+		//os.Setenv("ENV_CORE_TEST", "/Users/dhf/work/roi/services/core_service/config/core_test.json")
+		fmt.Printf("\n\n--- Convey")
+		os.Setenv("CONFIG_ADDRESS", "http://docker1.ihids.com:20100/api/rest/v1/")
+		os.Setenv("SERVICE_NAME", "uc_ca3")
+		os.Setenv("SERVICE_VERSION", "local_test")
+		os.Setenv("COMPANY", "test")
+		// InitTest()
+		// conf := GetConfig()
+		config, err := GetServiceConfig("uc_ca3", "local_test", "test")
+		So(err, ShouldBeNil)
+		So(config, ShouldNotBeNil)
+		//So(conf, ShouldNotBeNil)
+		mongo, err := OpenMongoDB()
+		So(err, ShouldBeNil)
+		So(mongo, ShouldNotBeNil)
+		c, err := GetCollection("systemConfig")
+		So(err, ShouldBeNil)
+		So(c, ShouldNotBeNil)
+	})
+}

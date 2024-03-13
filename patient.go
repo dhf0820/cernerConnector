@@ -280,6 +280,7 @@ func GetPatient(patId string) (*fhir.Patient, error) {
 }
 
 func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bundle, *common.CacheHeader, error) {
+	log.Debug3("Validating: " + token)
 	payload, _, err := jw_token.ValidateToken(JWToken, "")
 	if err != nil {
 		return nil, nil, err

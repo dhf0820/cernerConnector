@@ -57,7 +57,7 @@ func TestPatientCache(t *testing.T) {
 		So(err, ShouldBeNil)
 		So(jwt, ShouldNotBeNil)
 		So(payload, ShouldNotBeNil)
-		// jwt = "Bearer " + jwt
+		jwt = "Bearer " + jwt
 		// req, err := http.NewRequest("GET", "system/640ba5e3bd4105586a6dda74/Patient?family=jo&_count=3", nil)
 		// So(err, ShouldBeNil)
 		// So(req, ShouldNotBeNil)
