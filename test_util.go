@@ -93,11 +93,11 @@ func CreateCP(includeSave bool) *common.ConnectorPayload {
 	data := []*common.KVData{}
 	cacheServer := common.KVData{}
 	cacheServer.Name = "cacheServer"
-	cacheServer.Value = "http://yawl:50201"
+	cacheServer.Value = "http://universalcharts.com:30201"
 	data = append(data, &cacheServer)
 	hostServer := common.KVData{}
 	hostServer.Name = "cacheHost"
-	hostServer.Value = "http://ucCache:9200"
+	hostServer.Value = "http://universalcharts.com:30201" //"http://ucCache:9200"
 	data = append(data, &hostServer)
 	cc.Data = data
 	cc.CacheUrl = "http://yawl:50201/system"

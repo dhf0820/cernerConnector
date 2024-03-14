@@ -78,7 +78,7 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 	if os.Getenv("USE_CACHE") == "false" {
 		return -1, errors.New("NO CACHE")
 	}
-	log.Info("Starting CacheResourceBundleAndEnteries")
+	log.Info("Starting CacheResourceBundleAndEnteries. Page: " + fmt.Sprint(page))
 	fmt.Println()
 	header := *cbdl.Header
 	log.Debug3(fmt.Sprintf("--  Starting for ResourceType: %s  Page: %d\n", header.ResourceType, page))
