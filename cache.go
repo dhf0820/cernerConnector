@@ -167,13 +167,18 @@ func CacheViaCore(bundle *fhir.Bundle, token string, option string, page int) er
 	fmt.Println()
 	fmt.Println()
 	log.Debug3("CacheViaCore  --  POST cacheURL: " + cacheURL)
-	//cacheSavePayload := common.CacheSavePayload{}
-	bndl, err := bundle.MarshalJSON()
+	cacheSavePayload := common.CacheSavePayload{}
+	cacheSavePayload.Bundle = bundle
+	cacheSavePayload.Option = option
+	cacheSavePayload.PageNum = page
+	cacheSavePayload.
+		payload, err := json.Marshal(cacheSavePayload)
+	//bndl, err := bundle.MarshalJSON()
 	if err != nil {
 		err = log.Errorf("Marshal Bundle error: " + err.Error())
 		return err
 	}
-	req, _ := http.NewRequest("POST", cacheURL, bytes.NewBuffer(bndl))
+	req, _ := http.NewRequest("POST", cacheURL, bytes.NewBuffer(payload))
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", token)

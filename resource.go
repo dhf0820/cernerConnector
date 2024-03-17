@@ -385,7 +385,7 @@ func (c *Connection) GetNextResource(header *common.CacheHeader, url, resource, 
 		return
 	} else {
 		log.Debug3("--go c.GetNextResource is being called in the background")
-		go c.GetNextResource(header, nextURL, resource, token, page+1)
+		go c.GetNextResource(header, nextURL, resource, token, page)
 		log.Debug3("-- GetNextResource Returned and background started")
 	}
 	log.Debug3("GetNextResource is returning")
