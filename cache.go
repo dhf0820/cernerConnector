@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
 	//"os"
 
 	//"strconv"
@@ -79,11 +80,11 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 	if !UseCache() {
 		return -1, errors.New("NO CACHE")
 	}
-	log.Info("Starting CacheResourceBundleAndEnteries")
+	log.Info("Starting CacheResourceBundleAndEnteries. Page: " + fmt.Sprint(page))
 	fmt.Println()
 	log.Debug3("cbdl:  " + spew.Sdump(cbdl))
 	header := *cbdl.Header
-	log.Debug3(fmt.Sprintf("--  Starting for ResourceType: %s  Page: %d\n", header.ResourceType, page))
+	//log.Debug3(fmt.Sprintf("--  Starting for ResourceType: %s  Page: %d\n", header.ResourceType, page))
 	//fmt.Printf("CacheResourceBundleAndEntries:77  -- Header = %s\n", spew.Sdump(header))
 	log.Debug3(fmt.Sprintf("-- CashBase: %s\n", header.CacheBase))
 	//log.Debug3("cbdl:  " + spew.Sdump(cbdl))
@@ -166,7 +167,7 @@ func CacheViaCore(bundle *fhir.Bundle, token string, option string, page int) er
 	fmt.Println()
 	fmt.Println()
 	log.Debug3("CacheViaCore  --  POST cacheURL: " + cacheURL)
-	cacheSavePayload := common.CacheSavePayload{}
+	//cacheSavePayload := common.CacheSavePayload{}
 	bndl, err := bundle.MarshalJSON()
 	if err != nil {
 		err = log.Errorf("Marshal Bundle error: " + err.Error())
