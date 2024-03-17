@@ -415,7 +415,7 @@ func FindDocumentReference(connPayLoad *common.ConnectorPayload, userId, query, 
 
 	if UseCache() {
 		log.Debug3("calling CacheResourceBundleAndEntries")
-		pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
+		pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, int64(page))
 
 		if pg == -1 {
 			log.Error("Cache not responding")
@@ -499,7 +499,7 @@ func (c *Connection) GetNextDocumentReference(header *common.CacheHeader, url, t
 	cacheBundle.Header = header
 	cacheBundle.Bundle = bundle
 	log.Debug3("-- Calling CacheResourceBundleAndEntries")
-	pg, err := CacheResourceBundleAndEntries(&cacheBundle, token, page)
+	pg, err := CacheResourceBundleAndEntries(&cacheBundle, token, int64(page))
 	if err != nil {
 		log.Error("GetNextDocumentReference: returned err: " + err.Error())
 		return

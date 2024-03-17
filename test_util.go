@@ -89,18 +89,18 @@ func CreateCP(includeSave bool) *common.ConnectorPayload {
 	cc.Label = "OpenCernerConnector"
 	cc.Credentials = ""
 	cc.HostUrl = "https://fhir-open.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d"
-	cc.URL = "http://yawl:50103"
+	cc.URL = "http://universalcharts.com:30103"
 	data := []*common.KVData{}
 	cacheServer := common.KVData{}
 	cacheServer.Name = "cacheServer"
-	cacheServer.Value = "http://yawl:50201"
+	cacheServer.Value = "http://universalcharts.com:30201"
 	data = append(data, &cacheServer)
 	hostServer := common.KVData{}
 	hostServer.Name = "cacheHost"
 	hostServer.Value = "http://ucCache:9200"
 	data = append(data, &hostServer)
 	cc.Data = data
-	cc.CacheUrl = "http://yawl:50201/system"
+	cc.CacheUrl = "http://universalcharts.com:30201/system"
 
 	//TODO: AddFhirAuthToken
 	cp.ConnectorConfig = &cc

@@ -176,7 +176,7 @@ func getCondition(w http.ResponseWriter, r *http.Request) {
 	}
 	cp, err := GetConnectorPayload(r)
 	if err != nil {
-		errMsg := log.ErrMsg("gGetConnectorPayload error:  " + err.Error())
+		errMsg := log.ErrMsg("GetConnectorPayload error:  " + err.Error())
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
@@ -610,7 +610,7 @@ func (c *Connection) GetNextCondition(header *common.CacheHeader, url, resource,
 	cacheBundle.Bundle = bundle
 	if UseCache() {
 		log.Debug3("-- Calling CacheResourceBundleAndEntries")
-		pg, err := CacheResourceBundleAndEntries(&cacheBundle, token, page)
+		pg, err := CacheResourceBundleAndEntries(&cacheBundle, token, int64(page))
 		if err != nil {
 			log.Error("GetNextResource: returned err: " + err.Error())
 			return

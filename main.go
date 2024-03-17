@@ -12,12 +12,14 @@ import (
 	"os"
 
 	//service "github.com/dhf0820/baseConnector/services"
+	"github.com/dhf0820/uc_core/common"
 	log "github.com/dhf0820/vslog"
 	//"github.com/sirupsen/logrus"
 	// "strings"
 )
 
 // var err error
+var ServConfig common.ServiceConfig
 var err error
 var version string
 var Mode string
@@ -26,7 +28,7 @@ var ResponseType string
 var QueryString string
 
 func main() {
-	version = "240312.0"
+	version = "240316.0"
 	log.SetDebuglevel("DEBUG3")
 	log.Info("run mode: " + os.Getenv("MODE"))
 	switch os.Getenv("MODE") {

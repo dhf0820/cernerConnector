@@ -724,7 +724,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	resp.Header = header
 	resp.Message = "Ok"
 	logTime := time.Now()
-	log.Debug3(fmt.Sprintf("--  resp without bundle: " + spew.Sdump(resp)))
+	//log.Debug3(fmt.Sprintf("--  resp without bundle: " + spew.Sdump(resp)))
 	log.Debug3(fmt.Sprintf("--  Time to log = %s", time.Since(logTime)))
 	resp.Bundle = bundle
 	log.Debug3(fmt.Sprintf("--  Number of entries in bundle: %d", len(bundle.Entry)))

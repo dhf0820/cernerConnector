@@ -291,7 +291,7 @@ func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bund
 	// if err != nil {
 	// 	return nil, err
 	// }
-	var page = int64(1)
+	var page = 1
 	log.Debug3("--  queryString: %s" + query)
 	qry := fmt.Sprintf("Patient?%s", query)
 	log.Debug3("--  Final url to query: " + qry)
@@ -306,29 +306,29 @@ func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bund
 	if err != nil {
 		log.Error("getFhirBundle error: " + err.Error())
 	}
-	log.Debug3("--  Bundle= " + spew.Sdump(bundle))
-
 	enteries := len(bundle.Entry)
 
 	log.Debug3("--  Number of entries in bundle: " + fmt.Sprint(enteries))
+	//log.Debug3("--  Bundle= " + spew.Sdump(bundle))
+
 	//log.Debug5("bundle: " + spew.Sdump(bundle))
+	page = 1
 	header := &common.CacheHeader{}
 	header.SystemCfg = cp.System
 	connConfig := cp.ConnectorConfig
 	header.ResourceType = "Patient"
 	header.UserId = userId
-	header.PageId = 1
-	page = 1
+	header.PageId = page
 
 	queryId := primitive.NewObjectID().Hex()
 	header.QueryId = queryId
-	//log.Debug3("connConfig: " + spew.Sdump(connConfig))
+	log.Debug3("connConfig: " + spew.Sdump(connConfig))
 	header.CacheBase = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
 	log.Debug3("Header:" + spew.Sdump(header))
 	//header.ResourceCacheBase = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
-	header.GetBundleCacheBase = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheBase, header.SystemCfg.ID.Hex())
-	header.GetResourceCacheBase = fmt.Sprintf("%s/%s/CachePage", header.CacheBase, header.SystemCfg.ID.Hex())
-
+	header.GetBundleCacheBase = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheBase, header.QueryId)
+	header.GetResourceCacheBase = fmt.Sprintf("%s/%s/CachePage", header.CacheBase, header.QueryId)
+	log.Debug3("queryId: " + header.QueryId)
 	cacheBundle := common.CacheBundle{}
 	cacheBundle.PageId = header.PageId
 	cacheBundle.Header = header
@@ -349,7 +349,7 @@ func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bund
 	bundle.ResourceType = StrPtr("Bundle")
 	if UseCache() {
 		log.Debug3("calling CacheResourceBundleAndEntries")
-		pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, 0)
+		pg, err := CacheResourceBundleAndEntries(&cacheBundle, token, int64(page))
 		//log.Debug3(fmt.Sprintf("CacheResourceBundleAndEntries returned %d %ss in page: %d for %s  took %s", len(cacheBundle.Bundle.Entry), resource, page, sysCfg.DisplayName, time.Since(startTime)))
 		if err != nil {
 			//return err and done
@@ -357,7 +357,7 @@ func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bund
 		}
 		log.Debug3("links: " + spew.Sdump(bundle.Link))
 		//Follow the bundle links to retrieve all bundles(pages) in the query response
-		nextURL := GetNextObservationUrl(bundle.Link)
+		nextURL := GetNextResourceUrl(bundle.Link)
 		total := int64(0)
 		if nextURL == "" {
 			log.Debug3(fmt.Sprintf("GetNext%sUrl initialy No Next - One page only ", "Patient"))
@@ -368,7 +368,7 @@ func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bund
 			return bundle, cacheBundle.Header, err
 		}
 		page++
-		//go c.GetNextPatient(header, nextURL, resource, JWToken, int(page))
+		go c.GetNextResource(header, nextURL, "Patient", JWToken, int(page))
 	} else {
 		log.Info("Not Using Caching")
 	}

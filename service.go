@@ -102,6 +102,7 @@ func Initialize(serviceName, version string) (*common.ServiceConfig, error) {
 	if err != nil {
 		return nil, log.Errorf("could not retieve Configuration : " + err.Error())
 	}
+	ServConfig = *Conf
 	//DbConnector, err = common.GetDatabaseByName(Conf.DataConnectors, "mongo")
 	//fmt.Printf("\n----config: %s]\n", spew.Sdump(Conf))
 

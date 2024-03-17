@@ -583,7 +583,7 @@ func (c *Connection) GetNextDiagnosticRept(header *common.CacheHeader, url, reso
 	cacheBundle.Bundle = bundle
 	if UseCache() {
 		log.Debug3("-- Calling CacheResourceBundleAndEntries")
-		pg, err := CacheResourceBundleAndEntries(&cacheBundle, token, page)
+		pg, err := CacheResourceBundleAndEntries(&cacheBundle, token, int64(page))
 		if err != nil {
 			log.Error("GetNextResource: returned err: " + err.Error())
 			return

@@ -512,7 +512,7 @@ func FindObservation(connPayLoad *common.ConnectorPayload, userId, query, JWToke
 	startTime = time.Now()
 	if !UseCache() {
 		log.Info("Using Caching")
-		pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
+		pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, int64(page))
 		//log.Debug3(fmt.Sprintf("CacheResourceBundleAndEntries returned %d %ss in page: %d for %s  took %s", len(cacheBundle.Bundle.Entry), resource, page, sysCfg.DisplayName, time.Since(startTime)))
 		if err != nil {
 			//return err and done
@@ -555,7 +555,7 @@ func FindObservation(connPayLoad *common.ConnectorPayload, userId, query, JWToke
 func GetNextObservationUrl(link []fhir.BundleLink) string {
 	for _, lnk := range link {
 		if lnk.Relation == "next" {
-			log.Info("--  There is  next page to get")
+			log.Info("--  There is a next page to get")
 			return lnk.Url
 		}
 	}
@@ -564,7 +564,7 @@ func GetNextObservationUrl(link []fhir.BundleLink) string {
 
 // //GetNextResource: fetches the resource at provided url, processes it and checks if more to call.
 func (c *Connection) GetNextObservation(header *common.CacheHeader, url, resource, token string, page int) {
-	log.Debug3("-- page:  " + fmt.Sprint(page))
+	log.Debug3("-GetNextObservation- page:  " + fmt.Sprint(page))
 	//fmt.Printf("GetNextResource:155  --  resource: %s\n", resource) //spew.Sdump(header))
 	//Call Remote FHIR server for the resource bundle
 	startTime := time.Now()
@@ -593,7 +593,7 @@ func (c *Connection) GetNextObservation(header *common.CacheHeader, url, resourc
 	cacheBundle.Header = header
 	cacheBundle.Bundle = bundle
 	log.Debug3("-- Calling CacheResourceBundleAndEntries")
-	pg, err := CacheResourceBundleAndEntries(&cacheBundle, token, page)
+	pg, err := CacheResourceBundleAndEntries(&cacheBundle, token, int64(page))
 	if err != nil {
 		log.Error("GetNextObservation: returned err: " + err.Error())
 		return
