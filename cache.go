@@ -161,7 +161,7 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 
 }
 
-func CacheViaCore(bundle *fhir.Bundle, token string, option string, page int) error {
+func CacheViaCore(bundle *fhir.Bundle, queryId string, token string, option string, page int) error {
 	cacheURL := "http://UniversalCharts.com:30300/system/640ba5e3bd4105586a6dda74" + "/BundleTransaction"
 	fmt.Println()
 	fmt.Println()
@@ -171,8 +171,8 @@ func CacheViaCore(bundle *fhir.Bundle, token string, option string, page int) er
 	cacheSavePayload.Bundle = bundle
 	cacheSavePayload.Option = option
 	cacheSavePayload.PageNum = page
-	cacheSavePayload.
-		payload, err := json.Marshal(cacheSavePayload)
+	cacheSavePayload.QueryId = queryId
+	payload, err := json.Marshal(cacheSavePayload)
 	//bndl, err := bundle.MarshalJSON()
 	if err != nil {
 		err = log.Errorf("Marshal Bundle error: " + err.Error())

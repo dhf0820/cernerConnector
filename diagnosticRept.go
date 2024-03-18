@@ -572,7 +572,8 @@ func (c *Connection) GetNextDiagnosticRept(header *common.CacheHeader, url, reso
 	// 	fmt.Println(msg)
 	// 	return
 	// }
-
+	queryId := header.QueryId
+	log.Debug3("queryId: " + queryId)
 	//unMarshalResource(resource, bundle)
 	header.PageId += 1
 	tn := time.Now()
@@ -602,7 +603,7 @@ func (c *Connection) GetNextDiagnosticRept(header *common.CacheHeader, url, reso
 			return
 		} else {
 			log.Debug3("-- GetNextDiagnosticRept is being called in the background")
-			go c.GetNextResource(header, nextURL, resource, token, pg+1)
+			go c.GetNextResource(header, nextURL, resource, queryId, token, pg+1)
 			log.Debug3("GetNextDiagnosticRept Returned")
 		}
 		log.Debug3("GetNextDiagnosticRept is returning")

@@ -379,7 +379,7 @@ func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bund
 			return bundle, cacheBundle.Header, err
 		}
 		page++
-		go c.GetNextResource(header, nextURL, "Patient", JWToken, int(page))
+		go c.GetNextResource(header, nextURL, "Patient", queryId, JWToken, int(page))
 	} else {
 		log.Info("Not Using Caching")
 	}
