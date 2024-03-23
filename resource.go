@@ -250,7 +250,7 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	header.ResourceType = resource
 	header.UserId = userId
 	header.PageId = page
-	queryId := primitive.NewObjectID().Hex()
+	queryId := primitive.NewObjectID()
 	header.QueryId = queryId
 	log.Debug3("connConfig: " + spew.Sdump(connConfig))
 	header.CacheBase = fmt.Sprintf("%s/system/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
