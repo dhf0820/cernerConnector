@@ -212,7 +212,7 @@ func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, t
 func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query, JWToken string) (int64, *fhir.Bundle, *common.CacheHeader, error) {
 	//page := int64(1)
 	page := 1
-	connConfig := connPayLoad.ConnectorConfig
+	connConfig := connPayLoad.System.ConnectorConfig
 	log.Debug3("connPayload: " + spew.Sdump(connPayLoad))
 	//systemCfg := connPayLoad.System
 	log.Debug3("resource: " + resource)
@@ -231,7 +231,8 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	//Once background is started wait in a loop checking the ResourceCache Status using the assigned cacheId until either
 	// Have count documents or status is finished.
 	// check every 10 seconds.  Should be a FhirSystem variable value to avoid code change
-	c := New(connPayLoad.ConnectorConfig.HostUrl, "application/json")
+	c := New(connPayLoad.System.ConnectorConfig.HostUrl, "application/json")
+	//c := New(connPayLoad.ConnectorConfig.HostUrl, "application/json")
 	startTime := time.Now()
 	bundle, err := c.GetFhirBundle(fullQuery, JWToken)
 	if err != nil {
@@ -267,7 +268,7 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	//fmt.Printf("\n\n\n\n$$$ FindResource:110 calling CacheResourceBundleAndEntries (without bundle) - %s \n", spew.Sdump(cacheBundle))
 	//fmt.Printf("FindResource:126  --  bundle = %s\n", spew.Sdump(bundle))
 	//Cache the first bundle(page)
-	log.Debug3(fmt.Sprintf("Query %s for %ss took %s", connPayLoad.ConnectorConfig.Label, resource, time.Since(startTime)))
+	log.Debug3(fmt.Sprintf("Query %s for %ss took %s", connConfig.Label, resource, time.Since(startTime)))
 	log.Debug3("UnmarshalBundle")
 	// bundle := fhir4.Bundle{}
 	// bundle, err = fhir4.UnmarshalBundle(byte)
@@ -388,6 +389,8 @@ func (c *Connection) GetNextResource(header *common.CacheHeader, url, resource s
 	page = page + 1
 	if nextURL == "" {
 		log.Warn(fmt.Sprintf("GetNextResource Last page had %d Resources processed ", len(bundle.Entry)))
+		log.Debug3("Send post to tell core the query is done and to complete it.")
+		//err = CacheViaCore(bundle, queryId, token, "ALL", page)
 		return
 	} else {
 		log.Debug3("--go c.GetNextResource is being called in the background")

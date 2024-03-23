@@ -138,26 +138,26 @@ func TestDocumentReferenceCache(t *testing.T) {
 		cerSysCfg, err := GetSystemConfigById(cerSysCfgID)
 		So(err, ShouldBeNil)
 		So(cerSysCfg, ShouldNotBeNil)
-		cc := common.ConnectorConfig{}
 		cp := common.ConnectorPayload{}
-		cc.ID, _ = primitive.ObjectIDFromHex("62f1c5dab3070d0b40e7aac1")
-		cc.Name = "uc_ca3"
-		cc.Version = "local_test"
-		cc.CacheUrl = "http://uc_cache:9200"
-		// "cacheurl" : "http://uc_cache:9200",
-		// "cache_url" : "http://uc_cache:9200"
-		data := []*common.KVData{}
-		cacheServer := common.KVData{}
-		cacheServer.Name = "cacheServer"
-		cacheServer.Value = "http://universalcharts.com:30201"
-		data = append(data, &cacheServer)
-		hostServer := common.KVData{}
-		hostServer.Name = "cacheHost"
-		hostServer.Value = "http://ucCache:9200"
-		data = append(data, &hostServer)
-		cc.Data = data
-		//cp.FhirSystem = fhirSystem
-		cp.ConnectorConfig = &cc
+		//cc := common.ConnectorConfig{}
+		// cc.ID, _ = primitive.ObjectIDFromHex("62f1c5dab3070d0b40e7aac1")
+		// cc.Name = "uc_ca3"
+		// cc.Version = "local_test"
+		// cc.CacheUrl = "http://uc_cache:9200"
+		// // "cacheurl" : "http://uc_cache:9200",
+		// // "cache_url" : "http://uc_cache:9200"
+		// data := []*common.KVData{}
+		// cacheServer := common.KVData{}
+		// cacheServer.Name = "cacheServer"
+		// cacheServer.Value = "http://universalcharts.com:30201"
+		// data = append(data, &cacheServer)
+		// hostServer := common.KVData{}
+		// hostServer.Name = "cacheHost"
+		// hostServer.Value = "http://ucCache:9200"
+		// data = append(data, &hostServer)
+		// cc.Data = data
+		// //cp.FhirSystem = fhirSystem
+		// cp.ConnectorConfig = &cc
 		//FindResource(fhirSystem *common.FhirSystem, url, resource, userId, query)
 		cnt, bundle, hdr, err := FindResource(&cp, "DocumentReference", userId, "DocumentReference?patient="+patientId, jwt)
 

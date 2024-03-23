@@ -71,7 +71,7 @@ package services
 // 		return
 // 	}
 
-// 	//connectorConfig := connectorPayload.ConnectorConfig
+// 	//connectorConfig := connectorPayload.System.ConnectorConfig
 // 	// fhirId := GetFhirId(r)
 // 	// fhirSystem, err := GetFhirSystem(fhirId)
 // 	// if err != nil {
@@ -141,7 +141,7 @@ package services
 // 		return
 // 	}
 // 	sysCfg := connectorPayload.System
-// 	connConfig := connectorPayload.ConnectorConfig
+// 	connConfig := connectorPayload.System.ConnectorConfig
 // 	JWToken := r.Header.Get("Authorization")
 // 	Payload, status, err := token.ValidateToken(r.Header.Get("Authorization"), "")
 // 	if err != nil {

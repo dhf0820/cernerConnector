@@ -50,7 +50,7 @@ func findObservation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	connectorConfig := connectorPayload.ConnectorConfig
+	connectorConfig := connectorPayload.System.ConnectorConfig
 	log.Debug5("-- ConnectorPayload = " + spew.Sdump(connectorPayload))
 	uri := r.URL.RequestURI()
 	log.Debug3("--  uri: " + uri)
@@ -73,7 +73,7 @@ func findObservation(w http.ResponseWriter, r *http.Request) {
 	// qryStr := r.URL.RawQuery
 
 	// log.Debug3(fmt.Sprintf(" - resource = %s  uri = %s", resourceType, qryStr))
-	//url := connectorPayload.ConnectorConfig.HostUrl + queryStr
+	//url := connectorPayload.System.ConnectorConfig.HostUrl + queryStr
 
 	log.Debug3(" - calling " + queryStr)
 	var totalPages int64
@@ -109,7 +109,7 @@ func findObservation(w http.ResponseWriter, r *http.Request) {
 	log.Debug3(fmt.Sprintf(" - QueryId: %s", header.QueryId))
 	resp := common.ResourceResponse{}
 	//fmt.Printf("findResource:628 - Header: %s\n", spew.Sdump(header))
-	host := connectorPayload.ConnectorConfig.HostUrl
+	host := connectorPayload.System.ConnectorConfig.HostUrl
 	//host := common.GetKVData(GetConfig().Data, "cacheHost")
 	log.Debug3(" --  host: " + host)
 	cacheBundleUrl := fmt.Sprintf("%s/%s/BundleTransaction", connectorConfig.CacheUrl, header.QueryId)

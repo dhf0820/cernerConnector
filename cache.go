@@ -172,6 +172,7 @@ func CacheViaCore(bundle *fhir.Bundle, queryId primitive.ObjectID, token string,
 	cacheSavePayload.Bundle = bundle
 	cacheSavePayload.Option = option
 	cacheSavePayload.PageNum = page
+
 	cacheSavePayload.QueryId = queryId.Hex()
 	payload, err := json.Marshal(cacheSavePayload)
 	//bndl, err := bundle.MarshalJSON()
