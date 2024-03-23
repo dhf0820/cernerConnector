@@ -9,6 +9,8 @@ github.com/dhf0820/golangJWT v0.0.0-20240321235239-e7ddd24c9b2e h1:WaBvmDWZtQjN8
 github.com/dhf0820/golangJWT v0.0.0-20240321235239-e7ddd24c9b2e/go.mod h1:g9ygZMBvUJcFWz6sFRHICH5ZybsdYFcfChBEv0eHZsw=
 github.com/dhf0820/uc_core v0.0.0-20240323011402-fb816966e113 h1:Lr3/PQbp9l2T0bo6IARXfF9rFIkDgZtk1RCoSWNjNhU=
 github.com/dhf0820/uc_core v0.0.0-20240323011402-fb816966e113/go.mod h1:x0ZuaSPTnpYUa5g5bGCXIoT1VJsET+URuqdYJ16AjqY=
+github.com/dhf0820/uc_core v0.0.0-20240323031118-ad1d7f75445d h1:8eFGSLUyjQaQ5Y9C2D8yQfF3+XUR2L1Kly4de3Ckark=
+github.com/dhf0820/uc_core v0.0.0-20240323031118-ad1d7f75445d/go.mod h1:x0ZuaSPTnpYUa5g5bGCXIoT1VJsET+URuqdYJ16AjqY=
 github.com/dhf0820/vslog v0.0.0-20231007220019-758899f13b4a h1:Ml0irRYHKpTll4BRWdRVuiQ1WtXzx77K3IUJNtux7Lw=
 github.com/dhf0820/vslog v0.0.0-20231007220019-758899f13b4a/go.mod h1:blpTi2lVYBB7f49692KhhaPW6XIUP8zSl+AlihQiwmM=
 github.com/golang-jwt/jwt v3.2.2+incompatible h1:IfV12K8xAKAnZqdXVzCZ+TOjboZ2keLg81eXfW3O+oY=
