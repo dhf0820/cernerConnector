@@ -8,8 +8,8 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dhf0820/baseConnector v0.0.0-20230612022521-666c749210ae
 	github.com/dhf0820/fhir4 v0.0.0-20240211050500-ec607c1fa068
-	github.com/dhf0820/golangJWT v0.0.0-20240313012835-3bad75b17988
-	github.com/dhf0820/uc_core v0.0.0-20240317232555-4b4288d1b0e2
+	github.com/dhf0820/golangJWT v0.0.0-20240321235239-e7ddd24c9b2e
+	github.com/dhf0820/uc_core v0.0.0-20240323011402-fb816966e113
 	github.com/dhf0820/vslog v0.0.0-20231007220019-758899f13b4a
 	github.com/google/uuid v1.4.0
 	github.com/gorilla/mux v1.8.1

@@ -322,7 +322,7 @@ func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bund
 
 	//page = 1
 
-	queryId := primitive.NewObjectID().Hex()
+	queryId := primitive.NewObjectID()
 	header.QueryId = queryId
 	log.Debug3("connConfig: " + spew.Sdump(connConfig))
 	header.CacheBase = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())

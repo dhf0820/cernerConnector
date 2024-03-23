@@ -22,6 +22,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	common "github.com/dhf0820/uc_core/common"
 	log "github.com/dhf0820/vslog"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	//"github.com/sirupsen/logrus"
 	//"github.com/samply/golang-fhir-models/fhir-models/fhir"
@@ -161,7 +162,7 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 
 }
 
-func CacheViaCore(bundle *fhir.Bundle, queryId string, token string, option string, page int) error {
+func CacheViaCore(bundle *fhir.Bundle, queryId primitive.ObjectID, token string, option string, page int) error {
 	cacheURL := "http://UniversalCharts.com:30300/system/640ba5e3bd4105586a6dda74" + "/BundleTransaction"
 	fmt.Println()
 	fmt.Println()
@@ -171,7 +172,7 @@ func CacheViaCore(bundle *fhir.Bundle, queryId string, token string, option stri
 	cacheSavePayload.Bundle = bundle
 	cacheSavePayload.Option = option
 	cacheSavePayload.PageNum = page
-	cacheSavePayload.QueryId = queryId
+	cacheSavePayload.QueryId = queryId.Hex()
 	payload, err := json.Marshal(cacheSavePayload)
 	//bndl, err := bundle.MarshalJSON()
 	if err != nil {
@@ -470,7 +471,7 @@ func GetResourceCachePage(resource, userId string, perPage, pageNum int64) ([]In
 //return total, cacheBundle.Bundle, cacheBundle.Header, err
 //}
 
-func TotalCacheForQuery(queryId string) (int64, error) {
+func TotalCacheForQuery(queryId primitive.ObjectID) (int64, error) {
 	//TODO: Call Core to get cache status
 	total := int64(99999)
 	// startTime := time.Now()

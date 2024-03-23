@@ -343,12 +343,12 @@ func GetNextResourceUrl(link []fhir.BundleLink) string {
 }
 
 // //GetNextResource: fetches the resource at provided url, processes it and checks if more to call.
-func (c *Connection) GetNextResource(header *common.CacheHeader, url, resource, queryId, token string, page int) {
+func (c *Connection) GetNextResource(header *common.CacheHeader, url, resource string, queryId primitive.ObjectID, token string, page int) {
 	fmt.Printf("\n\n\n\n####################  GetNextResource page: %d   ###############\n", page)
 	//fmt.Printf("GetNextResource:155  --  resource: %s\n", resource) //spew.Sdump(header))
 	//Call Remote FHIR server for the resource bundle
 	//queryId := header.QueryId
-	log.Debug3("queryId: " + queryId)
+	log.Debug3("queryId: " + queryId.Hex())
 	startTime := time.Now()
 	bundle, err := c.GetFhirBundle(url, JWToken)
 	if err != nil {

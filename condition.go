@@ -121,7 +121,7 @@ func findCondition(w http.ResponseWriter, r *http.Request) {
 	resp.BundleId = *bundle.Id
 	resp.ResourceType = resourceType
 	resp.Status = 200
-	resp.QueryId = header.QueryId
+	resp.QueryId = header.QueryId.Hex()
 	resp.PageNumber = header.PageId
 	resp.CountInPage = len(bundle.Entry)
 	resp.TotalPages = totalPages
@@ -132,7 +132,7 @@ func findCondition(w http.ResponseWriter, r *http.Request) {
 	log.Debug3(fmt.Sprintf("--  Time to log = %s", time.Since(logTime)))
 	resp.Bundle = bundle
 	log.Debug3(fmt.Sprintf("--  Number of entries in bundle: %d", len(bundle.Entry)))
-	log.Debug3(fmt.Sprintf("--  QueryId: " + header.QueryId))
+	log.Debug3(fmt.Sprintf("--  QueryId: " + header.QueryId.Hex()))
 	FillResourceResponse(&resp, resourceType)
 	//fmt.Printf("findResource:614  --  Returning Bundle: %s\n", spew.Sdump(bundle))
 	//WriteFhirResourceBundle(w, resp.Status, &resp)
@@ -510,7 +510,7 @@ func FindCondition(connPayLoad *common.ConnectorPayload, userId, query, JWToken 
 	header.ResourceType = resource
 	header.UserId = userId
 	header.PageId = page
-	queryId := primitive.NewObjectID().Hex()
+	queryId := primitive.NewObjectID()
 	header.QueryId = queryId
 	//log.Debug5("connConfig: " + spew.Sdump(connConfig))
 	//header.CacheBase = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
