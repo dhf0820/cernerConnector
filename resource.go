@@ -383,16 +383,26 @@ func (c *Connection) GetNextResource(header *common.CacheHeader, url, resource s
 	// log.Debug3(fmt.Sprintf("pg: %d  Page: %d", pg, page))
 
 	log.Debug3("Cache current Page: " + fmt.Sprint(page))
-	err = CacheViaCore(bundle, queryId, token, "ALL", page)
+	err = CacheViaCore(bundle, queryId, token, "ALL", page, "false")
+	if err != nil {
+		log.Error("CacheViaCore err: " + err.Error())
+		return
+	}
 	log.Debug3("--  Calling GetNextResourceUrl")
 	nextURL := GetNextResourceUrl(bundle.Link)
-	page = page + 1
 	if nextURL == "" {
-		log.Warn(fmt.Sprintf("GetNextResource Last page had %d Resources processed ", len(bundle.Entry)))
+		onPage := len(bundle.Entry)
+		log.Warn(fmt.Sprintf("GetNextResource Last page had %d Resources processed ", onPage))
 		log.Debug3("Send post to tell core the query is done and to complete it.")
-		//err = CacheViaCore(bundle, queryId, token, "ALL", page)
+		err = CacheResourceFinished(header.SystemCfg, queryId, page, onPage)
+		//err = CacheViaCore(bundle, queryId, token, "ALL", page, "true") // Send post to Cache to finish the caching
+		if err != nil {
+			log.Error("CacheViaCore err: " + err.Error())
+			return
+		}
 		return
 	} else {
+		page = page + 1
 		log.Debug3("--go c.GetNextResource is being called in the background")
 		go c.GetNextResource(header, nextURL, resource, queryId, token, page)
 		log.Debug3("-- GetNextResource Returned and background started")

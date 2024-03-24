@@ -161,8 +161,34 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 	//c.CoreUrl = "http://	"
 
 }
+func CachedFinished(queryID primitive.ObjectID, token, onPage int, pageSize int) error {
+	//systemId := systemConfig.ID.Hex()
+	cacheURL := "http://UniversalCharts.com:30300/system/" + systemId + "/BundleTransaction"
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	log.Debug3("CacheFinished  --  POST cacheURL: " + cacheURL)
+	finishedCache := common.cacheResourceComplete{}
+	// cacheSavePayload.Bundle = bundle
+	// cacheSavePayload.Option = option
+	//finishedCache.PageNum = page
+	finishedCache.QueryId = queryID.Hex()
+	payload, err := json.Marshal(cacheSavePayload)
+	//bndl, err := bundle.MarshalJSON()
+	if err != nil {
+		err = log.Errorf("Marshal Bundle error: " + err.Error())
+		return err
+	}
+	req, _ := http.NewRequest("POST", cacheURL, bytes.NewBuffer(payload))
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", token)
+	req.Header.Set("Resource", *bundle.ResourceType)
+	req.Header.Set("Final", final)
 
-func CacheViaCore(bundle *fhir.Bundle, queryId primitive.ObjectID, token string, option string, page int) error {
+}
+
+func CacheViaCore(bundle *fhir.Bundle, queryId primitive.ObjectID, token string, option string, page int, final string) error {
 	cacheURL := "http://UniversalCharts.com:30300/system/640ba5e3bd4105586a6dda74" + "/BundleTransaction"
 	fmt.Println()
 	fmt.Println()
@@ -185,6 +211,7 @@ func CacheViaCore(bundle *fhir.Bundle, queryId primitive.ObjectID, token string,
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", token)
 	req.Header.Set("Resource", *bundle.ResourceType)
+	req.Header.Set("Final", final)
 	//token = "Bearer " + token
 	//log.Debug3("CacheResourceBundleAndEntries  --  Token: " + token)
 	client := &http.Client{}
