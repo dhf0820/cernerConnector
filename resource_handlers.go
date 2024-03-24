@@ -475,7 +475,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	connectorConfig := connectorPayload.ConnectorConfig
+	connectorConfig := connectorPayload.System.ConnectorConfig
 	log.Debug3("-- ConnectorPayload = " + spew.Sdump(connectorPayload))
 	uri := r.URL.RequestURI()
 	fmt.Printf("findResource:475  --  uri: %s\n", uri)
@@ -637,7 +637,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 			}
 			idName := ids[0]
 			idSearchValue := ids[1]
-			idents := connectorPayload.ConnectorConfig.Identifiers
+			idents := connectorPayload.System.ConnectorConfig.Identifiers
 			for _, id := range idents {
 				if id.Name == idName {
 					idValue = id.Value
@@ -670,7 +670,9 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	qryStr := r.URL.RawQuery
 
 	log.Debug3(fmt.Sprintf(" - resource = %s  uri = %s", resourceType, qryStr))
-	url := connectorPayload.ConnectorConfig.HostUrl + resourceType + "?" + qryStr
+	log.Debug3("")
+	url := connectorPayload.System.ConnectorConfig.HostUrl + resourceType + "?" + qryStr
+	//url := connectorPayload.System.ConnectorConfig.HostUrl + resourceType + "?" + qryStr
 	//url := connectorPayload.System.Url + Resource + "?" + qryStr
 	log.Debug3(" - calling " + url)
 	var totalPages int64
@@ -707,7 +709,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	log.Debug3(fmt.Sprintf(" - QueryId: %s", header.QueryId))
 	resp := common.ResourceResponse{}
 	//fmt.Printf("findResource:628 - Header: %s\n", spew.Sdump(header))
-	host := connectorPayload.ConnectorConfig.HostUrl
+	host := connectorPayload.System.ConnectorConfig.HostUrl
 	//host := common.GetKVData(GetConfig().Data, "cacheHost")
 	log.Debug3(" --  host: " + host)
 	cacheBundleUrl := fmt.Sprintf("%s/%s/BundleTransaction", connectorConfig.CacheUrl, header.QueryId)

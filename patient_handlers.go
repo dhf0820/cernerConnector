@@ -452,7 +452,7 @@ func searchPatient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//fhirSystem := connectorPayload.FhirSystem
-	//connConfig := connectorPayload.ConnectorConfig
+	//connConfig := connectorPayload.System.ConnectorConfig
 	//buildFieldsByTagMap("schema", *psp)
 	JWToken = r.Header.Get("Authorization")
 	log.Debug3("searchPatient - JWToken: " + JWToken)
