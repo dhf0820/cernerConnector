@@ -163,7 +163,7 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 }
 func FinishCache(systemConfig *common.SystemConfig, queryID primitive.ObjectID, token string, onPage int, pageSize int) error {
 	systemId := systemConfig.ID.Hex()
-	cacheURL := "http://UniversalCharts.com:30300/system/" + systemId + "/BundleTransaction"
+	cacheURL := "http://UniversalCharts.com:30300/system/" + systemId + "/FinishCache"
 	fmt.Println()
 	fmt.Println()
 	fmt.Println()

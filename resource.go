@@ -314,6 +314,7 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 			return 0, nil, nil, log.Errorf("Bundle is nil")
 		}
 		if len(bundle.Entry) == 0 {
+
 			return 0, bundle, cacheBundle.Header, log.Errorf("No resources found")
 		} else {
 			return int64(len(bundle.Entry)), bundle, cacheBundle.Header, err
