@@ -307,7 +307,7 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 		page++
 		go c.GetNextResource(header, nextURL, resource, queryId, JWToken, int(page))
 		log.Debug3(fmt.Sprintf("Page 1 total time: %s", time.Since(startTime)))
-		// There is one full page and possibley more. Respond with two aso they user will create two page buttons and update every
+		// There is one full page and possibly more. Respond with two so the user will create two page buttons and update every
 		// 10 secnds.
 		//return int64(page), bundle, cacheBundle.Header, err
 		if bundle == nil {
@@ -388,15 +388,13 @@ func (c *Connection) GetNextResource(header *common.CacheHeader, url, resource s
 		log.Error("CacheViaCore err: " + err.Error())
 		return
 	}
-	log.Debug3("--  Calling GetNextResourceUrl")
+	log.Debug3("-- Calling GetNextResourceUrl")
 	nextURL := GetNextResourceUrl(bundle.Link)
 	if nextURL == "" {
 		onPage := len(bundle.Entry)
 		log.Warn(fmt.Sprintf("GetNextResource Last page had %d Resources processed ", onPage))
 		log.Debug3("Send post to tell core the query is done and to complete it.")
-		err = FinishCache(header.SystemCfg, queryId, token, page, onPage)
-
-		//err = CacheViaCore(bundle, queryId, token, "ALL", page, "true") // Send post to Cache to finish the caching
+		err = FinishCache(header.SystemCfg, queryId, token, page, onPage)g
 		if err != nil {
 			log.Error("CacheViaCore err: " + err.Error())
 			return
