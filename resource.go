@@ -383,7 +383,7 @@ func (c *Connection) GetNextResource(header *common.CacheHeader, url, resource s
 	// log.Debug3(fmt.Sprintf("pg: %d  Page: %d", pg, page))
 
 	log.Debug3("Cache current Page: " + fmt.Sprint(page))
-	err = CacheViaCore(bundle, queryId, token, "ALL", page, "false")
+	err = CacheViaCore(bundle, queryId, token, "ALL", page)
 	if err != nil {
 		log.Error("CacheViaCore err: " + err.Error())
 		return
@@ -394,7 +394,7 @@ func (c *Connection) GetNextResource(header *common.CacheHeader, url, resource s
 		onPage := len(bundle.Entry)
 		log.Warn(fmt.Sprintf("GetNextResource Last page had %d Resources processed ", onPage))
 		log.Debug3("Send post to tell core the query is done and to complete it.")
-		err = CacheResourceFinished(header.SystemCfg, queryId, page, onPage)
+		err = CacheFinished(header.SystemCfg, queryId, page, onPage)
 		//err = CacheViaCore(bundle, queryId, token, "ALL", page, "true") // Send post to Cache to finish the caching
 		if err != nil {
 			log.Error("CacheViaCore err: " + err.Error())

@@ -161,19 +161,19 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 	//c.CoreUrl = "http://	"
 
 }
-func CachedFinished(queryID primitive.ObjectID, token, onPage int, pageSize int) error {
-	//systemId := systemConfig.ID.Hex()
+func CachedFinished(systemConfig *common.SystemConfig, queryID primitive.ObjectID, token string, onPage int, pageSize int) error {
+	systemId := systemConfig.ID.Hex()
 	cacheURL := "http://UniversalCharts.com:30300/system/" + systemId + "/BundleTransaction"
 	fmt.Println()
 	fmt.Println()
 	fmt.Println()
 	log.Debug3("CacheFinished  --  POST cacheURL: " + cacheURL)
-	finishedCache := common.cacheResourceComplete{}
+	finishedCache := common.FinishCachePayload{}
 	// cacheSavePayload.Bundle = bundle
 	// cacheSavePayload.Option = option
 	//finishedCache.PageNum = page
 	finishedCache.QueryId = queryID.Hex()
-	payload, err := json.Marshal(cacheSavePayload)
+	payload, err := json.Marshal(finishedCache)
 	//bndl, err := bundle.MarshalJSON()
 	if err != nil {
 		err = log.Errorf("Marshal Bundle error: " + err.Error())
@@ -183,12 +183,28 @@ func CachedFinished(queryID primitive.ObjectID, token, onPage int, pageSize int)
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", token)
-	req.Header.Set("Resource", *bundle.ResourceType)
-	req.Header.Set("Final", final)
-
+	//req.Header.Set("Resource", *bundle.ResourceType)
+	req.Header.Set("Final", "final")
+	client := &http.Client{}
+	//log.Debug3(fmt.Sprintf("CacheResourceBundleAndEntries  --  Method: %s  URL: %s", req.Method, cacheURL))
+	resp, err := client.Do(req)
+	//log.Debug3("CacheResourceBundleAndEntries  --  resp: " + spew.Sdump(resp))
+	//defer resp.Body.Close()
+	if err != nil {
+		err = log.Errorf("CacheResourceBundleAndEntries  -- Error uc_cache Request: " + err.Error())
+		fmt.Println(err.Error())
+		return nil
+	}
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		err = log.Errorf(fmt.Sprintf("CacheResourceBundleAndEntries -- Invalid uc_cache Status: " + fmt.Sprint(resp.StatusCode) + " -- " + resp.Status))
+		fmt.Println(err.Error())
+		return nil
+	}
+	log.Debug3("FinishCache Sent to uc_core Successful")
+	return nil
 }
 
-func CacheViaCore(bundle *fhir.Bundle, queryId primitive.ObjectID, token string, option string, page int, final string) error {
+func CacheViaCore(bundle *fhir.Bundle, queryId primitive.ObjectID, token string, option string, page int) error {
 	cacheURL := "http://UniversalCharts.com:30300/system/640ba5e3bd4105586a6dda74" + "/BundleTransaction"
 	fmt.Println()
 	fmt.Println()
@@ -211,7 +227,7 @@ func CacheViaCore(bundle *fhir.Bundle, queryId primitive.ObjectID, token string,
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", token)
 	req.Header.Set("Resource", *bundle.ResourceType)
-	req.Header.Set("Final", final)
+	//req.Header.Set("Final", final)
 	//token = "Bearer " + token
 	//log.Debug3("CacheResourceBundleAndEntries  --  Token: " + token)
 	client := &http.Client{}
