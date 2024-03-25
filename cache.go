@@ -161,7 +161,7 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 	//c.CoreUrl = "http://	"
 
 }
-func CachedFinished(systemConfig *common.SystemConfig, queryID primitive.ObjectID, token string, onPage int, pageSize int) error {
+func CacheFinished(systemConfig *common.SystemConfig, queryID primitive.ObjectID, token string, onPage int, pageSize int) error {
 	systemId := systemConfig.ID.Hex()
 	cacheURL := "http://UniversalCharts.com:30300/system/" + systemId + "/BundleTransaction"
 	fmt.Println()
