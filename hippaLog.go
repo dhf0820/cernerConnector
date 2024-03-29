@@ -7,4 +7,4 @@ import (
 	"github.com/dhf0820/uc_core/common"
 )
 
-func LogHippa(hl *common.HippaLog) {}
+func LogHippa(hl *common.HippaLog)
