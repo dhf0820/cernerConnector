@@ -161,8 +161,12 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 	//c.CoreUrl = "http://	"
 
 }
-func FinishCache(systemConfig *common.SystemConfig, queryID primitive.ObjectID, token string, onPage int, pageSize int) error {
+func FinishCache(systemConfig *common.SystemConfig, queryID primitive.ObjectID, token string, pageNum int, onPage int, pageSize int) error {
 	systemId := systemConfig.ID.Hex()
+	log.Debug3("@!!!SystemConfig: " + spew.Sdump(systemConfig))
+	log.Debug3("pageSize: " + fmt.Sprint(pageSize))
+	log.Debug3("onPage: " + fmt.Sprint(onPage))
+	log.Debug3("PageNum: " + fmt.Sprint(pageNum))
 	cacheURL := "http://UniversalCharts.com:30300/system/" + systemId + "/FinishCache"
 	fmt.Println()
 	fmt.Println()
@@ -171,8 +175,11 @@ func FinishCache(systemConfig *common.SystemConfig, queryID primitive.ObjectID, 
 	finishedCache := common.FinishCachePayload{}
 	// cacheSavePayload.Bundle = bundle
 	// cacheSavePayload.Option = option
-	//finishedCache.PageNum = page
+	finishedCache.PageNum = pageNum
+	finishedCache.OnPage = onPage
+	finishedCache.PageSize = pageSize
 	finishedCache.QueryId = queryID.Hex()
+	log.Debug3("finishedCache to send to core: " + spew.Sdump(finishedCache))
 	payload, err := json.Marshal(finishedCache)
 	//bndl, err := bundle.MarshalJSON()
 	if err != nil {
@@ -191,7 +198,7 @@ func FinishCache(systemConfig *common.SystemConfig, queryID primitive.ObjectID, 
 	//log.Debug3("CacheResourceBundleAndEntries  --  resp: " + spew.Sdump(resp))
 	//defer resp.Body.Close()
 	if err != nil {
-		err = log.Errorf("CacheResourceBundleAndEntries  -- Error uc_cache Request: " + err.Error())
+		err = log.Errorf("FinishCche  -- Error uc_cache Request: " + err.Error())
 		fmt.Println(err.Error())
 		return nil
 	}
@@ -214,6 +221,7 @@ func CacheViaCore(bundle *fhir.Bundle, queryId primitive.ObjectID, token string,
 	cacheSavePayload.Bundle = bundle
 	cacheSavePayload.Option = option
 	cacheSavePayload.PageNum = page
+	cacheSavePayload.ResourceType = *bundle.ResourceType
 
 	cacheSavePayload.QueryId = queryId.Hex()
 	payload, err := json.Marshal(cacheSavePayload)
@@ -245,7 +253,7 @@ func CacheViaCore(bundle *fhir.Bundle, queryId primitive.ObjectID, token string,
 		fmt.Println(err.Error())
 		return nil
 	}
-	log.Debug3("Bundle Sent to uc_core Successful")
+	log.Debug3("Bundle page: " + fmt.Sprint(page) + " Sent to uc_core Successful")
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		err = fmt.Errorf("CacheResourceBundleAndEntries: ReadAllBody : error: " + err.Error())

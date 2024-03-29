@@ -8,6 +8,7 @@ import (
 	//"github.com/joho/godotenv"
 	//"github.com/ory/dockertest/docker/types/versions"
 	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	//"net/http"
 	"os"
 
@@ -19,16 +20,19 @@ import (
 )
 
 // var err error
+var CurrentSystemId string
 var ServConfig common.ServiceConfig
 var err error
 var version string
 var Mode string
 var Env string
+var CurrentUser common.User
 var ResponseType string
 var QueryString string
+var CurrentUserID primitive.ObjectID
 
 func main() {
-	version = "240324.0"
+	version = "240328.0"
 	log.SetDebuglevel("DEBUG3")
 	log.Info("run mode: " + os.Getenv("MODE"))
 	switch os.Getenv("MODE") {

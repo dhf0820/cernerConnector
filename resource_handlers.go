@@ -435,7 +435,21 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 		WriteFhirOperationOutcome(w, status, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
+	CurrentSystemId = r.Header.Get("SYSTEMID")
+	if CurrentSystemId == "" {
+		errMsg := log.ErrMsg("--  Header SystemId is required ")
+		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
+		return
+	}
+	log.Debug3("CurrentSystemId: " + CurrentSystemId)
 	userId := Payload.UserId
+	userID, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		errMsg := log.ErrMsg("--  ReadAll FhirSystem error " + err.Error())
+		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
+		return
+	}
+	CurrentUserID = userID
 	resourceType := ""
 	params := mux.Vars(r)
 	log.Debug3(fmt.Sprintf("Params: %v\n", params))
@@ -676,10 +690,11 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	//url := connectorPayload.System.Url + Resource + "?" + qryStr
 	log.Debug3(" - calling " + url)
 	var totalPages int64
+	var inPage int64
 	log.Debug3(fmt.Sprintf(" --  Search %s with %s", resourceType, qryStr))
 	startTime := time.Now()
-	totalPages, bundle, header, err = FindResource(&connectorPayload, resourceType, userId, qryStr, JWToken)
-	log.Debug3(" - FindResource returned")
+	inPage, totalPages, bundle, header, err = FindResource(&connectorPayload, resourceType, userId, qryStr, JWToken)
+	log.Debug3(" - FindResource returned numPages: " + fmt.Sprint(totalPages))
 	finalStatus := status
 	if err != nil {
 		errMsg := log.ErrMsg(fmt.Sprintf("error:  %s", err.Error()))
@@ -704,6 +719,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	//finalStatus = status
 	log.Debug3(fmt.Sprintf(" - Get %s bundle successful in %s", resourceType, time.Since(startTime)))
 	log.Debug3(fmt.Sprintf(" - Total Pages: %d", totalPages))
+	log.Debug3(" - inPage :" + fmt.Sprint(inPage))
 	log.Debug3(fmt.Sprintf(" - Number in page: %d", len(bundle.Entry)))
 	log.Debug3(fmt.Sprintf(" - PageNumber: %d", header.PageId))
 	log.Debug3(fmt.Sprintf(" - QueryId: %s", header.QueryId))
@@ -1124,6 +1140,24 @@ func FillResourceResponse(resp *common.ResourceResponse, resourceType string) er
 			pat, err := fhir.UnmarshalPatient(item.Resource)
 			if err != nil {
 				return log.Errorf("UnMarshal(Patient) error = " + err.Error())
+			}
+			fmt.Printf("\n\n\n")
+			log.Info("HIPPALog access user: " + CurrentUserID.Hex() + " of patient: " + pat.ID.Hex())
+			logMsg := fmt.Sprintf("HIPPA log User: %s - %s accessed  Patient: %s", CurrentUser.ID.Hex(), CurrentUser.UserName, pat.ID.Hex())
+			log.Info(logMsg)
+			//log.Info(fmt.Sprintf("HIPPA log User: %s - %s accessed  Patient: %s", CurrentUser.ID.Hex(), CurrentUser.UserName, pat.ID.Hex()))
+			hl := &common.HippaLog{}
+			hl.UserId = CurrentUser.ID.Hex()
+			hl.PatientId = pat.ID.Hex()
+			hl.ResourceType = "Patient"
+			hl.ResourceId = hl.PatientId
+			hl.SystemId = CurrentSystemId
+			hl.LogType = "Core-Listed"
+			hl.LogTime = time.Now().UTC()
+			hl.LogMessage = logMsg
+			err = LogHippa(hl)
+			if err != nil {
+				log.Warn("HippaLogging failed: " + err.Error())
 			}
 			resData.Patient = &pat
 			log.Debug3(" Added PatientId: " + *pat.Id)
