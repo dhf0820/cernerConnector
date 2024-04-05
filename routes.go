@@ -28,7 +28,8 @@ var routes = Routes{
 	Route{
 		"FindPatient",
 		"GET",
-		"/api/rest/v1/Patient",
+		//"/api/rest/v1/Patient",
+		"/system/{SystemId}/Patient",
 		findResource,
 		//findPatient,
 	},

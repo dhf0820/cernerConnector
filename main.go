@@ -7,8 +7,10 @@ import (
 	//common "github.com/dhf0820/uc_core/common"
 	//"github.com/joho/godotenv"
 	//"github.com/ory/dockertest/docker/types/versions"
+	//jwToken "github.com/dhf0820/golangJWT"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	//"net/http"
 	"os"
 
@@ -30,9 +32,10 @@ var CurrentUser common.User
 var ResponseType string
 var QueryString string
 var CurrentUserID primitive.ObjectID
+var CurrentToken string
 
 func main() {
-	version = "240328.0"
+	version = "240330.0"
 	log.SetDebuglevel("DEBUG3")
 	log.Info("run mode: " + os.Getenv("MODE"))
 	switch os.Getenv("MODE") {

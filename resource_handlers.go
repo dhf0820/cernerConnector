@@ -435,7 +435,17 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 		WriteFhirOperationOutcome(w, status, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
-	CurrentSystemId = r.Header.Get("SYSTEMID")
+
+	CurrentToken = JWToken
+	params := mux.Vars(r)
+	log.Info(fmt.Sprintf("mux.Vars: %v", params))
+	SystemId := params["SystemId"] // The id of the fhirSystem to use
+	if SystemId == "" {
+		SystemId = r.Header.Get("SystemId")
+	}
+	log.Debug3("SystemId: " + SystemId)
+	CurrentSystemId = SystemId
+	//CurrentSystemId = r.Header.Get("SYSTEMID")
 	if CurrentSystemId == "" {
 		errMsg := log.ErrMsg("--  Header SystemId is required ")
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
@@ -451,31 +461,31 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	}
 	CurrentUserID = userID
 	resourceType := ""
-	params := mux.Vars(r)
+	params = mux.Vars(r)
 	log.Debug3(fmt.Sprintf("Params: %v\n", params))
 	if params["resource"] != "" {
 		log.Debug3(" --  Using Resource in params")
 		resourceType = params["resource"]
 	} else {
 		// url := r.URL
-		log.Debug2(fmt.Sprintf("--  url = %s", r.URL.Path))
-		log.Debug2(fmt.Sprintf("findResource:442  --  uri = %s", r.URL.RequestURI()))
-		resourceType = DetermineResource(r.URL.Path, "/api/rest/v1/")
+		log.Debug3(fmt.Sprintf("--  url = %s", r.URL.Path))
+		log.Debug3(fmt.Sprintf("--  uri = %s", r.URL.RequestURI()))
+		resourceType = DetermineResource(r.URL.Path, "")
 		if resourceType == "" {
 			errMsg := log.ErrMsg("Resource not found in URL")
 			WriteFhirOperationOutcome(w, status, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 			return
 		}
 	}
-	log.Debug1(" --  Resource = " + resourceType)
+	log.Debug3("ResourceType : " + resourceType)
+	log.Debug3(" --  Resource = " + resourceType)
 
 	//log.Debug1(" -- being called for resource: [%s]\n", Resource)
-	log.Debug2("--  Reading Body")
+	log.Debug3("--  Reading Body")
 	//fmt.Printf("findResource:453  --  r = %s\n", spew.Sdump(r))
 	body, err := io.ReadAll(r.Body) // Should be ConnectorPayload
 	if err != nil {
-		fmt.Printf("findResource:456  --  ReadAll FhirSystem error %s\n", err.Error())
-		errMsg := err.Error()
+		errMsg := log.ErrMsg("--  ReadAll FhirSystem error: " + err.Error())
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
@@ -490,7 +500,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	}
 
 	connectorConfig := connectorPayload.System.ConnectorConfig
-	log.Debug3("-- ConnectorPayload = " + spew.Sdump(connectorPayload))
+	//log.Debug3("-- ConnectorPayload = " + spew.Sdump(connectorPayload))
 	uri := r.URL.RequestURI()
 	fmt.Printf("findResource:475  --  uri: %s\n", uri)
 	fmt.Printf("findResource:476  --  URL.Path() = %s\n", r.URL.Path)
@@ -680,7 +690,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	var bundle *fhir.Bundle
 	var header *common.CacheHeader
 	//resourceId := r.Header.Get("Fhir-System")
-	log.Debug3(" - connectorPayload = " + spew.Sdump(connectorPayload))
+	//log.Debug3(" - connectorPayload = " + spew.Sdump(connectorPayload))
 	qryStr := r.URL.RawQuery
 
 	log.Debug3(fmt.Sprintf(" - resource = %s  uri = %s", resourceType, qryStr))
@@ -1111,15 +1121,17 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 // // }
 
 func DetermineResource(url string, prefix string) string {
-	parts := strings.SplitAfter(url, prefix)
+	parts := strings.Split(url, "/")
+	//parts := strings.SplitAfter(url, prefix)
 	resourceType := parts[len(parts)-1]
-	log.Debug3("DetermineResource:1011  --  resourceType: " + resourceType)
+	log.Debug3("--  resourceType: " + resourceType)
 	return resourceType
 }
 func DetermineGetResource(url string, prefix string) string {
 	log.Debug3(fmt.Sprintf("  --  url: " + url))
-	parts := strings.SplitAfter(url, prefix)
-	resourceType := strings.TrimRight(parts[len(parts)-2], "/")
+	parts := strings.Split(url, "/")
+	//parts := strings.SplitAfter(url, prefix)
+	resourceType := strings.TrimRight(parts[len(parts)-1], "/")
 	// var subs []string
 	log.Debug3("--  resourceType: " + resourceType)
 	return resourceType
@@ -1134,14 +1146,19 @@ func FillResourceResponse(resp *common.ResourceResponse, resourceType string) er
 	case "patient":
 		//pats := []fhir.Patient{}
 		//resData := common.ResourceData{}
-		for _, item := range resp.Bundle.Entry {
+		for i, item := range resp.Bundle.Entry {
+			log.Debug3("Bundle.Entry: " + fmt.Sprint(i))
 			resData := common.ResourceData{}
 
 			pat, err := fhir.UnmarshalPatient(item.Resource)
 			if err != nil {
-				return log.Errorf("UnMarshal(Patient) error = " + err.Error())
+				err = log.Errorf("UnMarshal(Patient) error = " + err.Error())
+				fmt.Println(err.Error())
+				return err
 			}
+			log.Debug3("Patient: " + spew.Sdump(pat))
 			fmt.Printf("\n\n\n")
+			log.Debug3("CurrentUser: " + spew.Sdump(CurrentUser))
 			log.Info("HIPPALog access user: " + CurrentUserID.Hex() + " of patient: " + pat.ID.Hex())
 			logMsg := fmt.Sprintf("HIPPA log User: %s - %s accessed  Patient: %s", CurrentUser.ID.Hex(), CurrentUser.UserName, pat.ID.Hex())
 			log.Info(logMsg)

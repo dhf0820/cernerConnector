@@ -212,11 +212,16 @@ var PageSize int
 
 // //Search for Resources matching url filters or id
 func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query, JWToken string) (int64, int64, *fhir.Bundle, *common.CacheHeader, error) {
+	systemID := connPayLoad.System.ID
+	log.Debug3("resource: " + resource)
+	//log.Debug3("connPayload: " + spew.Sdump(connPayLoad))
+	baseCache := connPayLoad.System.ConnectorConfig.CacheUrl
+	log.Debug3(fmt.Sprintf("baseCache: %s  SystemId: %s", baseCache, systemID.Hex()))
 	//page := int64(1)
-	PageSize = 20
+	PageSize = 10
 	page := 1
 	connConfig := connPayLoad.System.ConnectorConfig
-	log.Debug3("connPayload: " + spew.Sdump(connPayLoad))
+	//log.Debug3("ConnectorConfig: " + spew.Sdump(connConfig))
 	//systemCfg := connPayLoad.System
 	log.Debug3("resource: " + resource)
 	log.Debug3("query: " + query)
@@ -244,6 +249,10 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 		fmt.Printf("error: %s\n", err.Error())
 		return 0, 0, nil, nil, err
 	}
+	if bundle == nil {
+		//log.Debug3("bundle is nil")
+		return 0, 2, nil, nil, log.Errorf("bundle is nil")
+	}
 	// bundle, err := c.Query(query, JWToken) // Perform the actul query of the fhir server
 	// if err != nil {
 	// 	return 0, nil, nil, err
@@ -256,11 +265,12 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	header.PageId = page
 	queryId := primitive.NewObjectID()
 	header.QueryId = queryId
-	log.Debug3("connConfig: " + spew.Sdump(connConfig))
-	header.CacheBase = fmt.Sprintf("%s/system/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
+	//header.CacheUrl = fmt.Sprintf("query/%s", queryId) //baseCache, header.SystemCfg.ID.Hex())
+	//log.Debug3("connConfig: " + spew.Sdump(connConfig))
+	header.CacheUrl = fmt.Sprintf("%squery/%s", baseCache, header.QueryId.Hex())
 	//header.ResourceCacheBase = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
-	header.GetBundleCacheBase = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheBase, header.SystemCfg.ID.Hex())
-	header.GetResourceCacheBase = fmt.Sprintf("%s/%s/CachePage", header.CacheBase, header.SystemCfg.ID.Hex())
+	header.GetBundleCacheBase = fmt.Sprintf("%s/BundleTransaction", header.CacheUrl, header.SystemCfg.ID.Hex())
+	header.GetResourceCacheBase = fmt.Sprintf("%s/CachePage", header.CacheUrl) //, header.SystemCfg.ID.Hex())
 
 	cacheBundle := common.CacheBundle{}
 	cacheBundle.PageId = header.PageId
@@ -280,16 +290,22 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	// }
 	cacheBundle.Bundle = bundle
 	startTime = time.Now()
+	log.Debug3(fmt.Sprintf("Length of page %d is %d", page, len(bundle.Entry)))
 	if page == 1 {
+		log.Debug3("")
 		PageSize = len(bundle.Entry)
 		log.Debug3("$$$$$$ length of Page 1: " + fmt.Sprint(PageSize))
 
 	}
 	if UseCache() {
 		log.Debug3("Calling CacheViaCore for page: " + fmt.Sprint(page))
+		log.Debug3("Cache current Page: " + fmt.Sprint(page))
+		err = CacheViaCore(bundle, queryId, CurrentToken, "ALL", page)
 		if err != nil {
-			log.Error(err.Error())
+			log.Error("CacheViaCore err: " + err.Error())
+			return int64(page), 1, bundle, cacheBundle.Header, err
 		}
+
 		//log.Debug3("Calling CacheResourceBundleAndEntries with token: ") // + JWToken)
 		// pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
 		// log.Debug3(fmt.Sprintf("pg = %d  page = %d", pg, page))
@@ -332,6 +348,8 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 			//There are at least two pages since there is a next on the first page
 			return int64(len(bundle.Entry)), 2, bundle, cacheBundle.Header, err
 		}
+	} else {
+		log.Debug3("Not using cache for page: " + fmt.Sprint(page))
 	}
 	if bundle == nil {
 		log.Debug3("bundle is nil")

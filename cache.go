@@ -87,7 +87,7 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 	header := *cbdl.Header
 	//log.Debug3(fmt.Sprintf("--  Starting for ResourceType: %s  Page: %d\n", header.ResourceType, page))
 	//fmt.Printf("CacheResourceBundleAndEntries:77  -- Header = %s\n", spew.Sdump(header))
-	log.Debug3(fmt.Sprintf("-- CashBase: %s\n", header.CacheBase))
+	log.Debug3("-- CashURL: " + header.CacheUrl)
 	//log.Debug3("cbdl:  " + spew.Sdump(cbdl))
 	//fhirSystem := header.FhirSystem
 	// fhirSystem, err := GetFhirSystem(header.FhirSystem.Hex())
