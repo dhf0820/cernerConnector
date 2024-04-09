@@ -65,13 +65,13 @@ func Start(serviceName, codeVersion string) {
 		listenPort = "40103" // Default for Ca3Connector local host standalone
 	}
 	restAddress := fmt.Sprintf("%s:%s", "0.0.0.0", listenPort)
-	log.Debug3(fmt.Sprintf("--  restAddress: %s  -  port: %s", restAddress, listenPort))
+	log.Info(fmt.Sprintf("--  restAddress: %s  -  port: %s", restAddress, listenPort))
 	router := NewRouter()
 	configVersion := os.Getenv("CONFIG_VERSION")
 
-	log.Debug3(fmt.Sprintf("--  %s CodeVersion: [%s]  ConfigVersion: [%s]  is listening for restful requests at %s", serviceName, codeVersion, configVersion, restAddress))
+	log.Info(fmt.Sprintf("--  %s CodeVersion: [%s]  ConfigVersion: [%s]  is listening for restful requests at %s", serviceName, codeVersion, configVersion, restAddress))
 	err := http.ListenAndServe(restAddress, router)
-	log.Debug3("--  This should not happen err = " + err.Error())
+	log.Error("--  This should not happen err = " + err.Error())
 
 }
 

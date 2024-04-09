@@ -511,7 +511,7 @@ func searchPatient(w http.ResponseWriter, r *http.Request) {
 
 		// //}
 		// //fhirVersion := GetFHIRVersion(r)
-		// //cacheBaseURL := fmt.Sprintf("%s/%s/v1/", r.Host, parts[0])
+		// //CacheUrlURL := fmt.Sprintf("%s/%s/v1/", r.Host, parts[0])
 		// if err := r.ParseForm(); err != nil {
 		// 	err = fmt.Errorf("error parsing query: %s", err.Error())
 		// 	errMsg := err.Error()
@@ -606,8 +606,8 @@ func searchPatient(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("searchPatient:375 - Number in page: %d\n", len(bundle.Entry))
 		fmt.Printf("searchPatient:376 - PageNumber: %d\n", header.PageId)
 		resp := common.ResourceResponse{}
-		header.CacheBase = fmt.Sprintf("%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
-		log.Printf("\n\nsearchPatient:379  --  CacheUrl = %s\n", header.CacheBase)
+		header.CacheUrl = fmt.Sprintf("%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
+		log.Printf("\n\nsearchPatient:379  --  CacheUrl = %s\n", header.CacheUrl)
 		header.FhirId = fhirId
 		header.UserId = userId
 		resp.Bundle = bundle

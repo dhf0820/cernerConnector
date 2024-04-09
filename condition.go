@@ -513,10 +513,10 @@ func FindCondition(connPayLoad *common.ConnectorPayload, userId, query, JWToken 
 	queryId := primitive.NewObjectID()
 	header.QueryId = queryId
 	//log.Debug5("connConfig: " + spew.Sdump(connConfig))
-	//header.CacheBase = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
-	//header.ResourceCacheBase = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
-	//header.GetBundleCacheBase = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheBase, header.SystemCfg.ID.Hex())
-	//header.GetResourceCacheBase = fmt.Sprintf("%s/%s/CachePage", header.CacheBase, header.SystemCfg.ID.Hex())
+	//header.CacheUrl = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
+	//header.ResourceCacheUrl = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
+	//header.GetBundleCacheUrl = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheUrl, header.SystemCfg.ID.Hex())
+	//header.GetResourceCacheUrl = fmt.Sprintf("%s/%s/CachePage", header.CacheUrl, header.SystemCfg.ID.Hex())
 
 	cacheBundle := common.CacheBundle{}
 	cacheBundle.PageId = header.PageId

@@ -7,13 +7,10 @@ github.com/dhf0820/fhir4 v0.0.0-20240211050500-ec607c1fa068 h1:Xs3nXN+VfT/s1bzm3
 github.com/dhf0820/fhir4 v0.0.0-20240211050500-ec607c1fa068/go.mod h1:sSGz9Tm0LWe8jO/UTZaIhyJDynWHGFthxJY7zbRQgqM=
 github.com/dhf0820/golangJWT v0.0.0-20240321235239-e7ddd24c9b2e h1:WaBvmDWZtQjN8tIa6CxzhuBOxX3rtZB3NApAsH8c5R0=
 github.com/dhf0820/golangJWT v0.0.0-20240321235239-e7ddd24c9b2e/go.mod h1:g9ygZMBvUJcFWz6sFRHICH5ZybsdYFcfChBEv0eHZsw=
-github.com/dhf0820/uc_core v0.0.0-20240324211826-e0d29c3000d2 h1:+0Q0tgx0P9dDHtu/gN2DXG/GBuOvUODX0GZ47IaMGsc=
-github.com/dhf0820/uc_core v0.0.0-20240324211826-e0d29c3000d2/go.mod h1:x0ZuaSPTnpYUa5g5bGCXIoT1VJsET+URuqdYJ16AjqY=
+github.com/dhf0820/uc_core v0.0.0-20240329232029-71867f4be876 h1:k5Nfu1Rjr7hbyk1B7HvnNavv80hdR9Aaf8uyZ/cpze0=
+github.com/dhf0820/uc_core v0.0.0-20240329232029-71867f4be876/go.mod h1:4u8Td4KQ1jnmZyGgYRs95jOtelQmC23hQH4s2ysqkIA=
 github.com/dhf0820/vslog v0.0.0-20231007220019-758899f13b4a h1:Ml0irRYHKpTll4BRWdRVuiQ1WtXzx77K3IUJNtux7Lw=
 github.com/dhf0820/vslog v0.0.0-20231007220019-758899f13b4a/go.mod h1:blpTi2lVYBB7f49692KhhaPW6XIUP8zSl+AlihQiwmM=
-github.com/golang-jwt/jwt v3.2.2+incompatible h1:IfV12K8xAKAnZqdXVzCZ+TOjboZ2keLg81eXfW3O+oY=
-github.com/golang-jwt/jwt/v5 v5.2.0 h1:d/ix8ftRUorsN+5eMIlF4T6J8CAt9rch3My2winC1Jw=
-github.com/golang-jwt/jwt/v5 v5.2.0/go.mod h1:pqrtFR0X4osieyHYxtmOUWsAWrfe1Q5UVIyoH402zdk=
 github.com/golang/snappy v0.0.1 h1:Qgr9rKW7uDUkrbSmQeiDsGa8SjGyCOGtuasMWwvp2P4=
 github.com/golang/snappy v0.0.1/go.mod h1:/XxbfmMg8lxefKM7IXC3fBNl/7bRcc72aCRzEWrmP2Q=
 github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=

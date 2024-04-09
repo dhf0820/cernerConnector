@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"io"
 
-	"net"
-	"net/http"
-
 	"github.com/davecgh/go-spew/spew"
 	fhir "github.com/dhf0820/fhir4"
+	"net"
+	"net/http"
+	//"os"
 
 	//common "github.com/dhf0820/uc_core/common"
 	"strings"
@@ -210,18 +210,23 @@ func (c *Connection) GetFhirReq(req *http.Request) (*http.Response, error) {
 }
 
 func (c *Connection) GetFhirBundle(url string, token string) (*fhir.Bundle, error) {
+	log.Info("GetFhirBundle URL Requested: " + url)
 	fullUrl := ""
 	if strings.Contains(url, "https") {
 		fullUrl = url
 	} else {
 		fullUrl = c.BaseURL + "/" + url
 	}
-
-	//besure first character of partial url is /
-	// if url[0:1] != "/" {
-	// 	url = "/" + url
+	// limit := os.Getenv("PAGE_SIZE")
+	// if limit == "" {
+	// 	limit = "10"
 	// }
-
+	// limit = "10"
+	// //besure first character of partial url is /
+	// // if url[0:1] != "/" {
+	// // 	url = "/" + url
+	// // }
+	// fullUrl = fullUrl + "&_count=" + limit
 	log.Info("GetFhirBundle FullURL Requested: " + fullUrl)
 	req, err := http.NewRequest("GET", fullUrl, nil)
 	if err != nil {
@@ -236,7 +241,7 @@ func (c *Connection) GetFhirBundle(url string, token string) (*fhir.Bundle, erro
 		log.Error("--  !!!fhir query returned err: " + err.Error())
 		return nil, err
 	}
-	log.Debug3("resp.StatusCode: " + fmt.Sprint(resp.StatusCode))
+	log.Info("resp.StatusCode: " + fmt.Sprint(resp.StatusCode))
 	if resp.StatusCode == 401 {
 		defer resp.Body.Close()
 		byte, err := io.ReadAll(resp.Body)
@@ -277,6 +282,7 @@ func (c *Connection) GetFhirBundle(url string, token string) (*fhir.Bundle, erro
 	// fmt.Printf("GetFhirBundle:209  --  Bundle: %s\n", spew.Sdump(bundle))
 	// patient, err := fhir.UnmarshalPatient(bundle.Entry[0].Resource)
 	// fmt.Printf("GetFhirBundle:211  --  patient:  %s\n", spew.Sdump(patient))
+	log.Info("GetFhirBundle Returning Bundle")
 	return &bundle, nil
 	// body, err := ioutil.ReadAll(resp.Body)
 	// if err != nil {
@@ -373,15 +379,16 @@ func (c *Connection) GetFhirResults(url string, token string) (*fhir.Bundle, err
 //
 // Query sends a query to the base url
 func (c *Connection) QueryBundle(q, token string) (*fhir.Bundle, error) {
-	fmt.Printf("\n\n\n\nQueryBundle:233  --  BaseUrl: %s  -  Query param: %s\n\n\n\n", c.BaseURL, q)
+	log.Info(fmt.Sprintf("--  BaseUrl: %s  -  Query param: %s\n\n\n\n", c.BaseURL, q))
 	if q == "" {
 		return nil, fmt.Errorf("c.QueryBundle:231  --  query parameter missing")
 	}
 	url := fmt.Sprintf("%s/%s", c.BaseURL, q)
 	//fmt.Printf("fhir4_query:60  --  c.BaseUrl = %s\n", c.BaseURL)
-	fmt.Printf("c.QueryBundle:239  -- url = %s\n", url)
-
-	return c.GetFhirBundle(url, token)
+	log.Info("calling GetFhirBundle url = " + url)
+	bundle, err := c.GetFhirBundle(url, token)
+	log.Info("GetFhirBundle returned")
+	return bundle, err
 }
 
 func GetRemoteFhirPatient(qry string, fhirUrl string, token string) (*fhir.Patient, error) {
@@ -396,7 +403,7 @@ func GetRemoteFhirPatient(qry string, fhirUrl string, token string) (*fhir.Patie
 }
 
 func (c *Connection) PostFhir(qry, resourceType, token string, patient *fhir.Patient) (json.RawMessage, error) {
-	fmt.Printf("PostFhir:256  --  ResourceType = %s,  URLQuery = %s  BaseUrl = %s\n", resourceType, qry, c.BaseURL)
+	log.Info(fmt.Sprintf("--  ResourceType = %s,  URLQuery = %s  BaseUrl = %s\n", resourceType, qry, c.BaseURL))
 	fullUrl := c.BaseURL + qry
 	logrus.Infof("PostFhir:258 FullURL Requested: %s\n", fullUrl)
 	patb, err := json.Marshal(patient)

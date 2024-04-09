@@ -48,7 +48,7 @@ var routes = Routes{
 	Route{
 		"GetDiagnosticReport",
 		"GET",
-		"/api/rest/v1/{Resource}/{resourceId}",
+		"/api/rest/v1/DiagnosticReport/{resourceId}",
 		getDiagnosticRept,
 	},
 	Route{
@@ -124,12 +124,12 @@ var routes = Routes{
 		"/api/rest/v1/Coverage/resourceId",
 		getResource,
 	},
-	Route{
-		"GetDocumentReference",
-		"GET",
-		"/api/rest/v1/{Resource}/{resourceId}",
-		getResource,
-	},
+	// Route{
+	// 	"GetDocumentReference",
+	// 	"GET",
+	// 	"/api/rest/v1/{Resource}/{resourceId}",
+	// 	getResource,
+	// },
 	Route{
 		"FindEncounters",
 		"GET",
@@ -137,18 +137,18 @@ var routes = Routes{
 		findResource,
 	},
 
-	Route{
-		"FindResource",
-		"GET",
-		"/api/rest/v1/resource/{resource}",
-		findResource,
-	},
-	Route{
-		"GetResource",
-		"GET",
-		"/api/rest/v1/resource/{Resource}/{resourceId}",
-		getResource,
-	},
+	// Route{
+	// 	"FindResource",
+	// 	"GET",
+	// 	"/api/rest/v1/resource/{resource}",
+	// 	findResource,
+	// },
+	// Route{
+	// 	"GetResource",
+	// 	"GET",
+	// 	"/api/rest/v1/resource/{Resource}/{resourceId}",
+	// 	getResource,
+	// },
 	Route{
 		"FindGoal",
 		"GET",
@@ -161,18 +161,18 @@ var routes = Routes{
 		"/api/rest/v1/Goal/{resourceId}",
 		getResource,
 	},
-	Route{
-		"FindMetadata",
-		"GET",
-		"/api/rest/v1/resource/{resource}",
-		findResource,
-	},
-	Route{
-		"GetMetadata",
-		"GET",
-		"/api/rest/v1/resource/{resource}",
-		findResource,
-	},
+	// Route{
+	// 	"FindMetadata",
+	// 	"GET",
+	// 	"/api/rest/v1/resource/{resource}",
+	// 	findResource,
+	// },
+	// Route{
+	// 	"GetMetadata",
+	// 	"GET",
+	// 	"/api/rest/v1/resource/{resource}",
+	// 	findResource,
+	// },
 	Route{
 		"FindObservations",
 		"GET",
@@ -215,12 +215,12 @@ var routes = Routes{
 		"/api/rest/v1/QuestionaireResponse{resourceId}",
 		getResource,
 	},
-	Route{
-		"GetResource",
-		"GET",
-		"/api/rest/v1/{Resource}/{resourceId}",
-		getResource,
-	},
+	// Route{
+	// 	"GetResource",
+	// 	"GET",
+	// 	"/api/rest/v1/{Resource}/{resourceId}",
+	// 	getResource,
+	// },
 	// Route{
 	// 	"SavePatient",
 	// 	"POST",

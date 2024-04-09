@@ -251,8 +251,8 @@ package main
 // 	fmt.Printf("searchDocRef:217 - Number in page: %d\n", len(bundle.Entry))
 // 	fmt.Printf("searchDocRef:218 - PageNumber: %d\n", header.PageId)
 // 	resp := common.ResourceResponse{}
-// 	cacheBase := fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
-// 	cacheBundleURL := cacheBase + "/BundleTransaction"
+// 	CacheUrl := fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
+// 	cacheBundleURL := CacheUrl + "/BundleTransaction"
 // 	log.Printf("\n\n\n\n\n$$$ $$$ searchDocRef:214  --  CacheBundleUrl = %s\n", cacheBundleURL)
 // 	//header.FhirId = fhirSystem.ID.String()
 // 	//header.SystemCfg

@@ -1,7 +1,8 @@
 package main
 
 import (
-	"log"
+	"fmt"
+	log "github.com/dhf0820/vslog"
 	"net/http"
 	"time"
 )
@@ -11,12 +12,12 @@ func Logger(inner http.Handler, name string) http.Handler {
 		start := time.Now()
 		inner.ServeHTTP(w, r)
 
-		log.Printf(
+		log.Info(fmt.Sprintf(
 			"%s\t%s\t%s\t%s",
 			r.Method,
 			r.RequestURI,
 			name,
 			time.Since(start),
-		)
+		))
 	})
 }

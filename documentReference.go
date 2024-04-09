@@ -389,11 +389,11 @@ func FindDocumentReference(connPayLoad *common.ConnectorPayload, userId, query, 
 	queryId := primitive.NewObjectID()
 	header.QueryId = queryId
 	//log.Debug3("connConfig: " + spew.Sdump(connConfig))
-	header.CacheBase = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
+	header.CacheUrl = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
 	log.Debug3("Header:" + spew.Sdump(header))
-	//header.ResourceCacheBase = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
-	header.GetBundleCacheBase = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheBase, header.SystemCfg.ID.Hex())
-	header.GetResourceCacheBase = fmt.Sprintf("%s/%s/CachePage", header.CacheBase, header.SystemCfg.ID.Hex())
+	//header.ResourceCacheUrl = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
+	//header.GetBundleCacheUrl = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheUrl, header.SystemCfg.ID.Hex())
+	//header.GetResourceCacheUrl = fmt.Sprintf("%s/%s/CachePage", header.CacheUrl, header.SystemCfg.ID.Hex())
 
 	cacheBundle := common.CacheBundle{}
 	cacheBundle.PageId = header.PageId

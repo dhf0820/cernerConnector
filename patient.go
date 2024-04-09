@@ -325,16 +325,16 @@ func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bund
 	queryId := primitive.NewObjectID()
 	header.QueryId = queryId
 	log.Debug3("connConfig: " + spew.Sdump(connConfig))
-	header.CacheBase = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
+	header.CacheUrl = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
 	//log.Debug3("Header:" + spew.Sdump(header))
-	//header.ResourceCacheBase = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
+	//header.ResourceCacheUrl = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
 
-	// header.GetBundleCacheBase = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheBase, header.QueryId)
-	// header.GetResourceCacheBase = fmt.Sprintf("%s/%s/CachePage", header.CacheBase, header.QueryId)
+	// header.GetBundleCacheUrl = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheUrl, header.QueryId)
+	// header.GetResourceCacheUrl = fmt.Sprintf("%s/%s/CachePage", header.CacheUrl, header.QueryId)
 	// log.Debug3("queryId: " + header.QueryId)
 
-	header.GetBundleCacheBase = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheBase, header.SystemCfg.ID.Hex())
-	header.GetResourceCacheBase = fmt.Sprintf("%s/%s/CachePage", header.CacheBase, header.SystemCfg.ID.Hex())
+	//header.GetBundleCacheUrl = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheUrl, header.SystemCfg.ID.Hex())
+	//header.GetResourceCacheUrl = fmt.Sprintf("%s/%s/CachePage", header.CacheUrl, header.SystemCfg.ID.Hex())
 	log.Debug3("Header:" + spew.Sdump(header))
 
 	cacheBundle := common.CacheBundle{}

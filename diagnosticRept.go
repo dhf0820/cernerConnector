@@ -145,7 +145,7 @@ func findDiagnosticRept(w http.ResponseWriter, r *http.Request) {
 // }
 
 func getDiagnosticRept(w http.ResponseWriter, r *http.Request) {
-	log.Debug3("getResource  Start")
+	log.Debug3("getDiagnosticRept  Entered")
 	JWToken = r.Header.Get("Authorization")
 	_, status, err := jw_token.ValidateToken(JWToken, "")
 	if err != nil {
@@ -173,6 +173,7 @@ func getDiagnosticRept(w http.ResponseWriter, r *http.Request) {
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeInvalid, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
+	log.Info("getDiagnosticReport calling GetConnectorPayload")
 	cp, err := GetConnectorPayload(r)
 	if err != nil {
 		errMsg := log.ErrMsg("gGetConnectorPayload error:  " + err.Error())
@@ -465,6 +466,7 @@ func FindDiagnosticRept(connPayLoad *common.ConnectorPayload, userId, query, JWT
 	// check every 10 seconds.  Should be a FhirSystem variable value to avoid code change
 	c := New(connPayLoad.ConnectorConfig.HostUrl, "application/json")
 	startTime := time.Now()
+	log.Info("calling GetFhirBundle with: " + query)
 	bundle, err := c.GetFhirBundle(query, JWToken)
 	if err != nil {
 		// msg := log.ErrMsg("GetNextResource error: " + err.Error())
@@ -472,6 +474,7 @@ func FindDiagnosticRept(connPayLoad *common.ConnectorPayload, userId, query, JWT
 		fmt.Println(err.Error())
 		return 0, nil, nil, err
 	}
+	log.Info("getFhirBundle returned")
 	// bundle, err := c.Query(query, JWToken) // Perform the actul query of the fhir server
 	// if err != nil {
 	// 	return 0, nil, nil, err
@@ -485,10 +488,10 @@ func FindDiagnosticRept(connPayLoad *common.ConnectorPayload, userId, query, JWT
 	queryId := primitive.NewObjectID()
 	header.QueryId = queryId
 	log.Debug5("connConfig: " + spew.Sdump(connConfig))
-	//header.CacheBase = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
-	//header.ResourceCacheBase = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
-	//header.GetBundleCacheBase = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheBase, header.SystemCfg.ID.Hex())
-	//header.GetResourceCacheBase = fmt.Sprintf("%s/%s/CachePage", header.CacheBase, header.SystemCfg.ID.Hex())
+	//header.CacheUrl = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
+	//header.ResourceCacheUrl = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
+	//header.GetBundleCacheUrl = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheUrl, header.SystemCfg.ID.Hex())
+	//header.GetResourceCacheUrl = fmt.Sprintf("%s/%s/CachePage", header.CacheUrl, header.SystemCfg.ID.Hex())
 
 	cacheBundle := common.CacheBundle{}
 	cacheBundle.PageId = header.PageId

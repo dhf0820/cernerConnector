@@ -16,7 +16,7 @@ import (
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	// //"os"
+	//"os"
 	//"strconv"
 	"strings"
 	"time"
@@ -261,7 +261,7 @@ import (
 
 // // 	// }
 // // 	//fhirVersion := GetFHIRVersion(r)
-// // 	//cacheBaseURL := fmt.Sprintf("%s/%s/v1/", r.Host, parts[0])
+// // 	//CacheUrlURL := fmt.Sprintf("%s/%s/v1/", r.Host, parts[0])
 // // 	if err := r.ParseForm(); err != nil {
 // // 		err = fmt.Errorf("error parsing query: %s", err.Error())
 // // 		errMsg := err.Error()
@@ -445,7 +445,36 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// url := r.URL
 		log.Debug2(fmt.Sprintf("--  url = %s", r.URL.Path))
-		log.Debug2(fmt.Sprintf("findResource:442  --  uri = %s", r.URL.RequestURI()))
+		uri := r.URL.RequestURI()
+		log.Debug2(fmt.Sprintf("--  url = %s", uri))
+
+		URIparts := strings.Split(uri, "&")
+		log.Debug2(fmt.Sprintf("  uri = %s", URIparts[len(URIparts)-1]))
+		//countURI := URIparts[len(URIparts)-1]
+		// uri= URIparts[0 : len(URIparts)-1]+"&_count="
+		// log.Debug2(fmt.Sprintf("  newUri = %s", newUri))
+		count := URIparts[len(URIparts)-1]
+		log.Debug2(fmt.Sprintf("count = %s", count))
+		//countParts[0]
+		countParts := strings.Split(count, "=")
+		log.Debug2(fmt.Sprintf("countParts = %v", countParts))
+		if countParts[0] == "_count" {
+			errMsg := log.ErrMsg("_count should not be used in this context")
+			fmt.Printf("findResource:453  --  %s\n", errMsg)
+			WriteFhirOperationOutcome(w, status, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
+			return
+		}
+		// if countParts[0] == "_count" {
+		// 	count := os.Getenv("COUNT")
+		// 	if count == "" {
+		// 		count = "50"
+		// 		//newCountPart := fmt.Sprintf("_count=%s", count)
+		// 	}
+		// }
+		// uri= URIparts[0 : len(URIparts)-1]+"&_count="
+		// log.Debug2(fmt.Sprintf("  newUri = %s", newUri))
+		//if HasSufix(uri/)) == "/api/rest/v1/" {
+		log.Debug2(fmt.Sprintf("--  uri = %s", r.URL.RequestURI()))
 		resourceType = DetermineResource(r.URL.Path, "/api/rest/v1/")
 		if resourceType == "" {
 			errMsg := log.ErrMsg("Resource not found in URL")
@@ -460,8 +489,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	//fmt.Printf("findResource:453  --  r = %s\n", spew.Sdump(r))
 	body, err := io.ReadAll(r.Body) // Should be ConnectorPayload
 	if err != nil {
-		fmt.Printf("findResource:456  --  ReadAll FhirSystem error %s\n", err.Error())
-		errMsg := err.Error()
+		errMsg := log.ErrMsg("--  ReadAll FhirSystem error " + err.Error())
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
@@ -474,13 +502,14 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
+	log.Debug3("-- ConnectorPayload = " + spew.Sdump(connectorPayload))
 
 	connectorConfig := connectorPayload.System.ConnectorConfig
-	log.Debug3("-- ConnectorPayload = " + spew.Sdump(connectorPayload))
+
 	uri := r.URL.RequestURI()
-	fmt.Printf("findResource:475  --  uri: %s\n", uri)
-	fmt.Printf("findResource:476  --  URL.Path() = %s\n", r.URL.Path)
-	fmt.Printf("findResource:477  --  query = %s\n", r.URL.RawQuery)
+	log.Debug3(fmt.Sprintf("--  uri: %s\n", uri))
+	log.Debug3(fmt.Sprintf("--  URL.Path() = %s\n", r.URL.Path))
+	log.Debug3(fmt.Sprintf("--  query = %s\n", r.URL.RawQuery))
 	QueryString = r.URL.RawQuery
 	log.Debug3("QueryString: " + QueryString)
 	//r.URL.RawQuery
@@ -594,7 +623,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	// 	}
 	// }
 	//fhirVersion := GetFHIRVersion(r)
-	//cacheBaseURL := fmt.Sprintf("%s/%s/v1/", r.Host, parts[0])
+	//CacheUrlURL := fmt.Sprintf("%s/%s/v1/", r.Host, parts[0])
 	if err := r.ParseForm(); err != nil {
 		errMsg := log.ErrMsg("error parsing query: " + err.Error())
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityFatal, &errMsg))
@@ -666,7 +695,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	var bundle *fhir.Bundle
 	var header *common.CacheHeader
 	//resourceId := r.Header.Get("Fhir-System")
-	log.Debug3(" - connectorPayload = " + spew.Sdump(connectorPayload))
+	//log.Debug3(" - connectorPayload = " + spew.Sdump(connectorPayload))
 	qryStr := r.URL.RawQuery
 
 	log.Debug3(fmt.Sprintf(" - resource = %s  uri = %s", resourceType, qryStr))
@@ -715,6 +744,7 @@ func findResource(w http.ResponseWriter, r *http.Request) {
 	cacheBundleUrl := fmt.Sprintf("%s/%s/BundleTransaction", connectorConfig.CacheUrl, header.QueryId)
 	//header.CacheUrl = fmt.Sprintf("%s%sv1/Cache/%s/", host, parts[0], header.QueryId)
 	log.Debug3("  --  CacheUrl = " + cacheBundleUrl)
+	header.CacheUrl = cacheBundleUrl
 	//resp.Resource = header.ResourceType
 	resp.BundleId = *bundle.Id
 	resp.ResourceType = resourceType
@@ -744,7 +774,7 @@ type BasicResource struct {
 }
 
 func getResource(w http.ResponseWriter, r *http.Request) {
-	log.Debug3("getResource  Start")
+	log.Info("getResource  Entered")
 	JWToken = r.Header.Get("Authorization")
 	_, status, err := jw_token.ValidateToken(JWToken, "")
 	if err != nil {
@@ -756,9 +786,9 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 	Resource := DetermineGetResource(r.URL.Path, "/")
 	resourceId := params["resourceId"]
 	resourceType := params["Resource"]
-	log.Debug3(fmt.Sprintf("params = %s", params))
-	log.Debug3(fmt.Sprintf("param resource : %s - %s  ResId: %s", Resource, resourceType, resourceId))
-	results := json.RawMessage{}
+	log.Info(fmt.Sprintf("params = %s", params))
+	log.Info(fmt.Sprintf("param resource : %s - %s  ResId: %s", Resource, resourceType, resourceId))
+	//results := json.RawMessage{}
 	// fmt.Printf("getResource:674 - Request - ")
 	// spew.Dump(r)
 	// Resource = r.Header.Get("Resource")
@@ -772,6 +802,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeInvalid, fhir.IssueSeverityFatal, &errMsg))
 		return
 	}
+	log.Info("getResource calling GetConnectorPayload")
 	cp, err := GetConnectorPayload(r)
 	if err != nil {
 		errMsg := log.ErrMsg("gGetConnectorPayload error:  " + err.Error())
@@ -797,6 +828,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 	// params := mux.Vars(r)
 	// fmt.Printf("getResource:274 - params  %v\n", params)
 	// resourceId := params["id"]
+	log.Info("ResourceType: " + resourceType)
 	log.Debug3(fmt.Sprintf("Retrieving %s Record for id: [%s]", resourceType, resourceId))
 	if resourceId == "" {
 		errMsg := log.ErrMsg(fmt.Sprintf("GetResource %s specific ID string is required", Resource))
@@ -805,7 +837,8 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 	}
 	//TODO: Handle Get Resource by specific ID.  All Resources including Binary.
 	resp := common.ResourceResponse{}
-	results, err = GetResource(cp, Resource, resourceId, JWToken)
+	log.Info("getResource calling GetResource")
+	results, err := GetResource(cp, Resource, resourceId, JWToken)
 	if err == nil {
 		resp.Status = 200
 		resp.Message = "Ok"
@@ -814,6 +847,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverity(fhir.IssueTypeInvalid), &errMsg))
 		return
 	}
+	log.Info("getResource determining the type of resource")
 	basicResource := BasicResource{}
 	err = json.Unmarshal(results, &basicResource)
 	if err != nil {
@@ -821,13 +855,13 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityError, &errMsg))
 		return
 	}
-	log.Debug3("Basic Resource: " + spew.Sdump(basicResource))
+	log.Info("Basic Resource: " + spew.Sdump(basicResource))
 	resourceType = basicResource.ResourceType
 	//TODO: unmarshal into a basic fhir resource (id, text)
 	log.Debug3("FillResourceResponse for " + strings.ToLower(resourceType))
 	switch strings.ToLower(resourceType) {
 	case "patient":
-		log.Debug3("Processing Patient")
+		log.Info("Processing Patient")
 		//fmt.Printf("GetResource:801  --  patient raw = %v\n", results)
 		patient, err := fhir.UnmarshalPatient(results)
 		if err != nil {
@@ -862,7 +896,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		resp.Status = 200
 		log.Debug5("Patient case final " + spew.Sdump(resp))
 	case "binary":
-		log.Debug3("Processing Binary")
+		log.Info("Processing Binary")
 		//fmt.Printf("GetResource:831  --  patient raw = %v\n", results)
 		binary, err := fhir.UnmarshalBinary(results)
 		if err != nil {
@@ -883,6 +917,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		resp.QueryId = primitive.NewObjectID().Hex()
 		resp.Status = 200
 	case "documentreference":
+		log.Info("Processing DocumentReferene")
 		log.Debug5("Processing DocumentReference results: " + spew.Sdump(results))
 		data, err := fhir.UnmarshalDocumentReference(results)
 		if err != nil {
@@ -905,7 +940,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 		resp.QueryId = primitive.NewObjectID().Hex()
 		resp.Status = 200
 	default:
-		log.Debug3("Processing default: " + resourceType)
+		log.Info("Processing default: " + resourceType)
 		basicResource := BasicResource{}
 		err = json.Unmarshal(results, &basicResource)
 		if err != nil {
@@ -913,7 +948,7 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 			WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(400, fhir.IssueSeverityError, &errMsg))
 			return
 		}
-		log.Debug3("Basic Resource: " + spew.Sdump(basicResource))
+		log.Info("Basic Resource: " + spew.Sdump(basicResource))
 		resp.ResourceType = resourceType
 		//resp.Resource.ResourceType = resourceType
 

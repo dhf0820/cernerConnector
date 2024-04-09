@@ -97,10 +97,13 @@ func GetResourceBytes(cp *common.ConnectorPayload, resourceName, resourceId stri
 
 // //Request a specific resource by id
 func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, token string) (json.RawMessage, error) {
+	log.Info("GetResource entered")
 	qry := resourceId //fmt.Sprintf("%s", resourceId)
+	log.Debug1("resoureName: " + resourceName)
 	log.Debug3("accept: " + cp.ConnectorConfig.AcceptValue)
 	log.Debug3("Final Query: " + qry)
 	log.Info("cp.System.Url: " + cp.ConnectorConfig.HostUrl)
+	log.Debug1("cp.ConnectorConfig.CacheUrl: " + cp.ConnectorConfig.CacheUrl)
 	c := New(cp.ConnectorConfig.HostUrl, cp.ConnectorConfig.AcceptValue)
 	log.Debug3(fmt.Sprintf("Calling c.GetFhir with qry: %s  resource: %s", qry, resourceName))
 	bodyBytes, resourceType, status, err := c.GetFhirBytes(qry, resourceName, token)
@@ -210,10 +213,12 @@ func GetResource(cp *common.ConnectorPayload, resourceName, resourceId string, t
 
 // //Search for Resources matching url filters or id
 func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query, JWToken string) (int64, *fhir.Bundle, *common.CacheHeader, error) {
+	fmt.Printf("\n\n\n")
+	log.Debug3("FindResource:  --  resource: " + resource)
 	//page := int64(1)
 	page := 1
 	connConfig := connPayLoad.System.ConnectorConfig
-	log.Debug3("connPayload: " + spew.Sdump(connPayLoad))
+	//log.Debug3("connPayload: " + spew.Sdump(connPayLoad))
 	//systemCfg := connPayLoad.System
 	log.Debug3("resource: " + resource)
 	log.Debug3("query: " + query)
@@ -234,101 +239,100 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	c := New(connPayLoad.System.ConnectorConfig.HostUrl, "application/json")
 	//c := New(connPayLoad.ConnectorConfig.HostUrl, "application/json")
 	startTime := time.Now()
+	//Get the first bundle(page)
 	bundle, err := c.GetFhirBundle(fullQuery, JWToken)
+	log.Info("GetFhirBundle returned")
 	if err != nil {
-		msg := log.ErrMsg("GetNextResource error: " + err.Error())
+		msg := log.ErrMsg("GetFhirBundle error: " + err.Error())
 		fmt.Println(msg)
 		fmt.Printf("error: %s\n", err.Error())
 		return 0, nil, nil, err
 	}
-	// bundle, err := c.Query(query, JWToken) // Perform the actul query of the fhir server
-	// if err != nil {
-	// 	return 0, nil, nil, err
-	// }
-	//log.Debug3("bundle: " + spew.Sdump(bundle))
+	//Have the first bundle(page).  Cache it and start the background process to get the rest of the bundles
+
 	header := &common.CacheHeader{}
 	header.SystemCfg = connPayLoad.System
+	log.Debug3("resource: " + resource)
 	header.ResourceType = resource
 	header.UserId = userId
 	header.PageId = page
 	queryId := primitive.NewObjectID()
 	header.QueryId = queryId
-	log.Debug3("connConfig: " + spew.Sdump(connConfig))
-	header.CacheBase = fmt.Sprintf("%s/system/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
-	//header.ResourceCacheBase = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
-	header.GetBundleCacheBase = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheBase, header.SystemCfg.ID.Hex())
-	header.GetResourceCacheBase = fmt.Sprintf("%s/%s/CachePage", header.CacheBase, header.SystemCfg.ID.Hex())
+	//log.Debug3("connConfig: " + spew.Sdump(connConfig))
+	//log.Debug3("header: " + spew.Sdump(header))
+	log.Info("CacheUrl: " + connConfig.CacheUrl)
+	header.CacheUrl = connConfig.CacheUrl
+	//header.CacheUrl = fmt.Sprintf("%s/system/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
+	fmt.Printf("\n\n		######")
+	log.Info("### CacheUrl: " + header.CacheUrl)
+
+	//header.ResourceCacheUrl = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
+	//header.GetBundleCacheUrl = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheUrl, header.SystemCfg.ID.Hex())
+	//header.GetResourceCacheUrl = fmt.Sprintf("%s/%s/CachePage", header.CacheUrl, header.SystemCfg.ID.Hex())
 
 	cacheBundle := common.CacheBundle{}
 	cacheBundle.PageId = header.PageId
 	cacheBundle.Header = header
 	cacheBundle.ID = primitive.NewObjectID()
 	cacheBundle.Bundle = bundle
-	//log.Debug3("--  cacheBundle: " + spew.Sdump(cacheBundle))
-	//fmt.Printf("\n\n\n\n$$$ FindResource:110 calling CacheResourceBundleAndEntries (without bundle) - %s \n", spew.Sdump(cacheBundle))
-	//fmt.Printf("FindResource:126  --  bundle = %s\n", spew.Sdump(bundle))
-	//Cache the first bundle(page)
-	log.Debug3(fmt.Sprintf("Query %s for %ss took %s", connConfig.Label, resource, time.Since(startTime)))
-	log.Debug3("UnmarshalBundle")
-	// bundle := fhir4.Bundle{}
-	// bundle, err = fhir4.UnmarshalBundle(byte)
-	// if err != nil {
-	// 	return 0, nil, nil, err
-	// }
+	log.Debug1(fmt.Sprintf("Query %s for %ss took %s", connConfig.Label, resource, time.Since(startTime)))
 	cacheBundle.Bundle = bundle
 	startTime = time.Now()
-	if UseCache() {
-		log.Debug3("Calling CacheViaCore: ") // + JWToken)
-		err := CacheViaCore(bundle, queryId, JWToken, "ALL", page)
-		if err != nil {
-			log.Error(err.Error())
-		}
-		//log.Debug3("Calling CacheResourceBundleAndEntries with token: ") // + JWToken)
-		// pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
-		// log.Debug3(fmt.Sprintf("pg = %d  page = %d", pg, page))
-		// log.Debug3(fmt.Sprintf("CacheResource returned %d %ss in page: %d for %s  took %s\n", len(cacheBundle.Bundle.Entry), resource, page, systemCfg.DisplayName, time.Since(startTime)))
-		// if err != nil {
-		// 	//return err and done
-		// 	return int64(pg + 1), bundle, cacheBundle.Header, err
-		// }
-		log.Debug3("--  links: " + spew.Sdump(bundle.Link))
-		//Follow the bundle links to retrieve all bundles(pages) in the query response
-		nextURL := GetNextResourceUrl(bundle.Link)
-		total := int64(0)
-		if nextURL == "" {
-			log.Debug3("-- GetNext" + resource + " initialy No Next - One page only ")
-
-			total, err = TotalCacheForQuery(cacheBundle.QueryId)
-			cacheBundle.Header.PageId = int(page)
-			//page++
-			log.Debug3("total: " + fmt.Sprint(total))
-			return int64(page), bundle, cacheBundle.Header, err
-		}
-		page++
-		go c.GetNextResource(header, nextURL, resource, queryId, JWToken, int(page))
-		log.Debug3(fmt.Sprintf("Page 1 total time: %s", time.Since(startTime)))
-		// There is one full page and possibly more. Respond with two so the user will create two page buttons and update every
-		// 10 secnds.
-		//return int64(page), bundle, cacheBundle.Header, err
-		if bundle == nil {
-			return 0, nil, nil, log.Errorf("Bundle is nil")
-		}
-		if len(bundle.Entry) == 0 {
-			return 0, bundle, cacheBundle.Header, log.Errorf("No resources found")
-		} else {
-			return int64(len(bundle.Entry)), bundle, cacheBundle.Header, err
-		}
+	// if UseCache() {
+	log.Info("CacheHeader.CacheUrl: " + header.CacheUrl)
+	log.Info(fmt.Sprintf("Calling CacheViaCore for page %d ", page))
+	cacheURL := header.CacheUrl
+	log.Info("CacheURL: " + cacheURL)
+	log.Info("FindResource calling	CacheViaCore")
+	err = CacheViaCore(bundle, queryId, JWToken, cacheURL, page)
+	log.Debug2("CacheViaCore returned")
+	if err != nil {
+		log.Error(err.Error())
 	}
+	log.Debug3("--  links: " + spew.Sdump(bundle.Link))
+	//Follow the bundle links to retrieve all bundles(pages) in the query response
+	log.Info("-- Call GetNextResourceUrl")
+	//Call GetNextResourceURL to get the next page of resources
+	nextURL := GetNextResourceUrl(bundle.Link)
+	total := int64(0)
+	if nextURL == "" {
+		log.Debug1("-- GetNext" + resource + " initialy No Next - One page only ")
+
+		total, err = TotalCacheForQuery(cacheBundle.QueryId)
+		cacheBundle.Header.PageId = int(page)
+		//page++
+		log.Debug2("total: " + fmt.Sprint(total))
+		return int64(page), bundle, cacheBundle.Header, err
+	}
+	page++
+	log.Debug2("--  Calling GetNextResource as go routine	")
+	go c.GetNextResource(header, nextURL, resource, queryId, JWToken, int(page))
+	log.Debug2(fmt.Sprintf("Page 1 total time: %s", time.Since(startTime)))
+	// There is one full page and possibly more. Respond with two so the user will create two page buttons and update every
+	// 2 secnds.
+	//return int64(page), bundle, cacheBundle.Header, err
 	if bundle == nil {
-		log.Debug3("bundle is nil")
+		return 0, nil, nil, log.Errorf("Bundle is nil")
+	}
+	if len(bundle.Entry) == 0 {
+		return 0, bundle, cacheBundle.Header, log.Errorf("No resources found")
+	}
+	//else {
+	//	//TODO: need to cache the first page
+	//	return int64(len(bundle.Entry)), bundle, cacheBundle.Header, err
+	//}
+
+	if bundle == nil {
+		log.Warn("bundle is nil")
 	}
 	if cacheBundle.Header == nil {
-		log.Debug3("cacheBundle.Header is nil")
+		log.Warn("cacheBundle.Header is nil")
 	}
 	enteries := bundle.Entry
 	numEnteries := len(enteries)
-	log.Debug3("Number of entries:  " + fmt.Sprint(numEnteries))
+	log.Debug2("Number of entries:  " + fmt.Sprint(numEnteries))
 	return int64(numEnteries), bundle, cacheBundle.Header, err
+	//return int64(page), bundle, cacheBundle.Header, err
 	//return 0, bundle, cacheBundle.Header, err
 }
 
@@ -336,7 +340,7 @@ func GetNextResourceUrl(link []fhir.BundleLink) string {
 	log.Debug3("link: " + spew.Sdump(link))
 	for _, lnk := range link {
 		if lnk.Relation == "next" {
-			log.Debug3("--  There is a next page to get: " + lnk.Url)
+			log.Debug2("--  There is a next page to get: " + lnk.Url)
 			return lnk.Url
 		}
 	}
@@ -346,17 +350,19 @@ func GetNextResourceUrl(link []fhir.BundleLink) string {
 // //GetNextResource: fetches the resource at provided url, processes it and checks if more to call.
 func (c *Connection) GetNextResource(header *common.CacheHeader, url, resource string, queryId primitive.ObjectID, token string, page int) {
 	fmt.Printf("\n\n\n\n####################  GetNextResource page: %d   ###############\n", page)
-	//fmt.Printf("GetNextResource:155  --  resource: %s\n", resource) //spew.Sdump(header))
+	log.Debug2("header.SystemCfg.CacheUrl: " + header.SystemCfg.ConnectorConfig.CacheUrl)
+	header.CacheUrl = header.SystemCfg.ConnectorConfig.CacheUrl
+	log.Debug2(fmt.Sprintf("--  resource: %s  -  header.CacheUrl: %s", resource, header.CacheUrl))
 	//Call Remote FHIR server for the resource bundle
 	//queryId := header.QueryId
-	log.Debug3("queryId: " + queryId.Hex())
+	log.Info("queryId: " + queryId.Hex())
 	startTime := time.Now()
 	bundle, err := c.GetFhirBundle(url, JWToken)
 	if err != nil {
 		log.Error("c.GetFhirBundle error: " + err.Error())
 		return
 	}
-	log.Debug3(fmt.Sprintf("--  Query Next Set from %s of %s time: %s\n", header.SystemCfg.DisplayName, header.ResourceType, time.Since(startTime)))
+	log.Info(fmt.Sprintf("--  Query Next Set from %s of %s time: %s\n", header.SystemCfg.DisplayName, header.ResourceType, time.Since(startTime)))
 	// // fmt.Printf("GetNextResource:175  --  UnmarshalBundle\n")
 	// // bundle, err := fhir4.UnmarshalBundle(bytes)
 	// // if err != nil {
@@ -382,31 +388,34 @@ func (c *Connection) GetNextResource(header *common.CacheHeader, url, resource s
 	// }
 	// log.Debug3(fmt.Sprintf("pg: %d  Page: %d", pg, page))
 
-	log.Debug3("Cache current Page: " + fmt.Sprint(page))
-	err = CacheViaCore(bundle, queryId, token, "ALL", page)
+	log.Debug2("Cache current Page: " + fmt.Sprint(page))
+	//log.Info("header: " + spew.Sdump(header))
+	cacheURL := header.CacheUrl
+	log.Debug2("CacheURL: " + cacheURL)
+	err = CacheViaCore(bundle, queryId, token, cacheURL, page)
 	if err != nil {
 		log.Error("CacheViaCore err: " + err.Error())
 		return
 	}
-	log.Debug3("-- Calling GetNextResourceUrl")
+	log.Debug2("-- Calling GetNextResourceUrl")
 	nextURL := GetNextResourceUrl(bundle.Link)
 	if nextURL == "" {
 		onPage := len(bundle.Entry)
 		log.Warn(fmt.Sprintf("GetNextResource Last page had %d Resources processed ", onPage))
-		log.Debug3("Send post to tell core the query is done and to complete it.")
+		log.Debug2("Send post to tell core the query is done and to complete it.")
 		err = FinishCache(header.SystemCfg, queryId, token, page, onPage)
 		if err != nil {
-			log.Error("CacheViaCore err: " + err.Error())
+			log.Error("GetNextResource err: " + err.Error())
 			return
 		}
 		return
 	} else {
 		page = page + 1
-		log.Debug3("--go c.GetNextResource is being called in the background")
+		log.Debug2("--go c.GetNextResource is being called in the background")
 		go c.GetNextResource(header, nextURL, resource, queryId, token, page)
-		log.Debug3("-- GetNextResource Returned and background started")
+		log.Debug2("-- GetNextResource Returned and background started")
 	}
-	log.Debug3("GetNextResource is returning")
+	log.Debug2("GetNextResource is returning")
 }
 
 // func GetHeaderInfoFromBundle(resource string, hdr *common.CacheHeader, bundle *fhir4.Bundle) (string, string, error) {
@@ -494,6 +503,7 @@ func (c *Connection) GetNextResource(header *common.CacheHeader, url, resource s
 // }
 
 func GetConnectorPayload(r *http.Request) (*common.ConnectorPayload, error) {
+	log.Info("GetConnectorPayload entered")
 	body, err := io.ReadAll(r.Body) // Should be ConnectorPayload
 	if err != nil {
 		return nil, log.Errorf("ReadAll FhirSystem error " + err.Error())
@@ -504,12 +514,12 @@ func GetConnectorPayload(r *http.Request) (*common.ConnectorPayload, error) {
 	conPayload := &common.ConnectorPayload{}
 	err = json.Unmarshal(body, &conPayload)
 	if err != nil {
-		fmt.Printf("\nGetConnectorPayload:849  --  unmarshal err = %s\n", err.Error())
+		log.Error(" --  unmarshal err = " + err.Error())
 		// errMsg := err.Error()
 		// WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 		return nil, err
 	}
-	log.Info("Check ConPayload")
+	log.Info("ConPayload unmarshaled, now check it")
 	if conPayload == nil {
 		return nil, log.Errorf("conPayload is nil ")
 	}
