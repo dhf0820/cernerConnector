@@ -80,16 +80,17 @@ func CacheResourceBundleElements(ctx context.Context, userId,
 func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page int64) (int, error) {
 	fmt.Println("$$$$$$$$$$ Entering CaaheResourceBundleAndEntries $$$$$$")
 
-	if !UseCache() {
-		return -1, errors.New("NO CACHE")
-	}
+	// if !UseCache() {
+	// 	return -1, errors.New("NO CACHE")
+	// }
 	log.Info("Starting CacheResourceBundleAndEnteries. Page: " + fmt.Sprint(page))
 	fmt.Println()
-	log.Debug3("cbdl:  " + spew.Sdump(cbdl))
+	//log.Debug3("cbdl:  " + spew.Sdump(cbdl))
 	header := *cbdl.Header
 	//log.Debug3(fmt.Sprintf("--  Starting for ResourceType: %s  Page: %d\n", header.ResourceType, page))
 	//fmt.Printf("CacheResourceBundleAndEntries:77  -- Header = %s\n", spew.Sdump(header))
 	log.Info(fmt.Sprintf("-- CashBase: %s\n", header.CacheUrl))
+
 	//log.Debug3("cbdl:  " + spew.Sdump(cbdl))
 	//fhirSystem := header.FhirSystem
 	// fhirSystem, err := GetFhirSystem(header.FhirSystem.Hex())
@@ -165,10 +166,21 @@ func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page 
 	//c.CoreUrl = "http://	"
 
 }
+
+// <<<<<<< HEAD
 func FinishCache(systemConfig *common.SystemConfig, queryID primitive.ObjectID, token string, onPage int, pageSize int) error {
 	//systemId := systemConfig.ID.Hex()
 	cacheURL := systemConfig.ConnectorConfig.CacheUrl + "FinishCache"
 	//cacheURL := "http://UniversalCharts.com:30300/system/" + systemId + "/BundleTransaction"
+	// =======
+	// func FinishCache(systemConfig *common.SystemConfig, queryID primitive.ObjectID, token string, pageNum int, onPage int, pageSize int) error {
+	// 	systemId := systemConfig.ID.Hex()
+	// 	log.Debug3("@!!!SystemConfig: " + spew.Sdump(systemConfig))
+	// 	log.Debug3("pageSize: " + fmt.Sprint(pageSize))
+	// 	log.Debug3("onPage: " + fmt.Sprint(onPage))
+	// 	log.Debug3("PageNum: " + fmt.Sprint(pageNum))
+	// 	cacheURL := "http://UniversalCharts.com:30300/system/" + systemId + "/FinishCache"
+	// >>>>>>> 2062832a583c454d91d8636cf44ef1efded64a16
 	fmt.Println()
 	fmt.Println()
 	fmt.Println()
@@ -176,8 +188,11 @@ func FinishCache(systemConfig *common.SystemConfig, queryID primitive.ObjectID, 
 	finishedCache := common.FinishCachePayload{}
 	// cacheSavePayload.Bundle = bundle
 	// cacheSavePayload.Option = option
-	//finishedCache.PageNum = page
+	//finishedCache.PageNum = pageNum
+	finishedCache.OnPage = onPage
+	finishedCache.PageSize = pageSize
 	finishedCache.QueryId = queryID.Hex()
+	log.Debug3("finishedCache to send to core: " + spew.Sdump(finishedCache))
 	payload, err := json.Marshal(finishedCache)
 	//bndl, err := bundle.MarshalJSON()
 	if err != nil {
@@ -197,6 +212,7 @@ func FinishCache(systemConfig *common.SystemConfig, queryID primitive.ObjectID, 
 	//defer resp.Body.Close()
 	if err != nil {
 		err = log.Errorf("FinishCache  -- Error uc_cache Request: " + err.Error())
+
 		fmt.Println(err.Error())
 		return nil
 	}
@@ -221,6 +237,13 @@ func CacheViaCore(bundle *fhir.Bundle, queryID primitive.ObjectID, token string,
 	cacheURL = cacheURL + "BundleTransaction"
 	//log.Info("CacheViaCore  --  POST cacheURL: " + cacheURL)
 	cacheSavePayload := common.CacheSavePayload{}
+	// <<<<<<< HEAD
+	// =======
+	// 	cacheSavePayload.Bundle = bundle
+	// 	cacheSavePayload.Option = option
+	// 	cacheSavePayload.PageNum = page
+	// 	cacheSavePayload.ResourceType = *bundle.ResourceType
+	// >>>>>>> 2062832a583c454d91d8636cf44ef1efded64a16
 
 	cacheSavePayload.PageNum = page
 	cacheSavePayload.Bundle = bundle
@@ -258,6 +281,7 @@ func CacheViaCore(bundle *fhir.Bundle, queryID primitive.ObjectID, token string,
 		return nil
 	}
 	log.Debug1("Bundle Sent to uc_core Successful")
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		err = fmt.Errorf("CacheResourceBundleAndEntries: ReadAllBody : error: " + err.Error())

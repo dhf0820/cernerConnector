@@ -7,7 +7,10 @@ import (
 	//common "github.com/dhf0820/uc_core/common"
 	//"github.com/joho/godotenv"
 	//"github.com/ory/dockertest/docker/types/versions"
+	//jwToken "github.com/dhf0820/golangJWT"
 	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	//"net/http"
 	"os"
 
@@ -19,32 +22,43 @@ import (
 )
 
 // var err error
-var ServConfig common.ServiceConfig
+var CurrentSystemID primitive.ObjectID
+var CurrentSystem common.SystemConfig
+var CurrentServiceConfig common.ServiceConfig
+
+// var ServConfig common.ServiceConfig
 var err error
 var version string
 var Mode string
 var Env string
+var CurrentUser common.User
 var ResponseType string
 var QueryString string
+var CurrentUserID primitive.ObjectID
+var CurrentToken string
 
 func main() {
 	version = "2400409.0"
 	log.SetDebuglevel("DEBUG2")
+
 	log.Info("run mode: " + os.Getenv("MODE"))
 	switch os.Getenv("MODE") {
 	case "local":
+		log.Info("run mode: local")
 		err = godotenv.Load("./.env.cerner_conn")
 		if err == nil {
 			Mode = "local"
 			Env = "./.env.cerner_conn"
 		}
 	case "test":
+		log.Info("run mode: test")
 		err = godotenv.Load("./.env.cerner_conn_test")
 		if err == nil {
 			Mode = "test"
 			Env = "./.env.cerner_conn_test"
 		}
 	case "go_test":
+		log.Info("run mode: go_test")
 		err = godotenv.Load("./.env.cerner_conn_go_test")
 		if err == nil {
 			Mode = "go_test"

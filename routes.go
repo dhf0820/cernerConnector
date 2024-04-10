@@ -29,8 +29,9 @@ var routes = Routes{
 		"FindPatient",
 		"GET",
 		"/api/rest/v1/Patient",
-		findResource,
-		//findPatient,
+		//"/system/{SystemId}/Patient",
+		//findResource,
+		findPatient,
 	},
 	// Route{
 	// 	"GetPatient",

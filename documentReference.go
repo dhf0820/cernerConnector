@@ -391,9 +391,15 @@ func FindDocumentReference(connPayLoad *common.ConnectorPayload, userId, query, 
 	//log.Debug3("connConfig: " + spew.Sdump(connConfig))
 	header.CacheUrl = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
 	log.Debug3("Header:" + spew.Sdump(header))
+	// <<<<<<< HEAD
 	//header.ResourceCacheUrl = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
 	//header.GetBundleCacheUrl = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheUrl, header.SystemCfg.ID.Hex())
 	//header.GetResourceCacheUrl = fmt.Sprintf("%s/%s/CachePage", header.CacheUrl, header.SystemCfg.ID.Hex())
+	// =======
+	// 	//header.ResourceCacheBase = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
+	// 	header.GetBundleCacheBase = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheUrl, header.SystemCfg.ID.Hex())
+	// 	header.GetResourceCacheBase = fmt.Sprintf("%s/%s/CachePage", header.CacheUrl, header.SystemCfg.ID.Hex())
+	// >>>>>>> 2062832a583c454d91d8636cf44ef1efded64a16
 
 	cacheBundle := common.CacheBundle{}
 	cacheBundle.PageId = header.PageId

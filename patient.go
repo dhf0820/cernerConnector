@@ -1,634 +1,636 @@
 package main
 
 import (
-	"bytes"
-	"context"
+	// 	//"context"
+	// 	"encoding/json"
+	//"bytes"
 	"encoding/json"
-	"errors"
+	//"net/http"
 
-	//"io/ioutil"
-
+	// 	//"errors"
 	"fmt"
-	"time"
+	//"os"
 
 	"github.com/davecgh/go-spew/spew"
-	//"github.com/dhf0820/fhir4"
 	fhir "github.com/dhf0820/fhir4"
-	//"github.com/dhf0820/uc_core/common"
-	//"github.com/samply/golang-fhir-models/fhir-models/fhir"
 	common "github.com/dhf0820/uc_core/common"
+
+	//common "github.com/dhf0820/uc_core/common"
+	//"io"
+	"strings"
+	"time"
+
 	log "github.com/dhf0820/vslog"
-
 	//"github.com/sirupsen/logrus"
-	jw_token "github.com/dhf0820/golangJWT"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	//"io/ioutil"
-	"net/http"
-	//"os"
-	//"strings"
 )
 
-type Interface interface{}
-type PostPatientPayload struct {
-	MRN     string       `json:"mrn"`
-	Patient fhir.Patient `json:"patient"`
-}
+// func GetResourceBytes(cp *common.ConnectorPayload, resourceName, resourceId string, token string) ([]byte, int, error) {
+// 	//startTime := time.Now()
+// 	//log.Printf("GetResource:23 - cp: %s\n\n", spew.Sdump(cp))
+// 	//url := fmt.Sprintf("%s/%s%s", fhirSystem.FhirUrl, resourceName, resourceId)
+// 	qry := resourceId //fmt.Sprintf("%s", resourceId)
+// 	log.Debug3("accept: " + cp.ConnectorConfig.AcceptValue)
+// 	log.Debug3("Final Query: " + qry)
+// 	log.Info("cp.System.Url: " + cp.ConnectorConfig.HostUrl)
+// 	c := New(cp.ConnectorConfig.HostUrl, cp.ConnectorConfig.AcceptValue)
+// 	log.Debug2(" Calling c.GetFhir with qry: %s  resource: %s", qry, resourceName)
+// 	bodyBytes, resourceType, status, err := c.GetFhirBytes(qry, resourceName, token)
+// 	log.Debug3(fmt.Sprintf("resourceType: Patient status: %d",  ResourceType, status))
+// 	if bodyBytes != nil {
+// 		log.Debug3("bodyBytes: " + string(bodyBytes))
+// 		switch strings.ToLower(resourceName) {
+// 		case "OperationOutcome":
+// 			opOut, err := fhir.UnmarshalOperationOutcome(bodyBytes)
+// 			if err != nil {
+// 				log.Debug3("Response --  Error Decoding OperationOutcone: " + err.Error())
+// 				return bodyBytes, status, log.Errorf("Response --  Error Decoding Patient: " + err.Error())
+// 			}
+// 			log.Debug3("Response --  OperationOutcome: " + spew.Sdump(opOut))
+// 			return bodyBytes, status, nil
+// 		case "patient":
+// 			patient, err := fhir.UnmarshalPatient(bodyBytes)
+// 			if err != nil {
+// 				log.Debug3("Response --  Error Decoding Patient: " + err.Error())
+// 				return bodyBytes, status, log.Errorf("Response --  Error Decoding Patient: " + err.Error())
+// 			}
+// 			log.Debug5("Response --  Patient: " + spew.Sdump(patient))
+// 			return bodyBytes, status, nil
 
-// patId, patMrn, text, err
-func SavePatient(mrn string, cp *common.ConnectorPayload, JWToken string) (*http.Response, error) {
-	var patient fhir.Patient
-	patBytes := []byte{}
-	//var err error
-	if cp.SavePayload.SrcResource != nil { // Actual patient is provided use it
-		patBytes = cp.SavePayload.SrcResource
-	} else {
-		return nil, fmt.Errorf("No patient information provided.")
-	}
-	patient, err := fhir.UnmarshalPatient(patBytes)
-	//fmt.Printf("SavePatient:43  --  patient: %s\n", spew.Sdump(patient))
-	id := primitive.NewObjectID().Hex()
-	ident := CreateIdentifier(id)
-	//fmt.Printf("SavePatient:46 --  Current Patient.Ident: %s\n", spew.Sdump(patient.Identifier))
-	//fmt.Printf("SavePatient:47 --  New Identifier: %s\n", spew.Sdump(ident))
-	patient.Identifier = append(patient.Identifier, ident)
-	//fmt.Printf("SavePatient:49 --  New Identifiers: %s\n", spew.Sdump(patient.Identifier))
-	url := fmt.Sprintf("/%s", "Patient")
-	log.Debug3("final Query: " + url)
-	//log.Infof("SavePatient:52  --  cp: %s\n", spew.Sdump(cp.ConnectorConfig)) // cp.ConnectorConfig.HostUrl)
-	c := New(cp.ConnectorConfig.HostUrl, "application/json+fhir")
-	log.Debug3(fmt.Sprintf("Calling postFhir at %s  with %s\n", c.BaseURL, url))
-	resp, err := c.postFhir(url, "Patient", JWToken, &patient)
+// 		case "documentreference":
+// 			docRef, err := fhir.UnmarshalDocumentReference(bodyBytes)
+// 			if err != nil {
+// 				log.Debug3("Response --  Error Decoding DocumentReference: " + err.Error())
+// 				return bodyBytes, status, log.Errorf("Response --  Error Decoding DocumentReference: " + err.Error())
+// 			}
+// 			log.Debug5("Response --  DocumentReference: " + spew.Sdump(docRef))
+// 			return bodyBytes, status, nil
+// 		case "diagnosticreport":
+// 			diagRept, err := fhir.UnmarshalDiagnosticReport(bodyBytes)
+// 			if err != nil {
+// 				log.Debug3("Response --  Error Decoding DiagnosticReport: " + err.Error())
+// 				return bodyBytes, status, log.Errorf("Response --  Error Decoding DiagnosticReport: " + err.Error())
+// 			}
+// 			log.Debug5("Response --  DiagnosticReport: " + spew.Sdump(diagRept))
+// 			return bodyBytes, status, nil
+
+// 		default:
+// 			log.Debug3("ResponseType --  Not supported: " + resourceName)
+// 			return bodyBytes, 400, log.Errorf("ResponseType --  Not supported: " + resourceName)
+
+// 		}
+// 		// diagRept, err := fhir.UnmarshalDiagnosticReport(byte)
+// 		// if err != nil {
+// 		// 	log.Debug3("Response --  Error Decoding DiagnosticReport: " + err.Error())
+// 		// 	return byte, 400, log.Errorf("Response --  Error Decoding DiagnosticReport: " + err.Error())
+// 		// }
+// 		// log.Debug3("Response --  DiagnosticReport: " + spew.Sdump(diagRept))
+// 		// return byte, resp.StatusCode, nil
+
+// 		//TODO: Write test for this
+// 	}
+// 	//rawMessage, err := c.GetFhir(qry, resourceName, token)
+
+// 	return nil, 400, err
+
+// }
+
+// //Request a specific resource by id
+func GetPatient(cp *common.ConnectorPayload, resourceName, resourceId string, token string) (json.RawMessage, error) {
+	log.Info("GetResource entered")
+	qry := resourceId //fmt.Sprintf("%s", resourceId)
+	log.Debug1("resoureName: " + resourceName)
+	log.Debug3("accept: " + cp.ConnectorConfig.AcceptValue)
+	log.Debug3("Final Query: " + qry)
+	log.Info("cp.System.Url: " + cp.ConnectorConfig.HostUrl)
+	log.Debug1("cp.ConnectorConfig.CacheUrl: " + cp.ConnectorConfig.CacheUrl)
+	c := New(cp.ConnectorConfig.HostUrl, cp.ConnectorConfig.AcceptValue)
+	log.Debug3(fmt.Sprintf("Calling c.GetFhir with qry: %s  resource: %s", qry, resourceName))
+	bodyBytes, resourceType, status, err := c.GetFhirBytes(qry, resourceName, token)
 	if err != nil {
-		return resp, log.Errorf("!!!fhir query returned err: " + err.Error())
+		errMsg := log.ErrMsg("Error calling GetFhirBytes: " + err.Error())
+		log.Error(errMsg)
+		return nil, log.Errorf(errMsg)
 	}
-	//fmt.Printf("SavePatient:61  --  postFhir returned: %s\n", spew.Sdump(resp))
-	fmt.Printf("SavePatient:62  --  resp.Status: %s\n", resp.Status)
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		fmt.Printf("SavePatient:64  --  !!!fhir query returned err: %s\n", err)
-		return resp, errors.New(resp.Status)
-	} else {
-		fmt.Printf("SavePatient:67  --  !!!fhir query returned successful PostPatient\n")
-		return resp, nil
+	if bodyBytes != nil {
+		//log.Debug3("bodyBytes: " + string(bodyBytes))
+		log.Debug3("resourceType: " + resourceType)
+		log.Debug3("status: " + fmt.Sprint(status))
+		if bodyBytes != nil {
+
+			//log.Debug3("bodyBytes: " + string(bodyBytes))
+			switch strings.ToLower(resourceName) {
+			case "OperationOutcome":
+				opOut, err := fhir.UnmarshalOperationOutcome(bodyBytes)
+				if err != nil {
+					log.Debug3("Response --  Error Decoding OperationOutcone: " + err.Error())
+					return bodyBytes, log.Errorf("Response --  Error Decoding Patient: " + err.Error())
+				}
+				log.Debug5("Response --  OperationOutcome: " + spew.Sdump(opOut))
+				return bodyBytes, nil
+			case "patient":
+				patient, err := fhir.UnmarshalPatient(bodyBytes)
+				if err != nil {
+					log.Debug3("Response --  Error Decoding Patient: " + err.Error())
+					return bodyBytes, log.Errorf("Response --  Error Decoding Patient: " + err.Error())
+				}
+				log.Debug5("Response --  Patient: " + spew.Sdump(patient))
+				return bodyBytes, nil
+
+			case "documentreference":
+				docRef, err := fhir.UnmarshalDocumentReference(bodyBytes)
+				if err != nil {
+					log.Debug3("Response --  Error Decoding DocumentReference: " + err.Error())
+					return bodyBytes, log.Errorf("Response --  Error Decoding DocumentReference: " + err.Error())
+				}
+				log.Debug5("Response --  DocumentReference: " + spew.Sdump(docRef))
+				log.Debug3("Returning DocumentReference")
+				return bodyBytes, nil
+			case "diagnosticreport":
+				diagRept, err := fhir.UnmarshalDiagnosticReport(bodyBytes)
+				if err != nil {
+					log.Debug3("Response --  Error Decoding DiagnosticReport: " + err.Error())
+					return bodyBytes, log.Errorf("Response --  Error Decoding DiagnosticReport: " + err.Error())
+				}
+				log.Debug5("Response --  DiagnosticReport: " + spew.Sdump(diagRept))
+				return bodyBytes, nil
+
+			default:
+				log.Debug3("ResponseType:  " + resourceName)
+				return bodyBytes, nil //log.Errorf("ResponseType --  Not supported: " + resourceName)
+
+			}
+		}
+		return bodyBytes, nil
 	}
-
-	// defer resp.Body.Close()
-	// bodyBytes, err := ioutil.ReadAll(resp.Body)
+	return nil, log.Errorf("No body read from GetFhirBytes")
+	// if bodyBytes != nil {
+	// rawMessage, err := c.GetFhir(qry, resourceName, token)
 	// if err != nil {
-	// 	fmt.Printf("SavePatient:66  --  Error readying body: %s\n", err.Error())
-	// 	return nil, fmt.Errorf("SavePatient:67  --  Error readying body: %s", err.Error())
-	// }
-	// fmt.Printf("SavePatient:69  --  Raw body: %s\n", string(bodyBytes))
-	// resp.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-	// fmt.Printf("SavePatient:71  --  ReSet resp.Body to initial value\n")
-
-	// // byte, err := ioutil.ReadAll(resp.Body)
-	// // if err != nil {
-	// // 	fmt.Printf("SavePatient:69  --  Error reading body: %s\n", err.Error())
-	// // 	return nil, fmt.Errorf("SavePatient:69  --  Error readying body: %s", err.Error())
-	// // }
-	// fmt.Printf("SavePatient:74  --  Raw body: %s\n", string(bodyBytes))
-	// return resp, nil
-	// if resp.StatusCode < 200 || resp.StatusCode > 299 {
-	// 	log.Errorf("postFhir:274  --  returned error of %d - %s\n", resp.StatusCode, resp.Status)
-	// 	err = fmt.Errorf("%d|postFhir:275 %s", resp.StatusCode, resp.Status)
-	// 	//log.Errorf("%s", err.Error())
-	// 	return nil, err
-	// }
-	// defer resp.Body.Close()
-	// byte, err := ioutil.ReadAll(resp.Body)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("postFhir:282  --  Error readying body: %s", err.Error())
-	// }
-	// //fmt.Printf("postFhir:284  --  Raw body: %s\n", string(byte))
-
-	// pat, err := fhir.UnmarshalPatient(byte)
-	// if err != nil {
-	// 	fmt.Printf("postFhir:288  --  Error Decoding Patient: %s\n", err.Error())
-	// 	return nil, err
-	// }
-	// fmt.Printf("postFhir:291  --  Patient =  %s\n", spew.Sdump(pat))
-	// return byte, nil
-	// fmt.Printf("SavePatient:57  --  postFhir returned: %s\n", spew.Sdump(resp))
-
-	// rawMessage, err := c.PostFhir(url, "Patient", JWToken, patient)
-	// if err != nil {
-	// 	fmt.Printf("SavePatient:57  --  PostFhir failed: %v\n", err.Error())
 	// 	return nil, err
 	// }
 	// err = nil
-	// fmt.Printf("SavePatient:61  --  Patient %s\n", spew.Sdump(rawMessage))
-	// pat, err := fhir.UnmarshalPatient(rawMessage)
-	// if err != nil {
-	// 	err = fmt.Errorf("SavePatient:64  --  UnmarshalPatient failed: %v", err.Error())
+	// //fmt.Printf("GetResource:33  --  bundle: %s\n", spew.Sdump(bundle))
+	// return rawMessage, nil
+
+	// var res interface{}
+	// //var binary *fhir4.Binary
+	// //var vsResource *fhir4.VsResource
+	// switch resourceName {
+	// case "Binary":
+	// 	res, err = fhir4.UnmarshalBinary(bytes)
+	// case "Condition":
+	// 	res, err = fhir4.UnmarshalCondition(bytes)
+	// case "DocumentReference":
+	// 	res, err = fhir4.UnmarshalDocumentReference(bytes)
+	// 	if err != nil {
+	// 		fmt.Printf("UnmarshalDocumentReference direct to DocumentReference err = %v\n", err)
+	// 	}
+	// case "Observation":
+	// 	res, err = fhir4.UnmarshalObservation(bytes)
+	// case "Patient":
+	// 	fmt.Printf("Returning ByteArray")
+	// 	return bytes, nil
+	// 	pat, err := fhir4.UnmarshalPatient(bytes)
+	// 	if err != nil {
+	// 		fmt.Printf("UnmarshalPatient direct to patient err = %v\n", err)
+	// 	}
+	// 	bytes, err := json.Marshal(&pat)
+	// 	if err != nil {
+	// 		fmt.Printf("MarshalPatient to RawMessage err = %v\n", err)
+	// 	}
+	// 	rm := string(bytes)
+	// 	fmt.Println(rm)
+
+	// default:
+	// 	err := fmt.Errorf("unknown type of Resource: [%s]", resourceName)
 	// 	return nil, err
 	// }
-	// //mrn = GetMrn(&pat, "urn:oid:1.3.6.1.4.1.54392.5.1593.1", "mrn")
-	// //text := pat.Text.Div
-	// return &pat, nil
-
-	//TODO: CALL CHARTARCHIVE
-	// fmt.Printf("SavePatient:65  --  Calling InseretOne\n")
-	// result, err := collection.InsertOne(context.TODO(), patient)
-	// if err != nil {
-	// 	err = fmt.Errorf("savePatient:68  --  insert Patient InsertOne failed: %v", err.Error())
-	// 	return "", "", "", err
-	// }
-	// if oid, ok := result.InsertedID.(primitive.ObjectID); ok {
-	// 	//GetMrn(patient, "http://terminology.hl7.org/CodeSystem/v2-0203", "OurMrn")
-	// 	fmt.Printf("SavePatient:73  --  Insert Successful: %s\n", oid.Hex())
-	// 	GetMrn(patient, "https://fhir.vertisoft.com/6329112852f3616990e2f763/codeSet/4", "OurMrn")
-	// 	return oid.Hex(), *ident.Value, patient.Text.Div, err
-	// } else {
-	// 	err := fmt.Errorf("Invalid objectId")
-	// 	return "", "", "", err
-	// }
+	// //fmt.Printf("GetResource is returning err: %v\n", err)
+	// fmt.Printf("  QueryTime: %s\n", time.Since(startTime))
+	// return bytes, err
 }
 
-func CreateMRN(id string) string {
-	return string(id[len(id)-6:])
-}
+//var PageSize int
 
-func CreateIdentifier(id string) fhir.Identifier {
-	layout := "2006-01-02T15:04:05.000Z"
-	ident := fhir.Identifier{}
-	ident.Id = StrPtr(primitive.NewObjectID().Hex())
-	ident.Use = nil
-	cc := fhir.CodeableConcept{}
-	code := fhir.Coding{}
-	//code.System = StrPtr("urn:oid:1.3.6.1.4.1.54392.5.1593.1")
-	//code.System = StrPtr("https://fhir.vertisoft.com/640ba66cbd4105586a6dda75/codeSet/4")
-	code.System = StrPtr("http://terminology.hl7.org/CodeSystem/v2-0203")
-	code.Code = StrPtr("MR")
-	code.Display = StrPtr("Medical Record Number")
-	code.UserSelected = BoolPtr(false)
+func FindPatient(connPayLoad *common.ConnectorPayload, userId, query, JWToken string) (int64, *fhir.Bundle, *common.CacheHeader, error) {
+	fmt.Printf("\n\n\n")
+	log.Debug2("FindPatient:")
+	PageSize = 10
+	page := 1
+	resource := "Patient"
+	connConfig := connPayLoad.System.ConnectorConfig
+	//log.Debug3("connPayload: " + spew.Sdump(connPayLoad))
 
-	fmt.Printf("\nCreateIdentifier:107  --  ident : %s\n\n", spew.Sdump(ident))
-	//coding := []fhir.
-	cc.Coding = append(cc.Coding, code)
-	ident.Type = &cc
-	ident.Type.Text = StrPtr("mrn")
-	ident.Value = StrPtr(CreateMRN(id))
-	ident.System = StrPtr("urn:oid:1.3.6.1.4.1.54392.5.1593.1")
-	currentTime := time.Now()
-	ident.Period = &fhir.Period{}
-	ident.Period.Start = StrPtr(currentTime.Format(layout))
-	//fmt.Printf("\nCreateIdentifier:117  --  ident : %s\n\n", spew.Sdump(ident))
-	return ident
-}
+	//systemCfg := connPayLoad.System
 
-//This is Generic Fhir Interface to save a patient
+	log.Debug2("query: " + query)
+	fullQuery := fmt.Sprintf("Patient?%s", query)
+	//fmt.Printf("FindRecource:84  --  ConectorPayload: %s\n", spew.Sdump(connPayLoad))
+	log.Debug3("UserId: " + userId)
+	log.Debug2("fullQuery: " + fullQuery)
+	// fmt.Printf("FindResource:87  --  FhirSystem: %s\n", spew.Sdump(fhirSystem))
 
-// func (c *Connection) SavePatient(mrn string, patient *fhir.Patient) (*fhir.Patient, error) {
+	//log.Debug3("FindResource:89  -- Page: %d\n", page)
+	//fmt.Printf("FindResource:90  --  ConnectorConfig: %s\n", spew.Sdump(connConfig))
+	//fmt.Printf("FindResource:91  --  query: %s\n", query)
 
-// 	if mrn == "" { // For now use the provided MRN, if not there error //Generate a new MRN and insert into Identifiers.
-// 		return nil, errors.New("new UNIQUE MRN for the patient must be specified")
-// 	}
-// 	if patient == nil {
-// 		return nil, errors.New("FHIR (R4) patient must be provided")
-// 	}
-// 	patient.Id = StrPtr(primitive.NewObjectID().Hex())
-// 	patient.Meta = &fhir.Meta{}
-// 	patient.Meta.VersionId = StrPtr("1")
-// 	patient.Meta.LastUpdated = StrPtr(time.Now().Format("2006-01-02T15:04:05 0000Z"))
-
-// 	ident := fhir.Identifier{}
-// 	id := primitive.NewObjectID().Hex()
-// 	ident.Id = &id
-// 	// idUse := fhir.IdentifierUse.Code(fhir.IdentifierUseUsual)
-// 	// fhir.IdentifierUseUsual
-// 	//idUse := fhir.IdentifierUseUsual
-// 	code := fhir.IdentifierUseUsual
-// 	ident.Use = &code
-// 	ident.Value = &mrn
-// 	ident.Type = &fhir.CodeableConcept{}
-// 	ident.Type.Coding = []fhir.Coding{}
-// 	coding := fhir.Coding{}
-// 	coding.System = StrPtr("http://terminology.hl7.org/CodeSystem/v2-0203")
-// 	coding.Code = StrPtr("MR")
-// 	coding.Display = StrPtr("Medical record number")
-// 	coding.UserSelected = BoolPtr(false)
-// 	ident.Type.Coding = append(ident.Type.Coding, coding)
-// 	ident.Type.Text = StrPtr("MRN")
-// 	//ident.Period
-// 	ident.System = StrPtr("http://terminology.hl7.org/CodeSystem/v2-0203") //TODO: Replace with our own.
-// 	ident.Value = &mrn
-// 	//TODO: add _value Extension  for Rendered Value
-// 	patient.Identifier = []fhir.Identifier{}
-// 	patient.Identifier = append(patient.Identifier, ident)
-// 	fmt.Printf("\npatient: %s\n\n", spew.Sdump(patient))
-// 	client := &http.Client{}
-// 	fmt.Printf("Save Fhir Patient to: [%s]\n", fhirSystemURL)
-// 	bstr, err := json.Marshal(patient)
-// 	req, err := http.NewRequest("POST", fhirSystemURL, bytes.NewBuffer(bstr))
-// 	if err != nil {
-// 		fmt.Printf("NewRequest error: %s\n", err.Error())
-// 	}
-// 	req.Header.Set("Accept", "application/json+fhir")
-// 	req.Header.Set("Content-Type", "application/json")
-// 	resp, err := client.Do(req)
-
-// 	if err != nil {
-// 		log.Println("Error Posting new Patient:", err.Error())
-// 		return nil, err
-// 	}
-// 	//fmt.Printf("length of ressponse Body = %d\n", len(resp.Body) )
-// 	defer resp.Body.Close()
-// 	fmt.Printf("resp.StatusCode = %d - %s\n", resp.StatusCode, resp.Status)
-// 	// body, err := ioutil.ReadAll(resp.Body)
-// 	// if err != nil {
-// 	// 	fmt.Printf("Query Error: %v\n", err)
-// 	// 	return nil, err
-// 	// }
-
-// 	//fmt.Printf("PostPatient response: %s\n", spew.Sdump(resp))
-// 	return patient, nil
-// }
-
-func GetPatient(patId string) (*fhir.Patient, error) {
-	log.Debug3("-- retrieving a patient by id: " + patId)
-
-	filter := bson.M{"id": patId}
-	collection, _ := GetCollection("Patients")
-	pat := &fhir.Patient{}
-
-	log.Debug3("--Calling FindOne with Filter: " + spew.Sdump(filter))
-	err := collection.FindOne(context.TODO(), filter).Decode(pat) // See if the user already has a session
-	if err != nil {
-		return nil, log.Errorf("-- FindOne error: " + err.Error())
-	}
-	//fmt.Printf("GetPatient:201  -- FindOne Patient: %s\n", spew.Sdump(pat))
-	return pat, err
-
-	// qry := fmt.Sprintf("Patient/%s", patId)
-	// log.Infof("Final url to query: %s\n", qry)
-	// startTime := time.Now()
-	// bytes, err := c.Query(qry)
-	// log.Infof("Query time: %s", time.Since(startTime))
-
-	// if err != nil {
-	// 	return nil, fmt.Errorf("Query %s failed: %s", qry, err.Error())
-	// }
-	// patient := fhir.Patient{}
-	// err = json.Unmarshal(bytes, &patient)
-	// if err != nil {
-	// 	return nil, err%1@CU4HZJIYk@IT
-
-	// }
-	// return &patient, err
-}
-
-func PatientSearch(cp *common.ConnectorPayload, query, token string) (*fhir.Bundle, *common.CacheHeader, error) {
-	log.Debug3("Validating: " + token)
-	payload, _, err := jw_token.ValidateToken(token, "")
-	if err != nil {
-		return nil, nil, err
-	}
-
-	userId := payload.UserId
-	// fhirID, err := primitive.ObjectIDFromHex(fhirId)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	var page = 1
-	log.Debug3("--  queryString: %s" + query)
-	qry := fmt.Sprintf("Patient?%s", query)
-	log.Debug3("--  Final url to query: " + qry)
-
-	log.Debug3("cp.ConnectorConfig = " + spew.Sdump(cp.ConnectorConfig))
-	log.Debug3("URL = " + cp.ConnectorConfig.HostUrl)
-	baseUrl := cp.ConnectorConfig.HostUrl
-	c := New(baseUrl, "application/json+fhir")
-	log.Debug3(fmt.Sprintf("CallGetFhirBundle at %s  with %s", c.BaseURL, qry))
+	//TODO: Process the query in the background filling the resourceCache and BundleCache. Assign a cacheId on the call
+	//Once background is started wait in a loop checking the ResourceCache Status using the assigned cacheId until either
+	// Have count documents or status is finished.
+	// check every 10 seconds.  Should be a FhirSystem variable value to avoid code change
+	c := New(connPayLoad.System.ConnectorConfig.HostUrl, "application/json")
+	//c := New(connPayLoad.ConnectorConfig.HostUrl, "application/json")
 	startTime := time.Now()
-	bundle, err := c.GetFhirBundle(qry, token)
+	//Get the first bundle(page)
+	bundle, err := c.GetFhirBundle(fullQuery, JWToken)
+	log.Info("GetFhirBundle returned")
 	if err != nil {
-		log.Error("getFhirBundle error: " + err.Error())
+		msg := log.ErrMsg("GetFhirBundle error: " + err.Error())
+		fmt.Println(msg)
+		fmt.Printf("error: %s\n", err.Error())
+		return 0, nil, nil, err
 	}
-	enteries := len(bundle.Entry)
+	if bundle == nil {
+		//log.Debug3("bundle is nil")
+		return 0, nil, nil, log.Errorf("bundle is nil")
+	}
+	//Have the first bundle(page).  Cache it and start the background process to get the rest of the bundles
 
-	log.Debug3("--  Number of entries in bundle: " + fmt.Sprint(enteries))
-	//log.Debug3("--  Bundle= " + spew.Sdump(bundle))
-
-	//log.Debug5("bundle: " + spew.Sdump(bundle))
-	page = 1
 	header := &common.CacheHeader{}
-	header.SystemCfg = cp.System
-	connConfig := cp.ConnectorConfig
+	header.SystemCfg = connPayLoad.System
 	header.ResourceType = "Patient"
 	header.UserId = userId
 	header.PageId = page
-
-	//page = 1
-
 	queryId := primitive.NewObjectID()
 	header.QueryId = queryId
-	log.Debug3("connConfig: " + spew.Sdump(connConfig))
-	header.CacheUrl = fmt.Sprintf("%s/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
-	//log.Debug3("Header:" + spew.Sdump(header))
+
+	//log.Debug3("connConfig: " + spew.Sdump(connConfig))
+	//log.Debug3("header: " + spew.Sdump(header))
+	log.Info("CacheUrl: " + connConfig.CacheUrl)
+	header.CacheUrl = connConfig.CacheUrl
+	//header.CacheUrl = fmt.Sprintf("%s/system/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
+	fmt.Printf("\n\n		######")
+	log.Info("### CacheUrl: " + header.CacheUrl)
+
 	//header.ResourceCacheUrl = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
-
-	// header.GetBundleCacheUrl = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheUrl, header.QueryId)
-	// header.GetResourceCacheUrl = fmt.Sprintf("%s/%s/CachePage", header.CacheUrl, header.QueryId)
-	// log.Debug3("queryId: " + header.QueryId)
-
 	//header.GetBundleCacheUrl = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheUrl, header.SystemCfg.ID.Hex())
 	//header.GetResourceCacheUrl = fmt.Sprintf("%s/%s/CachePage", header.CacheUrl, header.SystemCfg.ID.Hex())
-	log.Debug3("Header:" + spew.Sdump(header))
 
 	cacheBundle := common.CacheBundle{}
 	cacheBundle.PageId = header.PageId
 	cacheBundle.Header = header
 	cacheBundle.ID = primitive.NewObjectID()
-	//fmt.Printf("\n\n\n\n$$$ FindResource:110 calling CacheResourceBundleAndEntries (without bundle) - %s \n", spew.Sdump(cacheBundle))
-	//fmt.Printf("FindResource:126  --  bundle = %s\n", spew.Sdump(bundle))
-	//Cache the first bundle(page)
-	log.Debug3(fmt.Sprintf("--  Query %s for %ss took %s\n\n\n", cp.ConnectorConfig.Label, "Patient", time.Since(startTime)))
-	log.Debug3("--  UnmarshalBundle")
-	// bundle := fhir4.Bundle{}
-	// bundle, err = fhir4.UnmarshalBundle(byte)
-	// if err != nil {
-	// 	return 0, nil, nil, err
-	// }
-	//log.Debug5("bundle: " + spew.Sdump(bundle))
 	cacheBundle.Bundle = bundle
-	//startTime = time.Now()
-	bundle.ResourceType = StrPtr("Bundle")
-	if UseCache() {
+	log.Debug1(fmt.Sprintf("Query %s for Patients took %s", connConfig.Label, time.Since(startTime)))
+	cacheBundle.Bundle = bundle
+	startTime = time.Now()
 
-		page := 1
-		log.Debug3("calling CacheResourceBundleAndEntries with page: " + fmt.Sprint(page))
-		pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, int64(page))
+	// if UseCache() {
+	log.Info("CacheHeader.CacheUrl: " + header.CacheUrl)
+	log.Info(fmt.Sprintf("Calling CacheViaCore for page %d ", page))
+	cacheURL := header.CacheUrl
+	log.Info("CacheURL: " + cacheURL)
+	log.Info("FindResource calling	CacheViaCore")
+	err = CacheViaCore(bundle, queryId, JWToken, cacheURL, page)
+	log.Debug2("CacheViaCore returned")
+	if err != nil {
+		log.Error(err.Error())
 
-		//log.Debug3(fmt.Sprintf("CacheResourceBundleAndEntries returned %d %ss in page: %d for %s  took %s", len(cacheBundle.Bundle.Entry), resource, page, sysCfg.DisplayName, time.Since(startTime)))
-		if err != nil {
-			//return err and done
-			return bundle, cacheBundle.Header, err // cacheBundle.Header, err
-		}
-		log.Debug3("links: " + spew.Sdump(bundle.Link))
-		//Follow the bundle links to retrieve all bundles(pages) in the query response
-		nextURL := GetNextResourceUrl(bundle.Link)
-		total := int64(0)
-		if nextURL == "" {
-			log.Debug3(fmt.Sprintf("GetNext%sUrl initialy No Next - One page only ", "Patient"))
-			total, err = TotalCacheForQuery(cacheBundle.QueryId)
-			cacheBundle.Header.PageId = pg
-			log.Debug3("total: " + fmt.Sprint(total))
-			//page++
-			return bundle, cacheBundle.Header, err
-		}
-		page++
-		go c.GetNextResource(header, nextURL, "Patient", queryId, JWToken, int(page))
-	} else {
-		log.Info("Not Using Caching")
 	}
+	// log.Debug3(fmt.Sprintf("Length of page %d is %d", page, len(bundle.Entry)))
+	// if page == 1 {
+	// 	log.Debug3("")
+	// 	PageSize = len(bundle.Entry)
+	// 	log.Debug3("$$$$$$ length of Page 1: " + fmt.Sprint(PageSize))
 
-	// cb := uc_core/common.CacheBundle{}
-	// cb.
-	// 	CacheResourceBundleAndEntries(bundle, JWToken, 1)
-	//fmt.Printf("PatientSearch:237  --  Bundle= %s\n\n\n", spew.Sdump(bundle))
-	return bundle, cacheBundle.Header, err
-	/*
-		if err != nil {
+	// }
+	// if UseCache() {
+	// 	log.Debug3("Calling CacheViaCore for page: " + fmt.Sprint(page))
+	// 	log.Debug3("Cache current Page: " + fmt.Sprint(page))
+	// 	err = CacheViaCore(bundle, queryId, CurrentToken, "ALL", page)
+	// 	if err != nil {
+	// 		log.Error("CacheViaCore err: " + err.Error())
+	// 		return int64(page), 1, bundle, cacheBundle.Header, err
+	// 	}
 
-			return nil, fmt.Errorf("Query %s failed: %s", query, err.Error())
-		}
+	// 	//log.Debug3("Calling CacheResourceBundleAndEntries with token: ") // + JWToken)
+	// 	// pg, err := CacheResourceBundleAndEntries(&cacheBundle, JWToken, page)
+	// 	// log.Debug3(fmt.Sprintf("pg = %d  page = %d", pg, page))
+	// 	// log.Debug3(fmt.Sprintf("CacheResource returned %d %ss in page: %d for %s  took %s\n", len(cacheBundle.Bundle.Entry), resource, page, systemCfg.DisplayName, time.Since(startTime)))
+	// 	// if err != nil {
+	// 	// 	//return err and done
+	// 	// 	return int64(pg + 1), bundle, cacheBundle.Header, err
+	// 	// }
+	// 	//log.Debug3("--  links: " + spew.Sdump(bundle.Link))
+	// 	//Follow the bundle links to retrieve all bundles(pages) in the query response
+	// 	nextURL := GetNextResourceUrl(bundle.Link)
+	// 	total := int64(0)
+	// 	if nextURL == "" {
+	// 		log.Debug3("-- GetNext" + resource + " initialy No Next - One page only ")
 
-		//fmt.Printf("\n\n\n@@@ RAW Patient: %s\n\n\n", pretty.Pretty(b))
-		// prettyJSON, err := json.MarshalIndent(b, "", "    ")
-		// if err != nil {
-		// 	fmt.Printf("MarshalIndent failed: %s\n", err.Error())
-		// 	return nil, err
-		// }
+	// 		//total, err = TotalCacheForQuery(cacheBundle.QueryId)
+	// 		cacheBundle.Header.PageId = int(1)
+	// 		//page++
+	// 		log.Debug3("total: " + fmt.Sprint(total))
+	// 		return int64(page), 1, bundle, cacheBundle.Header, err
+	// 	}
+	// 	// PageSize = len(bundle.Entry)
+	// 	// log.Debug3("$$$$$$ length of current page: " + fmt.Sprint(PageSize))
 
-		startTime = time.Now()
-		bundle := &fhir.Bundle{}
-		//data := PatientResult{}
-		if err := json.Unmarshal(bytes, &bundle); err != nil {
-			return nil, fmt.Errorf("PatientSearch ummarshal : %s", err.Error())
-		}
-		log.Infof("Unmarshal time: %s", time.Since(startTime))
-		//fmt.Printf("Response: %s\n", spew.Sdump(bundle))
-		//resourceCache := common.ResourceCache
+	// 	page++
+	// 	fmt.Printf("\n\n\n")
+	// 	log.Debug3("Calling GetNextResource in the background for page: " + fmt.Sprint(page))
+	// 	go c.GetNextResource(header, nextURL, resource, queryId, JWToken, int(page))
+	// 	log.Debug3(fmt.Sprintf("Page 1 total time: %s", time.Since(startTime)))
+	// 	// There is one full page and possibly more. Respond with two so the user will create two page buttons and update every
+	// 	// 10 secnds.
+	// 	//return int64(page), bundle, cacheBundle.Header, err
+	// 	if bundle == nil {
+	// 		return 0, 0, nil, nil, log.Errorf("Bundle is nil")
+	// 	}
+	// 	if len(bundle.Entry) == 0 {
+	// 		log.Warn("Bundle length should never be 0")
+	// 		return 0, 0, bundle, cacheBundle.Header, log.Errorf("No resources found")
+	// 	} else {
+	// 		//There are at least two pages since there is a next on the first page
+	// 		return int64(len(bundle.Entry)), 2, bundle, cacheBundle.Header, err
+	// 	}
+	// } else {
+	// 	log.Debug3("Not using cache for page: " + fmt.Sprint(page))
 
-		for _, entry := range bundle.Entry {
-			resourceCache := common.ResourceCache{}
-			resourceJson := entry.Resource
-			patient := fhir.Patient{}
-			json.Unmarshal(resourceJson, &patient)
-			resourceCache.Resource = entry.Resource
-			resourceCache.ResourceType = "Patient"
-			fmt.Printf("PatientSearch:160  --  PatientId = %s\n", *patient.Id)
+	log.Debug3("--  links: " + spew.Sdump(bundle.Link))
+	//Follow the bundle links to retrieve all bundles(pages) in the query response
+	log.Info("-- Call GetNextResourceUrl")
+	//Call GetNextResourceURL to get the next page of resources
+	nextURL := GetNextResourceUrl(bundle.Link)
+	total := int64(0)
+	if nextURL == "" {
+		log.Debug1("-- GetNext" + resource + " initialy No Next - One page only ")
 
-		}
-		header := &common.CacheHeader{}
-		header.FhirSystem = fhirSystem
-		cacheBundle := common.CacheBundle{}
-		cacheBundle.ID = primitive.NewObjectID() //Each cach bundle gets a new header. The queryId ties all pages together.
+		total, err = TotalCacheForQuery(cacheBundle.QueryId)
+		cacheBundle.Header.PageId = int(page)
+		//page++
+		log.Debug2("total: " + fmt.Sprint(total))
+		log.Debug2("Returning page: " + fmt.Sprint(page))
+		return int64(page), bundle, cacheBundle.Header, err
+	}
+	page++
+	log.Debug2("--  Calling GetNextResource as go routine	")
+	go c.GetNextResource(header, nextURL, resource, queryId, JWToken, int(page))
+	log.Debug2(fmt.Sprintf("Page 1 total time: %s", time.Since(startTime)))
+	// There is one full page and possibly more. Respond with two so the user will create two page buttons and update every
+	// 2 secnds.
+	//return int64(page), bundle, cacheBundle.Header, err
+	if bundle == nil {
+		return 0, nil, nil, log.Errorf("Bundle is nil")
+	}
+	if len(bundle.Entry) == 0 {
+		return 0, bundle, cacheBundle.Header, log.Errorf("No resources found")
+	}
+	//else {
+	//	//TODO: need to cache the first page
+	//	return int64(len(bundle.Entry)), bundle, cacheBundle.Header, err
+	//}
 
-		header.FhirId = fhirSystem.ID.Hex()            // Uniquely identifies the real url fo the fhir server
-		header.QueryId = primitive.NewObjectID().Hex() //Does not change on each page
-		header.PatientId = ""                          // Not used for patient cache sine each entry is a different patient
-		header.ResourceType = "Patient"
-		tn := time.Now()
-		header.CreatedAt = &tn
+	if bundle == nil {
+		log.Warn("bundle is nil")
+	}
+	if cacheBundle.Header == nil {
+		log.Warn("cacheBundle.Header is nil")
+	}
+	enteries := bundle.Entry
+	numEnteries := len(enteries)
 
-		cacheBundle.Header = header
-		cacheBundle.Bundle = bundle
-		cacheBundle.Header.PageId = 1
-
-		//TODO: Call Core CacheResources to cachhe the resources(patients)
-		fmt.Printf("PatientSearch:179 calling Insert %d Patients for now\n", len(cacheBundle.Bundle.Entry))
-
-		err = Insert(context.Background(), &cacheBundle, token)
-		if err != nil {
-			msg := fmt.Sprintf("CacheInsert initial error %s", err.Error())
-			fmt.Println(msg)
-			log.Error(msg)
-			return nil, errors.New(msg)
-		}
-		nextURL := GetNextResourceUrl(bundle.Link)
-		if nextURL == "" {
-			msg := fmt.Sprintf("GetNextResourceUrl initial No Next ")
-			// fmt.Println(msg)
-			log.Warn(msg)
-			//return nil, errors.New(msg)
-			return bundle, nil
-		}
-		go c.GetNextResource(header, nextURL, resource, token)
-	*/
-	return bundle, cacheBundle.Header, nil
-
+	log.Debug2("Number of entries:  " + fmt.Sprint(numEnteries))
+	return int64(numEnteries), bundle, cacheBundle.Header, err
 }
 
 // func GetNextResourceUrl(link []fhir.BundleLink) string {
+// 	log.Debug3("link: " + spew.Sdump(link))
 // 	for _, lnk := range link {
 // 		if lnk.Relation == "next" {
+// 			log.Debug2("--  There is a next page to get: " + lnk.Url)
 // 			return lnk.Url
 // 		}
 // 	}
 // 	return ""
 // }
-// func (c *Connection) GetNextResource(header *common.CacheHeader, url, token string) {
+
+// //GetNextResource: fetches the resource at provided url, processes it and checks if more to call.
+// func (c *Connection) GetNextResource(header *common.CacheHeader, url, resource string, queryId primitive.ObjectID, token string, page int) {
+// 	fmt.Printf("\n\n\n\n####################  GetNextResource page: %d   ###############\n", page)
+// 	log.Debug2("header.SystemCfg.CacheUrl: " + header.SystemCfg.ConnectorConfig.CacheUrl)
+// 	header.CacheUrl = header.SystemCfg.ConnectorConfig.CacheUrl
+// 	log.Debug2(fmt.Sprintf("--  resource: %s  -  header.CacheUrl: %s", resource, header.CacheUrl))
+
+// 	//Call Remote FHIR server for the resource bundle
+// 	//queryId := header.QueryId
+// 	log.Info("queryId: " + queryId.Hex())
 // 	startTime := time.Now()
-// 	bytes, err := c.GetFhir(url)
-// 	fmt.Printf("Query Next Set time: %s\n", time.Since(startTime))
+// 	bundle, err := c.GetFhirBundle(url, JWToken)
 // 	if err != nil {
-// 		msg := fmt.Sprintf("c.GetFhir error: %s", err.Error())
-// 		fmt.Println(msg)
-// 		log.Error(msg)
+// 		log.Error("c.GetFhirBundle error: " + err.Error())
 // 		return
 // 	}
-// 	bundle := &fhir.Bundle{}
+// 	log.Info(fmt.Sprintf("--  Query Next Set from %s of %s time: %s\n", header.SystemCfg.DisplayName, header.ResourceType, time.Since(startTime)))
+// 	// // fmt.Printf("GetNextResource:175  --  UnmarshalBundle\n")
+// 	// // bundle, err := fhir4.UnmarshalBundle(bytes)
+// 	// // if err != nil {
+// 	// // 	msg := fmt.Sprintf("GetNextResource:178 unmarshal : %s", err.Error())
+// 	// // 	//fmt.Printf(msg)
+// 	// // 	fmt.Println(msg)
+// 	// // 	return
+// 	// // }
 
-// 	if err := json.Unmarshal(bytes, bundle); err != nil {
-// 		msg := fmt.Sprintf("PatientSearch next unmarshal : %s", err.Error())
-// 		log.Error(msg)
-// 		fmt.Println(msg)
+// 	// //unMarshalResource(resource, bundle)
+// 	// header.PageId += 1
+// 	// tn := time.Now()
+// 	// header.CreatedAt = &tn
+// 	// cacheBundle := common.CacheBundle{}
+// 	// cacheBundle.ID = primitive.NewObjectID()
+// 	// cacheBundle.Header = header
+// 	// cacheBundle.Bundle = bundle
+// 	// log.Debug3("-- Calling CacheResourceBundleAndEntries for page: " + fmt.Sprint(page))
+// 	// pg, err := CacheResourceBundleAndEntries(&cacheBundle, token, int64(page))
+// 	// if err != nil {
+// 	// 	log.Errorf("GetNextResource returned err: " + err.Error())
+// 	// 	return
+// 	// }
+// 	// log.Debug3(fmt.Sprintf("pg: %d  Page: %d", pg, page))
+
+// 	log.Debug2("Cache current Page: " + fmt.Sprint(page))
+// 	//log.Info("header: " + spew.Sdump(header))
+// 	cacheURL := header.CacheUrl
+// 	log.Debug2("CacheURL: " + cacheURL)
+// 	err = CacheViaCore(bundle, queryId, token, cacheURL, page)
+// 	if err != nil {
+// 		log.Error("CacheViaCore err: " + err.Error())
 // 		return
 // 	}
-// 	header.PageId += 1
-// 	tn := time.Now()
-// 	header.CreatedAt = &tn
-// 	cacheBundle := common.CacheBundle{}
-// 	cacheBundle.ID = primitive.NewObjectID()
-// 	cacheBundle.Header = header
-// 	cacheBundle.Bundle = bundle
-
-// 	err = Insert(context.Background(), &cacheBundle)
-// 	if err != nil {
-// 		msg := fmt.Sprintf("CacheInsert error %s", err.Error())
-// 		fmt.Println(msg)
-// 		log.Error(msg)
-// 	}
-// 	fmt.Printf("Link: %s\n", spew.Sdump(bundle.Link))
+// 	log.Debug2("-- Calling GetNextResourceUrl")
 // 	nextURL := GetNextResourceUrl(bundle.Link)
 // 	if nextURL == "" {
-// 		msg := fmt.Sprintf("GetNextResourceUrl Last page had %d Resources processed ", len(bundle.Entry))
-// 		// fmt.Println(msg)
-// 		log.Warn(msg)
-// 		fmt.Printf("GetNext Resources should return\n")
+// 		//pageSize := 10 //TODO: Change pageSize from constant
+// 		onPage := len(bundle.Entry)
+// 		log.Warn(fmt.Sprintf("GetNextResource Last page had %d Resources processed ", onPage))
+// 		log.Debug2("Send post to tell core the query is done and to complete it.")
+// 		err = FinishCache(header.SystemCfg, queryId, token, page, onPage)
+
+// 		if err != nil {
+// 			log.Error("GetNextResource err: " + err.Error())
+// 			return
+// 		}
 // 		return
 // 	} else {
-// 		fmt.Printf("GetNextResources is being called in the background\n")
-// 		go c.GetNextResources(header, nextURL, token)
-// 		fmt.Printf("GetNextResources was called in the background\n")
+// 		page = page + 1
+// 		log.Debug2("--go c.GetNextResource is being called in the background")
+// 		go c.GetNextResource(header, nextURL, resource, queryId, token, page)
+// 		log.Debug2("-- GetNextResource Returned and background started")
 // 	}
-// 	fmt.Printf("GetNext Resource is returning\n")
-// 	return
+// 	log.Debug2("GetNextResource is returning")
 // }
 
-func GetMrn(pat *fhir.Patient, system string, code string) string {
-	idents := pat.Identifier
-	for _, ident := range idents {
-		if *ident.Type.Text == code {
-			value := *ident.Value
-			fmt.Printf("GetMrn:381  --  MRN Code : %s = %s\n", code, value)
-			return value
-		}
-	}
-	fmt.Printf("GetMrn:385  -- Identifier for System: %s   Code: %s was not found\n", system, code)
-	return ""
-}
+// func GetHeaderInfoFromBundle(resource string, hdr *common.CacheHeader, bundle *fhir4.Bundle) (string, string, error) {
+// 	fmt.Printf("\n\n\n################## GetHederInfoFromBundle:220  --  for Resource: [%s]\n\n", resource)
+// 	//resHeader := common.ResourceHeader{}
+// 	switch resource {
+// 	case "Patient":
+// 		fsIdentifiers := hdr.SystemCfg.Identifiers
+// 		res, err := fhir4.UnmarshalPatient(bundle.Entry[0].Resource)
+// 		if err != nil {
+// 			log.Errorf("%s unmarshal : %s", resource, err.Error())
+// 			return "", "", err
+// 		}
+// 		hdr.PatientId = *res.Id
+// 		hdr.ResourceId = *res.Id
+// 		GetPatientIdentifier(res.Identifier, fsIdentifiers, "mrn")
+// 		fmt.Printf("\nGetHeaderInfoFromBundle:221 -- Patient: %s\n", spew.Sdump((res)))
+// 		fmt.Printf("\nGetHeaderInfoFromBundle:222")
+// 		res1, err := fhir4.UnmarshalPatient(bundle.Entry[1].Resource)
+// 		if err != nil {
+// 			log.Errorf("%s unmarshal : %s", resource, err.Error())
+// 			return "", "", err
+// 		}
+// 		hdr.PatientId = *res.Id
+// 		hdr.ResourceId = *res.Id
+// 		fmt.Printf("\nGetHeaderInfoFromBundle:230 -- Patient: %s\n", spew.Sdump((res1)))
+// 		return *res.Id, *res.Id, nil
+// 	case "DocumentReference":
+// 		//log.Printf("GetHederInfoFromBundle312: --  Raw data: %s\n", string(bundle.Entry[0].Resource))
+// 		res, err := fhir4.UnmarshalDocumentReference(bundle.Entry[0].Resource)
+// 		if err != nil {
+// 			log.Errorf("%s unmarshal : %s", resource, err.Error())
+// 			return "", "", err
+// 		}
+// 		//fmt.Printf("\n###DocumentReference: %s\n", spew.Sdump(res))
+// 		parts := strings.Split(*res.Subject.Reference, "/")
+// 		hdr.PatientId = parts[1]
+// 		hdr.ResourceId = *res.Id
+// 		fmt.Printf("GetHeaderInfoFromBundle:243 -- DocumentReference: %s\n", spew.Sdump((res)))
+// 		return parts[1], *res.Id, nil
+// 	case "DiagnosticReport":
+// 		res, err := fhir4.UnmarshalDiagnosticReport(bundle.Entry[0].Resource)
+// 		if err != nil {
+// 			log.Errorf("%s unmarshal : %s", resource, err.Error())
+// 			return "", "", err
+// 		}
+// 		//fmt.Printf("\n###DiagnosticReport: %s\n", spew.Sdump(res))
+// 		parts := strings.Split(*res.Subject.Reference, "/")
+// 		hdr.PatientId = parts[1]
+// 		hdr.ResourceId = *res.Id
+// 		fmt.Printf("GetHeaderInfoFromBundle:255 -- DiagnosticReport: %s\n", spew.Sdump((res)))
+// 		return parts[1], "", nil
+// 	case "Observation":
+// 		res, err := fhir4.UnmarshalObservation(bundle.Entry[0].Resource)
+// 		if err != nil {
+// 			log.Errorf("%s unmarshal : %s", resource, err.Error())
+// 			return "", "", err
+// 		}
+// 		//fmt.Printf("\n###Observation: %s\n", spew.Sdump(res))
+// 		parts := strings.Split(*res.Subject.Reference, "/")
+// 		hdr.PatientId = parts[1]
+// 		hdr.ResourceId = *res.Id
+// 		fmt.Printf("GetHeaderInfoFromBundle:267 -- Observation:%s\n", spew.Sdump((res)))
+// 		return parts[1], "", nil
+// 	}
+// 	return "", "", nil
+// }
 
-func (pf *PatientFilter) Find() ([]fhir.Patient, error) {
-	fmt.Printf("Find:390  -- PatientFilter: %s\n", spew.Sdump(pf))
-	newErr := fmt.Errorf("pf.Find:391  ==  returning Find not implemented")
-	fmt.Printf("%s\n", newErr.Error())
-	return nil, newErr
-}
+// func GetCacheStatus(ucUrl, queryId string) int {
+// 	// coreURL := ucUrl + "/BundleTransaction"
+// 	// client := &http.Client{}
+// 	// //fmt.Printf("Send Status to: [%s]\n", statusURL)
+// 	// fmt.Printf("CacheResourceBundleAndEntries:99  --  Using CoreUrl: %s\n", coreURL)
+// 	// req, _ := http.NewRequest("GET", coreURL, bytes.NewBuffer(cacheBundle))
+// 	// //req, _ := http.NewRequest("POST", coreURL, bytes.NewBuffer(cacheBundle))
+// 	// //r, _ := http.NewRequest("POST", coreURL, nil)
+// 	// fmt.Printf("\nCacheResourceBundleEntries:339  --  Req: %s\n\n\n", spew.Sdump(req))
+// 	// req.Header.Set("Accept", "application/json")
+// 	// req.Header.Set("Content-Type", "application/json")
+// 	// req.Header.Set("Authorization", token)
+// 	// fmt.Printf("\nCacheResourceBundleEntries:107  --  Calling core: %s\n", coreURL)
+// 	// ///fmt.Printf("Using Token: %s\n", token)
+// 	// _, err = client.Do(req)
+// 	return 0
+// }
 
-func (pf *PatientFilter) FindById() (*fhir.Patient, error) {
-	fmt.Printf("FindById:397  -- PatientFilter: %s\n", spew.Sdump(pf))
-	if pf.Id == "" {
-		return nil, errors.New("FindById:400  --  Id is required")
-	}
-	filter := bson.D{{"id", pf.Id}}
-	collection, _ := GetCollection("Patients")
-	pat := &fhir.Patient{}
-	fmt.Printf("FindById:404  --  Calling FindOne with Filter: %v\n", filter)
-	err := collection.FindOne(context.TODO(), filter).Decode(pat) // See if the user already has a session
-	if err != nil {
-		return nil, log.Errorf("FindOne error: " + err.Error())
-	}
-	//fmt.Printf("GetPatient:158  -- FindOne Patient: %s\n", spew.Sdump(pat))
-	return pat, err
-	//return nil, fmt.Errorf("Find not implemented")
-}
+// func GetConnectorPayload(r *http.Request) (*common.ConnectorPayload, error) {
+// 	log.Info("GetConnectorPayload entered")
+// 	body, err := io.ReadAll(r.Body) // Should be ConnectorPayload
+// 	if err != nil {
+// 		return nil, log.Errorf("ReadAll FhirSystem error " + err.Error())
+// 	}
+// 	//mt.Printf("GetConnectorPayload:717  -- Got Body Now Unmarshal ConnectorPayload\n")
+// 	b := string(body)
+// 	log.Debug3("GetConnectorPayload Body: " + b)
+// 	conPayload := &common.ConnectorPayload{}
+// 	err = json.Unmarshal(body, &conPayload)
+// 	if err != nil {
+// 		log.Error(" --  unmarshal err = " + err.Error())
+// 		// errMsg := err.Error()
+// 		// WriteFhirOperationOutcome(w, 400, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
+// 		return nil, err
+// 	}
+// 	log.Info("ConPayload unmarshaled, now check it")
+// 	if conPayload == nil {
+// 		return nil, log.Errorf("conPayload is nil ")
+// 	}
+// 	//fmt.Printf("GetConnectorPayload:860  --  ConnectorPayLoad = %s\n", spew.Sdump(conPayload))
+// 	return conPayload, err
+// }
 
-func (c *Connection) PostPatient(cp *common.ConnectorPayload, mrn string, patient *fhir.Patient) (*fhir.Patient, error) {
-	if cp == nil {
-		return nil, log.Errorf("ConnectorPayload must be provided")
-	}
-	systemURL := cp.ConnectorConfig.HostUrl
-	if systemURL == "" {
-		//if systemURL == "" {
-		return nil, log.Errorf("cp.SystemUrl to add patient to must be specified")
-	}
-	if mrn == "" { // For now use the provided MRN, if not there error //Generate a new MRN and insert into Identifiers.
-		return nil, log.Errorf("new UNIQUE MRN for the patient must be specified")
-	}
-	if patient == nil {
-		return nil, log.Errorf("FHIR (R4) patient must be provided")
-	}
-	patient.Id = StrPtr(primitive.NewObjectID().Hex())
-	patient.Meta = &fhir.Meta{}
-	patient.Meta.VersionId = StrPtr("1")
-	patient.Meta.LastUpdated = StrPtr(time.Now().Format("2006-01-02T15:04:05 0000Z"))
+// func CreateFhirQuery(r *http.Request) (string, error) {
+// 	query := ""
+// 	values := r.URL.Query()
+// 	log.Debug3(fmt.Sprintf("CreateFhirQuery  values : %v", values))
+// 	if len(values) < 1 {
+// 		err := log.Errorf("Url.Querys are missing")
+// 		return "", err
+// 	}
+// 	//fmt.Printf("\nCreateFhirQuery:713  --  Keys : %v\n\n", keys)
+// 	for k, v := range values {
+// 		log.Info("Key:  " + k + " => " + v[0])
+// 		s := strings.TrimLeft(v[0], "[]")
+// 		if query == "" {
+// 			//for _, kv := range v {
+// 			query = fmt.Sprintf("%s=%s", k, s)
+// 			//}
+// 		} else {
+// 			query = fmt.Sprintf("%s&%s=%s", query, k, s)
+// 		}
+// 		log.Info("CreateFhirQuery = " + query)
+// 	}
+// 	return query, nil
+// }
 
-	ident := fhir.Identifier{}
-	id := primitive.NewObjectID().Hex()
-	ident.Id = &id
-	// idUse := fhir.IdentifierUse.Code(fhir.IdentifierUseUsual)
-	// fhir.IdentifierUseUsual
-	//idUse := fhir.IdentifierUseUsual
-	code := fhir.IdentifierUseUsual
-	ident.Use = &code
-	ident.Value = &mrn
-	ident.Type = &fhir.CodeableConcept{}
-	ident.Type.Coding = []fhir.Coding{}
-	coding := fhir.Coding{}
-	coding.System = StrPtr("http://terminology.hl7.org/CodeSystem/v2-0203")
-	coding.Code = StrPtr("MR")
-	coding.Display = StrPtr("Medical record number")
-	coding.UserSelected = BoolPtr(false)
-	ident.Type.Coding = append(ident.Type.Coding, coding)
-	ident.Type.Text = StrPtr("MRN")
-	//ident.Period
-	ident.System = StrPtr("urn:oid:1.3.6.1.4.1.54392.5.1593.1")
-	ident.Value = &mrn
-	//TODO: add _value Extension  for Rendered Value
-	patient.Identifier = []fhir.Identifier{}
-	patient.Identifier = append(patient.Identifier, ident)
-	fmt.Printf("\nPostPatient:454  --  %s\n\n", spew.Sdump(patient))
-	client := &http.Client{}
-	fmt.Printf("PostPatient:456  --  Save Fhir Patient to: [%s]\n", systemURL)
-	bstr, err := json.Marshal(patient)
-	if err != nil {
-		fmt.Printf("PostPatient:459  --  Marshal error: %s\n", err.Error())
-		return nil, err
-	}
-	req, err := http.NewRequest("POST", systemURL, bytes.NewBuffer(bstr))
-	if err != nil {
-		fmt.Printf("NewRequest error: %s\n", err.Error())
-	}
-	req.Header.Set("Accept", "application/json+fhir")
-	req.Header.Set("Content-Type", "application/json")
-	resp, err := client.Do(req)
-
-	if err != nil {
-		return nil, log.Errorf("Error Posting new Patient: " + err.Error())
-	}
-	//fmt.Printf("length of ressponse Body = %d\n", len(resp.Body) )
-	defer resp.Body.Close()
-	log.Debug3(fmt.Sprintf("resp.StatusCode = %d - %s", resp.StatusCode, resp.Status))
-	// body, err := ioutil.ReadAll(resp.Body)
-	// if err != nil {
-	// 	fmt.Printf("Query Error: %v\n", err)
-	// 	return nil, err
-	// }
-
-	//fmt.Printf("PostPatient response: %s\n", spew.Sdump(resp))
-	return patient, nil
-}
+// func UseCache() bool {
+// 	useCache := os.Getenv("USE_CACHE")
+// 	log.Debug3("useCache: " + useCache)
+// 	if useCache == "TRUE" {
+// 		log.Debug3("USE_CACHE: true")
+// 		return true
+// 	}
+// 	log.Debug3("Do Not Use Cache")
+// 	return false
+// }
