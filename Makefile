@@ -119,9 +119,9 @@ prod:
 	 docker push $(PROD)/$(IMAGE_NAME):$(VERSION)
 
 release:
-	CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) $(GOBUILD) -o $(BINARY) -v
-	docker build -t $(NS)/$(DOCKER_NAME):$(VERSION) -f Dockerfile .
-	docker push $(NS)/$(DOCKER_NAME):$(VERSION)
+	CGO_ENABLED=0 GOOS=linux amd64 $(GOBUILD) -o $(BINARY) -v
+	docker build -t $(PROD)/$(DOCKER_NAME):$(VERSION) -f Dockerfile .
+	docker push $(PROD)/$(DOCKER_NAME):$(VERSION)
 
 	# CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_UNIX) -v
 	# docker build -t $(NS)/$(IMAGE_NAME):$(VERSION) -f Dockerfile .

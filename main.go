@@ -38,8 +38,13 @@ var CurrentUserID primitive.ObjectID
 var CurrentToken string
 
 func main() {
-	version = "2400410.3"
-	log.SetDebuglevel("DEBUG2")
+	version = "240411.2"
+	debugLevel := os.Getenv("DEBUG_LEVEL")
+	if debugLevel == "" {
+		debugLevel = "DEBUG2"
+	}
+	log.SetDebuglevel(debugLevel)
+	log.Info("Set DebugLevel to: " + debugLevel)
 
 	log.Info("run mode: " + os.Getenv("MODE"))
 	switch os.Getenv("MODE") {
@@ -111,7 +116,7 @@ func main() {
 		os.Setenv("ACCESS_SECRET", secretKey)
 	}
 
-	log.Debug3(fmt.Sprintf("Calling service Start for %s  version: %s", serviceName, version))
+	log.Info(fmt.Sprintf("Calling service Start for %s  version: %s", serviceName, version))
 	log.Info("Service Starting with mode: " + os.Getenv("MODE") + "  env: " + Env)
 	Start(serviceName, version) //Should Not Return
 

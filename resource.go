@@ -463,13 +463,13 @@ func (c *Connection) GetNextResource(header *common.CacheHeader, url, resource s
 	cacheBundle.ID = primitive.NewObjectID()
 	cacheBundle.Header = header
 	cacheBundle.Bundle = bundle
-	log.Debug2("-- Calling CacheResourceBundleAndEntries for page: " + fmt.Sprint(page))
-	pg, err := CacheResourceBundleAndEntries(&cacheBundle, token, int64(page))
-	if err != nil {
-		log.Errorf("GetNextResource returned err: " + err.Error())
-		return
-	}
-	log.Debug2(fmt.Sprintf("pg: %d  Page: %d", pg, page))
+	//log.Debug2("-- Calling CacheResourceBundleAndEntries for page: " + fmt.Sprint(page))
+	// pg, err := CacheResourceBundleAndEntries(&cacheBundle, token, int64(page))
+	// if err != nil {
+	// 	log.Errorf("GetNextResource returned err: " + err.Error())
+	// 	return
+	// }
+	// log.Debug2(fmt.Sprintf("pg: %d  Page: %d", pg, page))
 
 	log.Debug2("Cache current Page: " + fmt.Sprint(page))
 	//log.Info("header: " + spew.Sdump(header))
