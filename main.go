@@ -38,7 +38,7 @@ var CurrentUserID primitive.ObjectID
 var CurrentToken string
 
 func main() {
-	version = "2400409.0"
+	version = "2400410.1"
 	log.SetDebuglevel("DEBUG2")
 
 	log.Info("run mode: " + os.Getenv("MODE"))

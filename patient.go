@@ -287,12 +287,13 @@ func FindPatient(connPayLoad *common.ConnectorPayload, userId, query, JWToken st
 	startTime = time.Now()
 
 	// if UseCache() {
-	log.Info("CacheHeader.CacheUrl: " + header.CacheUrl)
+	log.Info("CacheHeader: " + spew.Sdump(cacheBundle.Header))
 	log.Info(fmt.Sprintf("Calling CacheViaCore for page %d ", page))
 	cacheURL := header.CacheUrl
 	log.Info("CacheURL: " + cacheURL)
+	log.Info("cacheBundle: " + spew.Sdump(cacheBundle))
 	log.Info("FindResource calling	CacheViaCore")
-	err = CacheViaCore(bundle, queryId, JWToken, cacheURL, page)
+	err = CacheViaCore(bundle, queryId, cacheBundle.Header.ResourceType, JWToken, cacheURL, page)
 	log.Debug2("CacheViaCore returned")
 	if err != nil {
 		log.Error(err.Error())

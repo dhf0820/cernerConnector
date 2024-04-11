@@ -303,7 +303,7 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	cacheURL := header.CacheUrl
 	log.Info("CacheURL: " + cacheURL)
 	log.Info("FindResource calling	CacheViaCore")
-	err = CacheViaCore(bundle, queryId, JWToken, cacheURL, page)
+	err = CacheViaCore(bundle, queryId, cacheBundle.Header.ResourceType, JWToken, cacheURL, page)
 	log.Debug2("CacheViaCore returned")
 	if err != nil {
 		log.Error(err.Error())
@@ -475,7 +475,7 @@ func (c *Connection) GetNextResource(header *common.CacheHeader, url, resource s
 	//log.Info("header: " + spew.Sdump(header))
 	cacheURL := header.CacheUrl
 	log.Debug2("CacheURL: " + cacheURL)
-	err = CacheViaCore(bundle, queryId, token, cacheURL, page)
+	err = CacheViaCore(bundle, queryId, header.ResourceType, token, cacheURL, page)
 	if err != nil {
 		log.Error("CacheViaCore err: " + err.Error())
 		return

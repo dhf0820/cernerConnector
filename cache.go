@@ -79,7 +79,7 @@ func CacheResourceBundleElements(ctx context.Context, userId,
 // // sends bundle to cache which caches the Bundle  in BundleCache, then caches each entry in ResourceCacheCaches both the bundle and the individual entries cached in
 func CacheResourceBundleAndEntries(cbdl *common.CacheBundle, token string, page int64) (int, error) {
 	fmt.Println("$$$$$$$$$$ Entering CaaheResourceBundleAndEntries $$$$$$")
-
+	log.Debug2("caching resource type: " + cbdl.Header.ResourceType)
 	// if !UseCache() {
 	// 	return -1, errors.New("NO CACHE")
 	// }
@@ -225,8 +225,9 @@ func FinishCache(systemConfig *common.SystemConfig, queryID primitive.ObjectID, 
 	return nil
 }
 
-func CacheViaCore(bundle *fhir.Bundle, queryID primitive.ObjectID, token string, cacheURL string, page int) error {
+func CacheViaCore(bundle *fhir.Bundle, queryID primitive.ObjectID, resourceType, token string, cacheURL string, page int) error {
 	//cacheURL := "http://UniversalCharts.com:30300/system/640ba5e3bd4105586a6dda74" + "/BundleTransaction"
+	log.Debug2("ResourceType: " + resourceType)
 	if bundle == nil {
 		return log.Errorf("Bundle is nil")
 	}
@@ -234,6 +235,7 @@ func CacheViaCore(bundle *fhir.Bundle, queryID primitive.ObjectID, token string,
 	fmt.Println()
 	fmt.Println()
 	fmt.Println()
+
 	cacheURL = cacheURL + "BundleTransaction"
 	//log.Info("CacheViaCore  --  POST cacheURL: " + cacheURL)
 	cacheSavePayload := common.CacheSavePayload{}
@@ -246,9 +248,10 @@ func CacheViaCore(bundle *fhir.Bundle, queryID primitive.ObjectID, token string,
 	// >>>>>>> 2062832a583c454d91d8636cf44ef1efded64a16
 
 	cacheSavePayload.PageNum = page
-	cacheSavePayload.Bundle = bundle
-
+	cacheSavePayload.ResourceType = resourceType
 	cacheSavePayload.QueryId = queryId
+	log.Debug2("cacheSavePayload without Bundle: " + spew.Sdump(cacheSavePayload))
+	cacheSavePayload.Bundle = bundle
 	payload, err := json.Marshal(cacheSavePayload)
 	//bndl, err := bundle.MarshalJSON()
 	if err != nil {
@@ -261,7 +264,7 @@ func CacheViaCore(bundle *fhir.Bundle, queryID primitive.ObjectID, token string,
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", token)
-	req.Header.Set("Resource", *bundle.ResourceType)
+	req.Header.Set("Resource", resourceType)
 	//req.Header.Set("Final", final)
 	//token = "Bearer " + token
 	//log.Debug3("CacheResourceBundleAndEntries  --  Token: " + token)

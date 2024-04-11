@@ -1224,23 +1224,23 @@ func FillResourceResponse(resp *common.ResourceResponse, resourceType string) er
 			log.Debug3("Patient: " + spew.Sdump(pat))
 			fmt.Printf("\n\n\n")
 			log.Debug3("CurrentUser: " + spew.Sdump(CurrentUser))
-			log.Info("HIPPALog access user: " + CurrentUserID.Hex() + " of patient: " + pat.ID.Hex())
-			logMsg := fmt.Sprintf("HIPPA log User: %s - %s accessed  Patient: %s", CurrentUser.ID.Hex(), CurrentUser.UserName, pat.ID.Hex())
-			log.Info(logMsg)
-			//log.Info(fmt.Sprintf("HIPPA log User: %s - %s accessed  Patient: %s", CurrentUser.ID.Hex(), CurrentUser.UserName, pat.ID.Hex()))
-			hl := &common.HippaLog{}
-			hl.UserId = CurrentUser.ID.Hex()
-			hl.PatientId = pat.ID.Hex()
-			hl.ResourceType = "Patient"
-			hl.ResourceId = hl.PatientId
-			hl.SystemId = CurrentSystemID.Hex()
-			hl.LogType = "Core-Listed"
-			hl.LogTime = time.Now().UTC()
-			hl.LogMessage = logMsg
-			err = LogHippa(hl)
-			if err != nil {
-				log.Warn("HippaLogging failed: " + err.Error())
-			}
+			// log.Info("HIPPALog access user: " + CurrentUserID.Hex() + " of patient: " + pat.ID.Hex())
+			// logMsg := fmt.Sprintf("HIPPA log User: %s - %s accessed  Patient: %s", CurrentUser.ID.Hex(), CurrentUser.UserName, pat.ID.Hex())
+			// log.Info(logMsg)
+			// //log.Info(fmt.Sprintf("HIPPA log User: %s - %s accessed  Patient: %s", CurrentUser.ID.Hex(), CurrentUser.UserName, pat.ID.Hex()))
+			// hl := &common.HippaLog{}
+			// hl.UserId = CurrentUser.ID.Hex()
+			// hl.PatientId = pat.ID.Hex()
+			// hl.ResourceType = "Patient"
+			// hl.ResourceId = hl.PatientId
+			// hl.SystemId = CurrentSystemID.Hex()
+			// hl.LogType = "Core-Listed"
+			// hl.LogTime = time.Now().UTC()
+			// hl.LogMessage = logMsg
+			// err = LogHippa(hl)
+			// if err != nil {
+			// 	log.Warn("HippaLogging failed: " + err.Error())
+			// }
 			resData.Patient = &pat
 			log.Debug3(" Added PatientId: " + *pat.Id)
 			resp.Resources = append(resp.Resources, resData)
