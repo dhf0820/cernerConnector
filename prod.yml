@@ -4,7 +4,7 @@ services:
   cernerConnector:
 
 
-    image: vertisoft/cerner_connector:240410.1    
+    image: vertisoft/cerner_connector:240410.2    
 
     ports:
       - "0.0.0.0:20103:9200"
