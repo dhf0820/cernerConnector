@@ -105,6 +105,7 @@ test_amd64:
 	docker push $(TEST)/$(IMAGE_NAME):$(VERSION)
 
 prod:
+	ARCH=amd64
 	CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) $(GOBUILD) -o $(BINARY) 
 	docker build -t $(PROD)/$(DOCKER_NAME):$(VERSION) -f Dockerfile_$(ARCH) .
 	docker push $(PROD)/$(DOCKER_NAME):$(VERSION)
