@@ -4,7 +4,7 @@ services:
   cernerConnector:
 
 
-    image: dhf0820/cerner_connector:240410.2    
+    image: dhf0820/cerner_connector:240410.3    
 
     ports:
       - "0.0.0.0:20103:9200"
