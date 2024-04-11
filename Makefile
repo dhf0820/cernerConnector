@@ -106,7 +106,7 @@ test_amd64:
 
 prod:
 	ARCH=amd64
-	CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) $(GOBUILD) -o $(BINARY) 
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY) 
 	docker build -t $(PROD)/$(DOCKER_NAME):$(VERSION) -f Dockerfile_amd64 .
 	docker push $(PROD)/$(DOCKER_NAME):$(VERSION)
 
