@@ -2,3 +2,6 @@
 ./cernerConn 
 ./cerner_connector
 cerner_connector
+cerner_connector_linux
+cerner_connector_amd64
+cerner_conn_amd64
