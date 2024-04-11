@@ -96,8 +96,8 @@ mac_local:
 
 test_linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOHOSTARCH=amd64 GOHOSTOS=linux $(GOBUILD) -o $(IMAGE_NAME) 
-	docker build -t $(TEST)/$(IMAGE_NAME):$(VERSION) --no-cache -f Dockerfile .
-	docker push $(TEST)/$(IMAGE_NAME):$(VERSION)
+	docker build -t $(PROD)/$(IMAGE_NAME):$(VERSION) --no-cache -f Dockerfile .
+	docker push $(PROD)/$(IMAGE_NAME):$(VERSION)
 
 test_amd64:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(IMG_NAME) 
@@ -107,7 +107,7 @@ test_amd64:
 prod:
 	ARCH=amd64
 	CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) $(GOBUILD) -o $(BINARY) 
-	docker build -t $(PROD)/$(DOCKER_NAME):$(VERSION) -f Dockerfile_$(ARCH) .
+	docker build -t $(PROD)/$(DOCKER_NAME):$(VERSION) -f Dockerfile_amd64 .
 	docker push $(PROD)/$(DOCKER_NAME):$(VERSION)
 
 	#CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) $(GOBUILD) -o $(BINARY) -v
