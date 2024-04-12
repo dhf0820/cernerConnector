@@ -202,6 +202,32 @@ func WriteFhirResponse(w http.ResponseWriter, status int, resp *common.ResourceR
 	return nil
 }
 
+func WriteInitialFhirResponse(w http.ResponseWriter, status int, resp *common.InitialResourceResponse) error {
+	w.Header().Set("Content-Type", "application/json")
+	log.Debug3(fmt.Sprint("--  Status: ", status))
+	//log.Debug3(fmt.Sprintf("WriteFhirResponse:170  --  Status: %d\n", status))
+	//log.Debug3("Data:  " + spew.Sdump(resp))
+	switch status {
+	case 200:
+		w.WriteHeader(http.StatusOK)
+	case 400:
+		w.WriteHeader(http.StatusBadRequest)
+	case 401:
+		w.WriteHeader(http.StatusUnauthorized)
+	case 403:
+		w.WriteHeader(http.StatusForbidden)
+	default:
+		w.WriteHeader(status)
+	}
+	err := json.NewEncoder(w).Encode(resp)
+	if err != nil {
+
+		fmt.Println("WriteInitialFhirResponse:184  --  Error marshaling JSON:", err)
+		return log.Errorf("--  Error marshaling JSON: " + err.Error())
+	}
+	return nil
+}
+
 //################################### FHIR Responses ####################################
 
 func CreateOperationOutcome(code fhir.IssueType, severity fhir.IssueSeverity, details *string) *fhir.OperationOutcome {

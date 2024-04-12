@@ -215,7 +215,7 @@ func GetPatient(cp *common.ConnectorPayload, resourceName, resourceId string, to
 
 func FindPatient(connPayLoad *common.ConnectorPayload, userId, query, JWToken string) (int64, *fhir.Bundle, *common.CacheHeader, error) {
 	fmt.Printf("\n\n\n")
-	log.Debug2("FindPatient:")
+	log.Debug2("Starting FindPatient")
 	PageSize = 10
 	page := 1
 	resource := "Patient"
@@ -224,8 +224,8 @@ func FindPatient(connPayLoad *common.ConnectorPayload, userId, query, JWToken st
 
 	//systemCfg := connPayLoad.System
 
-	log.Debug2("query: " + query)
-	fullQuery := fmt.Sprintf("Patient?%s", query)
+	//log.Debug2("query: " + query)
+	fullQuery := query //fmt.Sprintf("Patient?%s", query)
 	//fmt.Printf("FindRecource:84  --  ConectorPayload: %s\n", spew.Sdump(connPayLoad))
 	log.Debug3("UserId: " + userId)
 	log.Debug2("fullQuery: " + fullQuery)
@@ -264,6 +264,8 @@ func FindPatient(connPayLoad *common.ConnectorPayload, userId, query, JWToken st
 	header.PageId = page
 	queryId := primitive.NewObjectID()
 	header.QueryId = queryId
+	header.CacheStatusUrl = fmt.Sprintf("queue/%s/CacheStatus", header.QueryId.Hex())
+	header.CachePageUrl = fmt.Sprintf("queue/%s/CachePatientPage", header.QueryId.Hex())
 
 	//log.Debug3("connConfig: " + spew.Sdump(connConfig))
 	//log.Debug3("header: " + spew.Sdump(header))

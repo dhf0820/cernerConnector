@@ -38,7 +38,7 @@ var CurrentUserID primitive.ObjectID
 var CurrentToken string
 
 func main() {
-	version = "240411.2"
+	version = "240412.4"
 	debugLevel := os.Getenv("DEBUG_LEVEL")
 	if debugLevel == "" {
 		debugLevel = "DEBUG2"

@@ -217,7 +217,7 @@ var PageSize int
 // <<<<<<< HEAD
 func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query, JWToken string) (int64, *fhir.Bundle, *common.CacheHeader, error) {
 	fmt.Printf("\n\n\n")
-	log.Debug3("FindResource:  --  resource: " + resource)
+	log.Debug2("FindResource:  --  resource: " + resource)
 	// =======
 	// func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query, JWToken string) (int64, int64, *fhir.Bundle, *common.CacheHeader, error) {
 	// 	systemID := connPayLoad.System.ID
@@ -275,16 +275,14 @@ func FindResource(connPayLoad *common.ConnectorPayload, resource, userId, query,
 	header.PageId = page
 	queryId := primitive.NewObjectID()
 	header.QueryId = queryId
-
-	//log.Debug3("connConfig: " + spew.Sdump(connConfig))
-	//log.Debug3("header: " + spew.Sdump(header))
 	log.Info("CacheUrl: " + connConfig.CacheUrl)
 	header.CacheUrl = connConfig.CacheUrl
 	//header.CacheUrl = fmt.Sprintf("%s/system/%s", connConfig.CacheUrl, header.SystemCfg.ID.Hex())
 	fmt.Printf("\n\n		######")
 	log.Info("### CacheUrl: " + header.CacheUrl)
 
-	//header.ResourceCacheUrl = fmt.Sprintf("%s/%s/%s/BundleTransaction", connConfig.CacheUrl, header.FhirSystem.ID.Hex())
+	// header.CacheStatusUrl = fmt.Sprintf("queue/%s/CacheStatus", queryId.Hex())
+	// header.CachePageUrl = fmt.Sprintf("queue/%s/CachePatientPage", queryId.Hex())
 	//header.GetBundleCacheUrl = fmt.Sprintf("%s/%s/BundleTransaction", header.CacheUrl, header.SystemCfg.ID.Hex())
 	//header.GetResourceCacheUrl = fmt.Sprintf("%s/%s/CachePage", header.CacheUrl, header.SystemCfg.ID.Hex())
 

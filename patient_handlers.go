@@ -87,7 +87,7 @@ func findPatient(w http.ResponseWriter, r *http.Request) {
 			WriteFhirOperationOutcome(w, status, CreateOperationOutcome(fhir.IssueTypeProcessing, fhir.IssueSeverityFatal, &errMsg))
 			return
 		}
-		log.Debug2(fmt.Sprintf("--  uri = %s", r.URL.RequestURI()))
+		log.Debug2("--  uri = " + r.URL.RequestURI())
 		resourceType = DetermineResource(r.URL.Path, "/api/rest/v1/")
 		if resourceType == "" {
 			errMsg := log.ErrMsg("Resource not found in URL")
@@ -248,10 +248,10 @@ func findPatient(w http.ResponseWriter, r *http.Request) {
 	}
 
 	queryStr := ""
-	log.Debug3("-- Resource: " + resourceType)
+	log.Debug2("-- Resource: " + resourceType)
 	switch strings.ToLower(resourceType) {
 	case "patient":
-		log.Debug3("-  case: " + resourceType)
+		log.Debug2("-  case: " + resourceType)
 		queryStr = fmt.Sprintf("%s?%s", resourceType, r.URL.RawQuery) //BuildPatientQuery(r)
 	case "documentreference":
 		log.Debug3("-  case: " + resourceType)
@@ -297,54 +297,38 @@ func findPatient(w http.ResponseWriter, r *http.Request) {
 			}
 			uri = fmt.Sprintf("Patient?identifier=%s", idValue+idSearchValue)
 			log.Debug3(" - New Identifier search Value: " + uri)
-			// uriValues.Del("identifier")
-			// uriValues.Set("identifier", id)
-			// //urlB.RawQuery = uriValues.Encode()
-			// r.URL.RawQuery = uriValues.Encode()
-			// //curUri := r.RequestURI
-			// //urUriParts := strings.Split(curUri, "?")
-			// r.RequestURI = uriValues.Encode()
-			// fmt.Printf("\n\n$$$ searchResources: 188 - Updated request: %s\n\n", spew.Sdump(r))
 		} else {
 			log.Debug3(fmt.Sprintf(" - using other search params: %v", uriValues))
 		}
 	}
 	var bundle *fhir.Bundle
 	var header *common.CacheHeader
-	//resourceId := r.Header.Get("Fhir-System")
-	//log.Debug3(" - connectorPayload = " + spew.Sdump(connectorPayload))
 	qryStr := r.URL.RawQuery
 
 	log.Debug3(fmt.Sprintf(" - resource = %s  uri = %s", resourceType, qryStr))
 	log.Debug3("")
 	url := connectorPayload.System.ConnectorConfig.HostUrl + resourceType + "?" + qryStr
-	//url := connectorPayload.System.ConnectorConfig.HostUrl + resourceType + "?" + qryStr
-	//url := connectorPayload.System.Url + Resource + "?" + qryStr
 	log.Debug3(" - calling " + url)
 	var totalPages int64
-	var inPage int64
+	// var inPage int64
 	log.Debug3(fmt.Sprintf(" --  Search %s with %s", resourceType, qryStr))
 	startTime := time.Now()
-	inPage, bundle, header, err = FindResource(&connectorPayload, resourceType, userId, qryStr, JWToken)
-	log.Debug3(" - FindResource returned Inpage: " + fmt.Sprint(inPage))
+	fmt.Printf("\n\n")
+	log.Debug2("Calling FindResource	")
+	inPage, bundle, header, err := FindPatient(&connectorPayload, userId, queryStr, JWToken)
+	// inPage, bundle, header, err = FindResource(&connectorPayload, resourceType, userId, qryStr, JWToken)
+	// header.CacheStatusUrl = fmt.Sprintf("queue/%s/CacheStatus", header.QueryId.Hex())
+	// header.CachePageUrl = fmt.Sprintf("queue/%s/CachePatientPage", header.QueryId.Hex())
+	log.Debug2(" - FindResource returned Header: " + spew.Sdump(header))
+	log.Debug2(" - FindResource returned Inpage: " + fmt.Sprint(inPage))
+	fmt.Printf("\n\n")
 	finalStatus := status
 	if err != nil {
 		errMsg := log.ErrMsg(fmt.Sprintf("error:  %s", err.Error()))
 		fmt.Println(errMsg)
-		// errParts := strings.Split(err.Error(), "|")
-		// log.Debug3(" - errParts = " + spew.Sdump(errParts))
-		// if len(errParts) > 1 { //Not a valid error message
-		// 	errMsg = errParts[1]
-		// 	finalStatus, err = strconv.Atoi(errParts[0])
-		// 	if err != nil {
-		// 		finalStatus = 413
-		// 	}
-		// 	log.Debug3("finalStatus: " + fmt.Sprint(finalStatus))
-		// }
 		oo := CreateOperationOutcome(fhir.IssueTypeNotFound, fhir.IssueSeverityInformation, &errMsg)
 		//log.Debug3("OpOutcome: " + spew.Sdump(oo))
 		WriteFhirOperationOutcome(w, finalStatus, oo)
-		//CreateOperationOutcome(fhir.IssueTypeNotFound, fhir.IssueSeverityInformation, &errMsg))
 		return
 	}
 
@@ -355,7 +339,8 @@ func findPatient(w http.ResponseWriter, r *http.Request) {
 	log.Debug3(fmt.Sprintf(" - Number in page: %d", len(bundle.Entry)))
 	log.Debug3(fmt.Sprintf(" - PageNumber: %d", header.PageId))
 	log.Debug3(fmt.Sprintf(" - QueryId: %s", header.QueryId))
-	resp := common.ResourceResponse{}
+	log.Debug2(" --  Header: " + spew.Sdump(header))
+	resp := common.InitialResourceResponse{}
 	//fmt.Printf("findResource:628 - Header: %s\n", spew.Sdump(header))
 	host := connectorPayload.System.ConnectorConfig.HostUrl
 	//host := common.GetKVData(GetConfig().Data, "cacheHost")
@@ -377,11 +362,11 @@ func findPatient(w http.ResponseWriter, r *http.Request) {
 	logTime := time.Now()
 	//log.Debug3(fmt.Sprintf("--  resp without bundle: " + spew.Sdump(resp)))
 	log.Debug3(fmt.Sprintf("--  Time to log = %s", time.Since(logTime)))
-	resp.Bundle = bundle
+	//resp.Bundle = bundle
 	log.Debug3(fmt.Sprintf("--  Number of entries in bundle: %d", len(bundle.Entry)))
 	log.Debug3(fmt.Sprintf("--  QueryId: " + header.QueryId.Hex()))
-	FillResourceResponse(&resp, resourceType)
+	//FillResourceResponse(&resp, resourceType)
 	//fmt.Printf("findResource:614  --  Returning Bundle: %s\n", spew.Sdump(bundle))
 	//WriteFhirResourceBundle(w, resp.Status, &resp)
-	WriteFhirResponse(w, resp.Status, &resp)
+	WriteInitialFhirResponse(w, resp.Status, &resp)
 }
