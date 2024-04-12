@@ -210,7 +210,7 @@ func (c *Connection) GetFhirReq(req *http.Request) (*http.Response, error) {
 }
 
 func (c *Connection) GetFhirBundle(url string, token string) (*fhir.Bundle, error) {
-	log.Info("GetFhirBundle URL Requested: " + url + "&_count=50")
+	log.Info("GetFhirBundle URL Requested: " + url + "&_count=25")
 	fullUrl := ""
 	if strings.Contains(url, "https") {
 		fullUrl = url
